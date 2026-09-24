@@ -1,0 +1,72 @@
+<div
+  class="search-wrapper"
+  tabindex="-1"
+  [class.recipient]="recipient()"
+  [class.mobile-menu]="mobileMenu()"
+  [class.mobile-expanded]="mobileMenu() && mobile.view() === 'search'"
+  (focusout)="closeResults($event)"
+  (keydown.escape)="dismiss()"
+>
+  @if (mobileMenu() && mobile.view() === 'search') {
+    <header class="search-heading">
+      <h1 data-page-heading tabindex="-1">Suche</h1>
+      <button class="icon-button" type="button" aria-label="Suche schließen" (click)="dismiss()">
+        <app-icon name="close" />
+      </button>
+    </header>
+  }
+  <label class="search" [for]="fieldId()">
+    <span class="sr-only">{{
+      recipient() ? 'Empfänger aus Designbeispielen wählen' : 'Devspace-Beispiele durchsuchen'
+    }}</span>
+    <input
+      [id]="fieldId()"
+      type="search"
+      autocomplete="off"
+      [placeholder]="
+        recipient()
+          ? 'An: #channel, oder @jemand oder E-Mail-Adresse'
+          : mobileMenu()
+            ? 'Gehe zu…'
+            : 'Devspace durchsuchen'
+      "
+      [value]="query()"
+      (input)="changeQuery($event)"
+      (focus)="expanded.set(true)"
+      (keydown.arrowdown)="focusResults($event)"
+      [attr.aria-expanded]="expanded() && !!query()"
+      [attr.aria-controls]="fieldId() + '-results'"
+    />
+    @if (!recipient()) {
+      <app-icon name="search" />
+    }
+  </label>
+  <div
+    #results
+    class="results"
+    [id]="fieldId() + '-results'"
+    [hidden]="(!expanded() || !query()) && !(mobileMenu() && mobile.view() === 'search')"
+  >
+    <p class="results-note">Nur lokale Designbeispiele</p>
+    @for (item of channelResults(); track item.id) {
+      <a [routerLink]="[basePath, 'channels', item.id]" (click)="expanded.set(false)"
+        ><app-icon name="hash" />{{ item.label }}</a
+      >
+    }
+    @for (item of peopleResults(); track item.id) {
+      <a [routerLink]="[basePath, 'direkt', item.id]" (click)="expanded.set(false)"
+        ><app-avatar-image [index]="item.avatar ?? null" [size]="40" />{{ item.label }}</a
+      >
+    }
+    @if (messageMatch()) {
+      <a [routerLink]="[basePath, 'channels', 'entwicklerteam']" (click)="expanded.set(false)"
+        ><app-icon name="message" /><span
+          >Noah Braun · Entwicklerteam<br />Welche Version ist aktuell von Angular?</span
+        ></a
+      >
+    }
+    @if (!channelResults().length && !peopleResults().length && !messageMatch()) {
+      <p>Keine passenden Designbeispiele.</p>
+    }
+  </div>
+</div>

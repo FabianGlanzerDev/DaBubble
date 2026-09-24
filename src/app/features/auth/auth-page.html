@@ -1,0 +1,136 @@
+<app-public-layout
+  [variant]="mode()"
+  [brandVisible]="!embedded()"
+  [showRegistration]="mode() === 'login'"
+  [mainId]="embedded() ? null : 'main-content'"
+>
+  <div class="auth-screen" [class.registration-screen]="mode() === 'register'">
+    <form
+      class="auth-card"
+      [class.login-card]="mode() === 'login'"
+      [class.register-card]="mode() === 'register'"
+      aria-labelledby="auth-title"
+      aria-describedby="auth-note"
+      novalidate
+      (submit)="submit($event)"
+      [attr.aria-busy]="session.busy()"
+    >
+      <header class="card-heading">
+        @if (mode() !== 'login') {
+          <a class="back-link icon-button" routerLink="/anmeldung" aria-label="Zur Anmeldung"
+            ><app-icon name="arrow"
+          /></a>
+        }
+        <h1 id="auth-title" [attr.data-page-heading]="embedded() ? null : ''" tabindex="-1">
+          {{ page().title }}
+        </h1>
+      </header>
+      <p class="description">{{ page().description }}</p>
+      @if (accessBlocked()) {
+        <p class="access-note" role="status">
+          Die Chat-Ansicht ist geschützt. Bitte melde dich an.
+        </p>
+      }
+      <div class="fields">
+        @if (mode() === 'register') {
+          <app-form-field
+            fieldId="register-name"
+            kind="name"
+            label="Name"
+            icon="user"
+            placeholder="Name und Nachname"
+            autocomplete="name"
+            [(value)]="name"
+            [submitted]="submitted()"
+            [disabled]="!!session.pending()"
+          />
+        }
+        <app-form-field
+          fieldId="auth-email"
+          kind="email"
+          label="E-Mail-Adresse"
+          icon="mail"
+          placeholder="beispielname@email.com"
+          autocomplete="email"
+          [(value)]="email"
+          (valueChange)="issue.set(null)"
+          [serverError]="fieldIssue('email')"
+          [submitted]="submitted()"
+          [disabled]="!!session.pending()"
+        />
+        <app-form-field
+          fieldId="auth-password"
+          kind="password"
+          label="Passwort"
+          icon="lock"
+          placeholder="Passwort"
+          [autocomplete]="mode() === 'login' ? 'current-password' : 'new-password'"
+          [(value)]="password"
+          (valueChange)="issue.set(null)"
+          [serverError]="fieldIssue('password')"
+          [submitted]="submitted()"
+          [disabled]="!!session.pending()"
+        />
+      </div>
+      @if (mode() === 'login') {
+        <a class="reset-link" routerLink="/passwort-reset">Passwort vergessen?</a>
+        <div class="divider"><span>ODER</span></div>
+        <button class="google-button" type="button" disabled aria-describedby="auth-note">
+          <span class="google-mark" aria-hidden="true"></span>Anmelden mit Google
+        </button>
+        <div class="login-actions">
+          <button
+            class="auth-button"
+            type="submit"
+            [disabled]="!session.configured() || session.busy()"
+            aria-describedby="auth-note"
+          >
+            {{ session.pending() === 'login' ? 'Anmeldung läuft…' : 'Anmelden' }}
+          </button>
+          <button class="auth-button secondary" type="button" disabled aria-describedby="auth-note">
+            Gäste-Login
+          </button>
+        </div>
+      } @else {
+        <label class="consent"
+          ><input
+            #consentField
+            type="checkbox"
+            [checked]="consent()"
+            (change)="consent.set(consentField.checked)"
+            aria-describedby="auth-note"
+          /><span
+            >Ich stimme der
+            <a class="privacy-label" routerLink="/datenschutz">Datenschutzerklärung</a> zu.</span
+          ></label
+        >
+        <div class="continue-row">
+          <button
+            class="auth-button"
+            type="submit"
+            [disabled]="!valid() || session.busy()"
+            [attr.aria-label]="
+              session.configured() ? 'Weiter zur Avatar-Auswahl' : 'Weiter zur Avatar-Vorschau'
+            "
+            aria-describedby="auth-note"
+          >
+            {{ session.pending() === 'register' ? 'Konto wird erstellt…' : 'Weiter' }}
+          </button>
+        </div>
+      }
+      @if (fieldIssue('general')) {
+        <p class="action-error" role="alert">{{ fieldIssue('general') }}</p>
+      }
+    </form>
+    <aside class="preview-note" aria-label="Stand der Vorschau">
+      <p id="auth-note">{{ notice() }}</p>
+      @if (session.user()) {
+        <a routerLink="/chat">Zum angemeldeten Arbeitsbereich</a>
+      }
+      @if (mode() === 'register') {
+        <a routerLink="/avatar-vorschau">Avatar-Design direkt ansehen</a>
+      }
+      <a routerLink="/vorschau">Layout-Vorschau öffnen</a>
+    </aside>
+  </div>
+</app-public-layout>

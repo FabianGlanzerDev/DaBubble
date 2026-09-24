@@ -1,0 +1,107 @@
+@if (avatarMode()) {
+  <app-avatar-image class="profile-avatar" [index]="draftAvatar()" [size]="200" />
+  <h3 class="profile-name">{{ draftName() }}</h3>
+  <p>Aus der Liste wählen</p>
+  <div class="avatar-options" aria-label="Avatarentwurf">
+    @for (avatar of avatars; track avatar) {
+      <button
+        type="button"
+        [attr.aria-pressed]="draftAvatar() === avatar"
+        [attr.aria-label]="'Avatar ' + (avatar + 1)"
+        (click)="draftAvatar.set(avatar)"
+        [disabled]="realAccount() && session.busy()"
+      >
+        <app-avatar-image [index]="avatar" [size]="56" />
+      </button>
+    }
+  </div>
+  <div class="actions">
+    <button class="button secondary" type="button" (click)="openEdit()">Zurück</button
+    ><button
+      class="button"
+      type="button"
+      [disabled]="!realAccount() || !!nameError() || session.busy()"
+      (click)="save()"
+    >
+      {{ session.pending() === 'profile' ? 'Speichert…' : 'Speichern' }}
+    </button>
+  </div>
+} @else if (editing()) {
+  <button
+    class="avatar-edit"
+    type="button"
+    (click)="open('avatar')"
+    [disabled]="realAccount() && session.busy()"
+    aria-label="Avatar ändern"
+  >
+    <app-avatar-image [index]="draftAvatar()" [size]="200" />
+  </button>
+  <label class="name-label" for="profile-name"><app-icon name="user" />Vollständiger Name</label>
+  <input
+    class="overlay-input"
+    id="profile-name"
+    [value]="draftName()"
+    (input)="updateName($event)"
+    autocomplete="off"
+    [attr.aria-invalid]="!!nameError()"
+    [disabled]="realAccount() && session.busy()"
+    aria-describedby="profile-error"
+  />
+  <p class="field-error" id="profile-error">
+    {{ nameError() }}
+  </p>
+  <div class="actions">
+    <button
+      class="button secondary"
+      type="button"
+      [disabled]="realAccount() && session.busy()"
+      (click)="open('profile')"
+    >
+      Abbrechen</button
+    ><button
+      class="button"
+      type="button"
+      [disabled]="!realAccount() || !!nameError() || session.busy()"
+      (click)="save()"
+    >
+      {{ session.pending() === 'profile' ? 'Speichert…' : 'Speichern' }}
+    </button>
+  </div>
+} @else {
+  <app-avatar-image class="profile-avatar" [index]="person().avatar" [size]="200" />
+  <div class="name-row">
+    <h3 class="profile-name">{{ person().name }}</h3>
+    @if (own()) {
+      <button class="text-button profile-edit-button" type="button" (click)="openEdit()">
+        <span>Bearbeiten</span><app-icon name="pencil" />
+      </button>
+    }
+  </div>
+  @if (!realAccount()) {
+    <p class="presence" [class.away]="person().away">
+      <span></span>{{ person().away ? 'Abwesend' : 'Aktiv' }}<small> · Designbeispiel</small>
+    </p>
+  } @else {
+    <p>Angemeldet</p>
+  }
+  <div class="email">
+    <h4><app-icon name="mail" />E-Mail-Adresse</h4>
+    <p>{{ person().email }}</p>
+  </div>
+  @if (!own()) {
+    <div class="actions">
+      <a class="button" [routerLink]="['/vorschau/direkt', person().id]" (click)="overlay.close()"
+        ><app-icon name="message" />Nachricht</a
+      >
+    </div>
+  }
+}
+@if (error()) {
+  <p class="action-error" role="alert">{{ error() }}</p>
+}
+@if (!realAccount()) {
+  <p class="overlay-note">
+    Beispielprofil · Änderungen werden nicht gespeichert. Dein eigenes Profil kannst du nach der
+    Anmeldung bearbeiten.
+  </p>
+}

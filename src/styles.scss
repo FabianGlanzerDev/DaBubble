@@ -1,0 +1,309 @@
+@use '@fontsource-variable/nunito/wght.css';
+
+/* Figma palette; Nunito confirmed by the supplied accepted Angular project. */
+:root {
+  color-scheme: light;
+  --page: #eceefe;
+  --surface: #fff;
+  --surface-soft: #eceefe;
+  --text: #000;
+  --text-secondary: #686868;
+  --accent: #444df2;
+  --accent-hover: #797ef3;
+  --accent-medium: #535af1;
+  --accent-soft: #eceefe;
+  --border: #d5d8ee;
+  --focus: #343bbc;
+  --radius: 1.25rem;
+  --radius-small: 0.75rem;
+  font-family:
+    'Nunito Variable',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  font-synthesis: none;
+  color: var(--text);
+  background: var(--page);
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  min-width: 0;
+}
+button,
+input,
+textarea {
+  font: inherit;
+}
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease,
+    border-color 200ms ease;
+}
+button {
+  cursor: pointer;
+}
+a {
+  color: var(--accent);
+  text-underline-offset: 0.2em;
+}
+button:disabled,
+input:disabled,
+textarea:disabled {
+  cursor: not-allowed;
+  opacity: 1;
+}
+button:disabled {
+  color: var(--text-secondary);
+  background: var(--surface-soft);
+  border-color: var(--border);
+}
+input:disabled,
+textarea:disabled {
+  -webkit-text-fill-color: var(--text-secondary);
+}
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 4px;
+}
+[tabindex='-1']:focus {
+  outline: none;
+}
+img {
+  max-width: 100%;
+}
+h1,
+h2,
+h3,
+p {
+  overflow-wrap: anywhere;
+}
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+p {
+  line-height: 1.6;
+}
+.eyebrow {
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.muted {
+  color: var(--text-secondary);
+}
+.button {
+  min-height: 44px;
+  display: inline-flex;
+  gap: 0.6rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 1.1rem;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-small);
+  background: var(--accent);
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  font-weight: 650;
+  line-height: 1.4;
+}
+.button:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+.button.secondary {
+  background: var(--surface);
+  color: var(--accent);
+  border-color: var(--border);
+}
+.button.secondary:hover {
+  background: var(--accent-medium);
+  color: white;
+}
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  background: transparent;
+}
+.icon-button:hover:not(:disabled) {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.field {
+  display: grid;
+  gap: 0.5rem;
+  text-align: left;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.field input {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0.8rem 1rem;
+  border-radius: var(--radius-small);
+  border: 1px solid var(--border);
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+.overlay-input {
+  width: 100%;
+  min-width: 0;
+  padding: 15px 20px;
+  min-height: 56px;
+  border: 1px solid #adb0d9;
+  border-radius: 30px;
+  background: white;
+  color: black;
+  font-size: 18px;
+  resize: vertical;
+  transition: border-color 200ms;
+}
+.overlay-input:hover {
+  border-color: #797ef3;
+}
+.overlay-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.text-button {
+  min-height: 44px;
+  padding: 4px 0;
+  background: transparent;
+  border: 0;
+  color: var(--accent);
+  font-size: 18px;
+}
+.text-button:hover:not(:disabled) {
+  color: var(--accent-medium);
+  text-decoration: underline;
+}
+.text-button:disabled {
+  background: transparent;
+}
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+.actions.end {
+  justify-content: flex-end;
+}
+.actions .button {
+  border-radius: 30px;
+  font-size: 18px;
+  padding: 12px 24px;
+}
+.actions .button:disabled {
+  color: white;
+  background: var(--text-secondary);
+  border-color: var(--text-secondary);
+}
+.overlay-note {
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 20px 0 0;
+}
+.field-error {
+  color: #c52d46;
+  font-size: 14px;
+  margin: 6px 0 0;
+  min-height: 20px;
+}
+@media (max-width: 767px) {
+  .actions {
+    gap: 16px;
+  }
+  .actions .button {
+    max-width: 100%;
+  }
+  .overlay-note {
+    font-size: 11px;
+  }
+  .icon-button:active,
+  .text-button:active {
+    color: var(--accent);
+    background: var(--page);
+  }
+}
+@media (max-width: 374px) {
+  .actions {
+    gap: 8px;
+  }
+  .actions .button {
+    padding-inline: 16px;
+    font-size: 16px;
+  }
+}
+.skip-link {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 100;
+  padding: 0.8rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--text);
+  color: white;
+  transform: translateY(-200%);
+}
+.skip-link:focus {
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+.action-error,
+.action-status {
+  padding: 12px;
+  border-radius: 12px;
+  margin-top: 24px;
+  overflow-wrap: anywhere;
+  font-size: 16px;
+}
+.action-error {
+  color: #a51e1e;
+  background: #fff1f1;
+}
+.action-status {
+  color: #253995;
+  background: var(--page);
+}

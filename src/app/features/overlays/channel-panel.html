@@ -1,0 +1,134 @@
+@if (creating()) {
+  <p class="channel-description">
+    Channels dienen deinem Team zur Kommunikation. Am besten sollten sie themenbezogen sein,
+    #marketing zum Beispiel.
+  </p>
+  <label class="field-label" for="channel-name">Channel-Name</label>
+  <div class="with-icon">
+    <app-icon name="hash" /><input
+      class="overlay-input"
+      id="channel-name"
+      placeholder="z.B. Kooperationsprojekte"
+      [value]="name()"
+      (input)="changeName($event)"
+      (blur)="touched.set(true)"
+      [attr.aria-invalid]="touched() && !!nameError()"
+      aria-describedby="channel-name-error"
+    />
+  </div>
+  <p id="channel-name-error" class="field-error">{{ touched() ? nameError() : '' }}</p>
+  <label class="field-label" for="channel-description">Beschreibung <span>(optional)</span></label>
+  <input
+    class="overlay-input"
+    id="channel-description"
+    placeholder="Dein Text hier"
+    [value]="description()"
+    (input)="changeDescription($event)"
+  />
+  <div class="actions end">
+    <button class="button" type="button" [disabled]="!!nameError()" (click)="showPeople()">
+      Weiter zur Mitgliederauswahl
+    </button>
+  </div>
+} @else {
+  <section class="channel-section" [class.editing]="editName()">
+    <div class="section-heading">
+      <h3>Channel-Name</h3>
+      @if (editName()) {
+        <button class="text-button" type="button" disabled aria-label="Speichern">
+          <span class="edit-label">Speichern</span
+          ><app-icon class="mobile-edit" name="check-circle" /><span class="sr-only"
+            >: Channel-Name</span
+          >
+        </button>
+      } @else {
+        <button
+          class="text-button"
+          type="button"
+          (click)="startNameEdit()"
+          aria-label="Bearbeiten: Channel-Name"
+        >
+          <span class="edit-label">Bearbeiten</span
+          ><app-icon class="mobile-edit" name="pencil" /><span class="sr-only">: Channel-Name</span>
+        </button>
+      }
+    </div>
+    @if (editName()) {
+      <label class="sr-only" for="edit-channel-name">Channel-Name</label>
+      <div class="with-icon">
+        <app-icon name="hash" /><input
+          id="edit-channel-name"
+          class="overlay-input"
+          [value]="name()"
+          (input)="changeName($event)"
+        />
+      </div>
+    } @else {
+      <p class="channel-label"><app-icon name="hash" />{{ label() }}</p>
+    }
+  </section>
+  <section class="channel-section" [class.editing]="editDescription()">
+    <div class="section-heading">
+      <h3>Beschreibung</h3>
+      @if (editDescription()) {
+        <button class="text-button" type="button" disabled aria-label="Speichern">
+          <span class="edit-label">Speichern</span
+          ><app-icon class="mobile-edit" name="check-circle" /><span class="sr-only"
+            >: Beschreibung</span
+          >
+        </button>
+      } @else {
+        <button
+          class="text-button"
+          type="button"
+          aria-label="Bearbeiten: Beschreibung"
+          (click)="description.set(descriptionExample); editDescription.set(true)"
+        >
+          <span class="edit-label">Bearbeiten</span
+          ><app-icon class="mobile-edit" name="pencil" /><span class="sr-only">: Beschreibung</span>
+        </button>
+      }
+    </div>
+    @if (editDescription()) {
+      <label class="sr-only" for="edit-description">Beschreibung</label
+      ><textarea
+        id="edit-description"
+        class="overlay-input"
+        rows="3"
+        [value]="description()"
+        (input)="changeDescription($event)"
+      ></textarea>
+    } @else {
+      <p>{{ descriptionExample }}</p>
+    }
+    <hr />
+    <h3>Erstellt von</h3>
+    <button
+      class="creator text-button"
+      type="button"
+      (click)="overlay.open('profile', { personId: 'noah-braun' })"
+    >
+      Noah Braun
+    </button>
+  </section>
+  <section class="channel-section mobile-members">
+    <h3>
+      <button
+        type="button"
+        class="members-heading"
+        aria-label="Mitgliederübersicht öffnen"
+        (click)="overlay.open('members', { channelId: overlay.current()?.channelId })"
+      >
+        Mitglieder
+      </button>
+    </h3>
+    <app-members-panel [embedded]="true" />
+  </section>
+  <div class="actions end">
+    <button class="button" type="button" disabled>Channel verlassen</button>
+  </div>
+}
+<p class="overlay-note">
+  Designvorschau · Channel-Erstellung, Speichern, Verlassen und die verbindliche Prüfung auf
+  doppelte Namen benötigen Anmeldung und Datenbank. Es wird kein Channel angelegt oder geändert.
+</p>

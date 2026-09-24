@@ -1,0 +1,198 @@
+:host {
+  display: block;
+}
+.destination {
+  pointer-events: none;
+}
+.destination app-auth-page {
+  display: block;
+}
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  overflow: hidden;
+}
+.intro-background {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, #444df2, #535af1, #797ef3);
+}
+.animated-brand {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100px;
+  height: 70px;
+  transform: translate(-50%, -50%);
+  animation: expand-brand 1500ms ease 500ms forwards;
+}
+.brand-line {
+  display: flex;
+  align-items: center;
+  width: 280px;
+  height: 70px;
+}
+img {
+  width: 80px;
+  height: 70px;
+  flex-shrink: 0;
+}
+.word-clip {
+  min-width: 0;
+  overflow: hidden;
+  margin-left: 24px;
+}
+.word-clip span {
+  display: block;
+  opacity: 0;
+  font-size: 34px;
+  font-weight: 700;
+  color: white;
+  animation: reveal-name 500ms ease-in 1500ms forwards;
+}
+.departing .intro-background {
+  animation: fade-background 500ms ease-out forwards;
+}
+.departing .animated-brand {
+  animation: dock-brand 1500ms ease forwards;
+}
+.departing .word-clip span {
+  color: black;
+}
+.departing img {
+  width: 70px;
+  height: 70px;
+  transition:
+    width 1500ms,
+    height 1500ms;
+}
+.departing .word-clip {
+  margin-left: 15px;
+  transition: margin 1500ms;
+}
+.departing .word-clip span {
+  font-size: 32px;
+  transition:
+    font-size 1500ms,
+    color 500ms;
+}
+.skip-intro {
+  position: absolute;
+  right: 28px;
+  bottom: 24px;
+  padding: 12px 18px;
+  border-radius: 30px;
+  color: white;
+  text-decoration: none;
+}
+.skip-intro:hover,
+.skip-intro:focus-visible {
+  background: #ffffff24;
+  outline-color: white;
+}
+.departing .skip-intro {
+  color: var(--accent);
+}
+@keyframes expand-brand {
+  to {
+    width: 280px;
+  }
+}
+@keyframes reveal-name {
+  from {
+    opacity: 0;
+    transform: translateX(-150%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes fade-background {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes dock-brand {
+  from {
+    width: 280px;
+  }
+  to {
+    top: 75px;
+    left: 75px;
+    width: 250px;
+    transform: none;
+  }
+}
+@media (max-width: 767px) {
+  .animated-brand {
+    width: 70px;
+    height: 70px;
+    overflow: hidden;
+    animation-name: expand-mobile-brand;
+  }
+  .departing .animated-brand {
+    animation-name: dock-mobile-brand;
+  }
+  .brand-line {
+    width: 240px;
+    height: 70px;
+    max-width: 100%;
+  }
+  img {
+    width: 70px;
+    height: 70px;
+  }
+  .word-clip {
+    flex: 0 0 auto;
+    margin-left: 16px;
+  }
+  .word-clip span {
+    font-size: 28px;
+  }
+  .departing img {
+    width: 56px;
+    height: 56px;
+  }
+  .departing .brand-line {
+    height: 56px;
+    transition: height 1500ms;
+  }
+  .departing .word-clip {
+    margin-left: 0.9rem;
+  }
+  .departing .word-clip span {
+    font-size: 28px;
+  }
+  @keyframes expand-mobile-brand {
+    to {
+      width: 240px;
+    }
+  }
+  @keyframes dock-mobile-brand {
+    from {
+      width: 240px;
+    }
+    to {
+      top: max(32px, calc((100dvh - 788px) / 2));
+      left: 50%;
+      width: 205px;
+      height: 56px;
+      transform: translateX(-50%);
+    }
+  }
+}
+@media (min-width: 768px) and (max-width: 1100px) {
+  @keyframes dock-brand {
+    from {
+      width: 280px;
+    }
+    to {
+      top: 40px;
+      left: 32px;
+      width: 250px;
+      transform: none;
+    }
+  }
+}

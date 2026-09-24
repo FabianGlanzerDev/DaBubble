@@ -1,0 +1,123 @@
+@use '../../shared/styles/auth-card';
+
+.preview-note nav {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0 20px;
+}
+
+.auth-screen {
+  transform: translateY(16px);
+}
+.auth-card {
+  padding: 40px 53px;
+  min-height: 669px;
+}
+h1 {
+  white-space: nowrap;
+}
+.back-link {
+  left: -24px;
+}
+.selected-avatar {
+  display: flex;
+  justify-content: center;
+  margin-top: 52px;
+}
+h2 {
+  overflow-wrap: anywhere;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 44px;
+  text-align: center;
+  margin: 32px 0 6px;
+}
+.list-label {
+  font-size: 20px;
+  line-height: 27px;
+  margin: 0 auto 22px;
+  max-width: 464px;
+}
+.avatar-options {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.avatar-options button {
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  border-radius: 50%;
+}
+.avatar-options button[aria-pressed='true'] {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+.avatar-options button:hover {
+  outline: 3px solid var(--border);
+  outline-offset: 4px;
+}
+.avatar-options button:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 6px;
+}
+.continue-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 66px;
+}
+
+@media (max-width: 767px) {
+  .back-link {
+    left: 0;
+    top: -6px;
+  }
+  .auth-screen {
+    transform: none;
+  }
+  .auth-card {
+    padding: 24px 20px;
+    min-height: 0;
+  }
+  h1 {
+    white-space: normal;
+    max-width: 300px;
+    padding-inline: 24px;
+    margin: auto;
+  }
+  .selected-avatar {
+    margin-top: 32px;
+    zoom: 0.714286;
+  }
+  h2 {
+    margin-top: 24px;
+    font-size: 32px;
+  }
+  .list-label {
+    font-size: 20px;
+    margin-top: 6px;
+    text-align: left;
+  }
+  .avatar-options {
+    gap: 8px;
+    max-width: none;
+    margin: auto;
+    justify-content: space-between;
+  }
+  .avatar-options app-avatar-image {
+    zoom: 0.75;
+  }
+  .continue-row {
+    margin-top: 28px;
+  }
+}
+@media (max-width: 374px) {
+  .avatar-options {
+    justify-content: center;
+    gap: 12px 24px;
+    max-width: 240px;
+  }
+}

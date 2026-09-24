@@ -1,0 +1,88 @@
+@if (item(); as selected) {
+  <header class="conversation-header">
+    <div class="title">
+      @if (isChannel) {
+        <app-icon name="hash" />
+      } @else {
+        <app-avatar-image [index]="selected.avatar ?? null" [size]="50" />
+      }
+      <h1 data-page-heading tabindex="-1">
+        <button class="title-button" (click)="openDetails()">{{ selected.label }}</button>
+      </h1>
+      @if (isChannel) {
+        <button class="icon-button" (click)="openDetails()" aria-label="Channel-Details öffnen">
+          <app-icon name="chevron" />
+        </button>
+      }
+    </div>
+    @if (isChannel) {
+      <div class="members">
+        <button
+          class="member-list"
+          (click)="overlay.open('members', { channelId: selected.id })"
+          aria-label="3 Beispielmitglieder ansehen"
+        >
+          <span class="member-avatars" aria-hidden="true"
+            ><app-avatar-image [index]="5" [size]="40" /><app-avatar-image
+              [index]="4"
+              [size]="40" /><app-avatar-image [index]="2" [size]="40" /></span
+          ><span>3</span>
+        </button>
+        <button
+          class="icon-button"
+          (click)="overlay.open('add-members', { channelId: selected.id })"
+          aria-label="Mitglieder hinzufügen"
+        >
+          <app-icon name="user-add" />
+        </button>
+      </div>
+    }
+  </header>
+  @if (isChannel && selected.id === 'entwicklerteam') {
+    <section class="transcript" aria-label="Statische Beispielnachrichten aus Figma">
+      @for (message of messages; track message.author; let first = $first) {
+        <div class="date-divider">
+          <span>{{ first ? 'Dienstag, 14 Januar' : 'Heute' }}</span>
+        </div>
+        <app-message-preview [message]="message" (showThread)="preview.openThread()" />
+      }
+    </section>
+  } @else {
+    <section class="empty-conversation" aria-label="Nachrichtenbereich">
+      <button class="empty-person" (click)="openDetails()">
+        @if (!isChannel) {
+          <app-avatar-image [index]="selected.avatar ?? null" [size]="100" />
+        }
+        <h2>{{ isChannel ? '# ' : '' }}{{ selected.label }}</h2>
+      </button>
+      @if (isChannel) {
+        <p>
+          Das ist der Anfang des Channels
+          <button class="text-button" (click)="openDetails()"># {{ selected.label }}</button>.
+        </p>
+      } @else if (selected.id === 'frederik-beck') {
+        <p>
+          Dieser Raum ist nur für dich da. Mache dir Notizen, liste deine To-dos auf oder bewahre
+          Links und Dateien griffbereit auf. Du kannst hier auch gerne Dinge mit dir selbst
+          besprechen.
+        </p>
+      } @else {
+        <p>
+          Diese Unterhaltung findet nur zwischen
+          <button class="text-button" (click)="openDetails()">&#64;{{ selected.label }}</button> und
+          dir statt.
+        </p>
+      }
+    </section>
+  }
+  <app-message-composer
+    fieldId="message-draft"
+    [placeholder]="isChannel ? 'Nachricht an #' + selected.label : 'Nachricht an ' + selected.label"
+  />
+} @else {
+  <section class="missing">
+    <h1 data-page-heading tabindex="-1">Eintrag nicht gefunden</h1>
+    <p>Dieser Eintrag gehört nicht zur Layout-Vorschau.</p>
+    <a class="button secondary" [routerLink]="basePath">Zum Arbeitsbereich</a>
+  </section>
+}

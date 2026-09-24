@@ -1,0 +1,89 @@
+@if (listing()) {
+  <ul class="members-list">
+    @for (person of members; track person.id) {
+      <li>
+        <button type="button" (click)="overlay.open('profile', { personId: person.id })">
+          <app-avatar-image [index]="person.avatar" [size]="50" /><span
+            >{{ person.name }}{{ person.id === 'frederik-beck' ? ' (Du)' : '' }}</span
+          >
+        </button>
+      </li>
+    }
+  </ul>
+  <button
+    class="add-members"
+    type="button"
+    (click)="overlay.open('add-members', { channelId: overlay.current()?.channelId })"
+  >
+    <app-icon name="user-add" />Mitglieder hinzufügen
+  </button>
+} @else {
+  @if (choosing()) {
+    <label class="radio"
+      ><input type="radio" name="member-mode" [checked]="all()" (change)="all.set(true)" />Alle
+      Mitglieder von <span>Entwicklerteam</span> hinzufügen</label
+    >
+    <label class="radio"
+      ><input
+        type="radio"
+        name="member-mode"
+        [checked]="!all()"
+        (change)="all.set(false)"
+      />Bestimmte Leute hinzufügen</label
+    >
+  } @else {
+    <p class="channel-name">
+      # {{ overlay.current()?.channelId === 'office-team' ? 'Office-team' : 'Entwicklerteam' }}
+    </p>
+  }
+  @if (!choosing() || !all()) {
+    <div class="selected-people">
+      @for (person of people; track person.id) {
+        @if (selected().includes(person.id)) {
+          <span class="person-chip"
+            ><app-avatar-image [index]="person.avatar" [size]="30" />{{ person.name
+            }}<button
+              type="button"
+              [attr.aria-label]="person.name + ' aus Auswahl entfernen'"
+              (click)="remove(person.id)"
+            >
+              <app-icon name="close" /></button
+          ></span>
+        }
+      }
+    </div>
+    <label class="sr-only" for="member-search">Beispielmitglieder suchen</label>
+    <input
+      class="overlay-input"
+      id="member-search"
+      placeholder="Name eingeben"
+      [value]="query()"
+      (input)="search($event)"
+      autocomplete="off"
+    />
+    @if (query()) {
+      <ul class="members-list search-results" aria-label="Gefundene Beispielmitglieder">
+        @for (person of results(); track person.id) {
+          <li>
+            <button type="button" (click)="select(person.id)">
+              <app-avatar-image [index]="person.avatar" [size]="40" />{{ person.name }}
+            </button>
+          </li>
+        } @empty {
+          <li>Keine weiteren Beispielmitglieder gefunden.</li>
+        }
+      </ul>
+    }
+  }
+  <div class="actions end">
+    <button class="button" type="button" disabled>
+      {{ choosing() ? 'Erstellen' : 'Hinzufügen' }}
+    </button>
+  </div>
+}
+@if (!embedded()) {
+  <p class="overlay-note">
+    Nur Beispielmitglieder. Auswahl und Suche funktionieren lokal; es werden keine Mitglieder oder
+    Channels gespeichert.
+  </p>
+}

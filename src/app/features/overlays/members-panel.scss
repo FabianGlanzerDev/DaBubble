@@ -1,0 +1,90 @@
+.members-list {
+  margin: 20px 0;
+  padding: 0;
+  list-style: none;
+}
+.members-list button {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-radius: 30px;
+  padding: 8px 12px;
+  background: transparent;
+  font-size: 18px;
+}
+.members-list button:hover {
+  background: var(--accent-soft);
+  color: var(--accent-medium);
+}
+.members-list span {
+  overflow-wrap: anywhere;
+}
+.add-members {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border: 0;
+  border-radius: 30px;
+  padding: 12px;
+  background: transparent;
+  font-size: 18px;
+  text-align: left;
+}
+.add-members:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.radio {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 24px 0;
+  flex-wrap: wrap;
+  font-size: 18px;
+}
+.radio input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
+}
+.radio span,
+.channel-name {
+  color: var(--accent);
+}
+.selected-people {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.person-chip {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 6px 10px;
+  margin-bottom: 10px;
+  border-radius: 30px;
+  background: var(--accent-soft);
+}
+.person-chip button {
+  padding: 2px;
+  border: 0;
+  background: transparent;
+  display: flex;
+}
+.search-results {
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid #adb0d9;
+  border-radius: 20px;
+  padding: 8px;
+}
+@media (max-width: 767px) {
+  .members-list button,
+  .add-members,
+  .radio {
+    font-size: 16px;
+  }
+}

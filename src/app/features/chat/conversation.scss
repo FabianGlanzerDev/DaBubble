@@ -1,0 +1,248 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  min-width: 0;
+  min-height: 580px;
+}
+.conversation-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 24px 45px;
+  min-height: 96px;
+  flex-shrink: 0;
+  box-shadow: 0 3px 5px #0000000d;
+}
+.title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.title > app-icon {
+  width: 32px;
+  height: 32px;
+}
+h1 {
+  margin: 0;
+  font-size: 24px;
+}
+.channel-options:disabled {
+  color: var(--text);
+  background: transparent;
+}
+.members {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 20px;
+}
+.members .icon-button {
+  border-radius: 50%;
+  color: var(--text);
+}
+.member-avatars {
+  display: flex;
+}
+.member-avatars app-avatar-image {
+  border: 2px solid white;
+  border-radius: 50%;
+  margin-left: -10px;
+}
+.transcript {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  flex: 1;
+  padding: 28px 35px;
+}
+.transcript > :first-child {
+  margin-top: auto;
+}
+.transcript app-message-preview {
+  margin-inline: 10px;
+}
+.member-list {
+  padding-block: 0;
+}
+.date-divider {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.date-divider::before,
+.date-divider::after {
+  content: '';
+  height: 1px;
+  background: #adb0d9;
+  flex: 1;
+}
+.date-divider span {
+  border: 1px solid #adb0d9;
+  border-radius: 30px;
+  padding: 5px 15px;
+  font-size: 18px;
+  text-align: center;
+}
+.empty-conversation {
+  margin-top: auto;
+  padding: 32px 40px;
+}
+.empty-conversation p {
+  max-width: 100%;
+  color: var(--text-secondary);
+  font-size: 20px;
+}
+.title-button,
+.empty-person,
+.member-list {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 4px;
+  border-radius: 24px;
+  font: inherit;
+  text-align: left;
+}
+.title-button:hover,
+.member-list:hover {
+  background: var(--page);
+  color: var(--accent-medium);
+}
+.empty-person {
+  align-items: end;
+  gap: 25px;
+}
+.empty-person:hover h2 {
+  color: var(--accent-medium);
+}
+.empty-person h2 {
+  font-size: 24px;
+  margin: 0;
+}
+app-message-composer {
+  margin: 20px 35px 40px;
+}
+.missing {
+  padding: 32px;
+}
+@media (min-width: 1200px) {
+  :host {
+    flex: 1;
+    min-height: 0;
+  }
+  .transcript {
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .transcript > * {
+    flex-shrink: 0;
+  }
+}
+@media (max-width: 1599px) {
+  .conversation-header {
+    padding: 24px;
+  }
+  .title {
+    gap: 8px;
+  }
+  h1 {
+    font-size: 22px;
+  }
+  .members {
+    gap: 8px;
+  }
+  .transcript {
+    padding: 28px 24px;
+  }
+  app-message-composer {
+    margin: 12px 24px 24px;
+  }
+}
+
+@media (max-width: 767px) {
+  :host {
+    flex: 1;
+    min-height: 0;
+  }
+  .conversation-header {
+    padding: 8px 16px;
+    gap: 4px;
+    min-height: 60px;
+    flex-wrap: nowrap;
+  }
+  .title {
+    gap: 8px;
+  }
+  .title > app-icon {
+    width: 24px;
+    height: 24px;
+  }
+  .title .icon-button {
+    width: 32px;
+  }
+  h1 {
+    font-size: 20px;
+  }
+  .members {
+    gap: 0;
+  }
+  .member-list {
+    display: none;
+  }
+  .members > .icon-button {
+    background: var(--page);
+    width: 44px;
+  }
+  .transcript {
+    padding: 24px 16px 0;
+    gap: 20px;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .transcript > * {
+    flex-shrink: 0;
+  }
+  .transcript app-message-preview {
+    margin-inline: 0;
+  }
+  .date-divider span {
+    font-size: 17px;
+    padding: 4px 14px;
+  }
+  .empty-conversation {
+    padding: 24px 16px;
+    overflow: auto;
+  }
+  .empty-person {
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .empty-person app-avatar-image {
+    zoom: 0.88;
+  }
+  .empty-conversation p {
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+  app-message-composer {
+    margin: 12px 16px 20px;
+  }
+}
+@media (max-width: 374px) {
+  h1 {
+    font-size: 18px;
+  }
+  .title {
+    gap: 2px;
+  }
+  .empty-conversation p {
+    font-size: 17px;
+  }
+}

@@ -1,0 +1,62 @@
+<div class="composer">
+  <label class="sr-only" [for]="fieldId()">{{
+    reply() ? 'Antwortentwurf' : 'Nachrichtenentwurf'
+  }}</label>
+  <textarea
+    #field
+    [id]="fieldId()"
+    rows="2"
+    [value]="draft()"
+    (input)="updateDraft(field.value)"
+    (keydown.escape)="mentionsOpen.set(false)"
+    [placeholder]="placeholder()"
+    [attr.aria-describedby]="fieldId() + '-note'"
+  ></textarea>
+  <div class="tools">
+    <button class="icon-button" (click)="openEmoji()" aria-label="Emoji in Entwurf einfügen">
+      <app-icon name="smile" />
+    </button>
+    <button
+      class="icon-button"
+      (click)="mentionsOpen.set(!mentionsOpen())"
+      [attr.aria-expanded]="mentionsOpen()"
+      [attr.aria-controls]="fieldId() + '-mentions'"
+      aria-label="Erwähnung in Entwurf einfügen"
+    >
+      <app-icon name="at" />
+    </button>
+    <span class="draft-note" [id]="fieldId() + '-note'">Lokaler Entwurf · Versand ausstehend</span>
+    <button
+      class="icon-button send"
+      disabled
+      [attr.aria-label]="
+        reply()
+          ? 'Antwort senden – noch nicht verfügbar'
+          : 'Nachricht senden – noch nicht verfügbar'
+      "
+    >
+      <app-icon name="send" />
+    </button>
+  </div>
+  @if (mentionsOpen()) {
+    <div
+      class="mentions"
+      [id]="fieldId() + '-mentions'"
+      (keydown.escape)="mentionsOpen.set(false)"
+      tabindex="-1"
+      role="group"
+      aria-label="Erwähnungen auswählen"
+    >
+      @for (mention of filteredMentions(); track mention) {
+        <button (click)="insert(mention)">
+          @if (mention.startsWith('@')) {
+            <app-avatar-image [index]="mentionAvatar(mention)" [size]="50" />
+          }
+          <span>{{ mention }}</span>
+        </button>
+      } @empty {
+        <p>Keine passenden Designbeispiele.</p>
+      }
+    </div>
+  }
+</div>

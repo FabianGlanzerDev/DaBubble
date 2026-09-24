@@ -1,0 +1,139 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+.search-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  box-shadow: 0 3px 5px #0000000d;
+}
+.search-heading h1 {
+  margin: 0;
+  font-size: 20px;
+}
+.search-wrapper {
+  position: relative;
+}
+.search {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: 70px;
+  border: 1px solid transparent;
+  border-radius: 42px;
+  padding: 0 45px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  transition: border-color 200ms;
+}
+.search:hover {
+  border-color: #adb0d9;
+}
+.search:focus-within {
+  border-color: var(--accent);
+}
+.search app-icon {
+  width: 32px;
+  height: 32px;
+}
+input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  font-size: 24px;
+  outline: none;
+}
+.results {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 8;
+  max-height: 420px;
+  overflow-y: auto;
+  padding: 16px;
+  border: 1px solid #adb0d9;
+  border-radius: 0 24px 24px 24px;
+  box-shadow: 0 6px 10px #0003;
+  background: white;
+}
+.results a {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 12px;
+  min-height: 44px;
+  border-radius: 28px;
+  text-decoration: none;
+  color: black;
+  font-size: 18px;
+}
+.results a:hover {
+  background: var(--accent-soft);
+  color: var(--accent-medium);
+}
+.results-note {
+  color: var(--text-secondary);
+  font-size: 12px;
+  margin: 0 0 8px;
+}
+.recipient .search {
+  height: 55px;
+  border-color: #adb0d9;
+  padding: 0 20px;
+}
+.recipient input {
+  font-size: 18px;
+}
+@media (max-width: 1599px) {
+  .search {
+    padding: 0 24px;
+  }
+  input {
+    font-size: 20px;
+  }
+}
+@media (max-width: 767px) {
+  .mobile-menu .search {
+    border-color: #adb0d9;
+  }
+  .mobile-expanded .search {
+    margin: 10px 16px;
+  }
+  .mobile-expanded .results {
+    position: static;
+    border: 0;
+    box-shadow: none;
+    max-height: none;
+    padding: 16px 32px 100px;
+  }
+  .mobile-expanded .results a {
+    gap: 16px;
+    margin-bottom: 14px;
+    font-size: 18px;
+  }
+  .mobile-expanded .results app-avatar-image {
+    zoom: 1.25;
+  }
+  .mobile-expanded .results-note {
+    font-size: 11px;
+    margin-bottom: 12px;
+  }
+  input,
+  .recipient input {
+    font-size: 16px;
+  }
+  .search {
+    height: 48px;
+    padding: 0 16px;
+  }
+  .results {
+    padding: 8px;
+  }
+  .results a {
+    font-size: 16px;
+  }
+}

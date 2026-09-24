@@ -1,0 +1,97 @@
+.auth-screen {
+  width: min(100%, 606px);
+  position: relative;
+}
+.auth-card {
+  background: white;
+  border-radius: 30px;
+  box-shadow: 0 2px 10px #00000014;
+}
+.card-heading {
+  position: relative;
+  text-align: center;
+}
+h1 {
+  margin: 0;
+  color: var(--accent);
+  font-size: 46px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.back-link {
+  position: absolute;
+  top: 7px;
+  left: -24px;
+  color: black;
+}
+.back-link app-icon {
+  width: 24px;
+  height: 24px;
+}
+.auth-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  padding: 12px 24px;
+  border: 1px solid var(--accent);
+  border-radius: 100px;
+  background: var(--accent);
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 24px;
+  text-decoration: none;
+}
+.auth-button:disabled {
+  background: var(--text-secondary);
+  color: white;
+  border-color: var(--text-secondary);
+}
+.auth-button.secondary {
+  background: white;
+  color: var(--accent);
+}
+.auth-button:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+.auth-button.secondary:hover:not(:disabled) {
+  background: var(--accent-medium);
+  color: white;
+}
+.preview-note {
+  position: absolute;
+  top: calc(100% + 12px);
+  width: 100%;
+  text-align: center;
+  color: #52576e;
+  font-size: 12px;
+}
+.preview-note p {
+  margin: 0;
+  line-height: 1.5;
+}
+.preview-note a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+}
+@media (max-width: 767px) {
+  h1 {
+    font-size: 32px;
+  }
+  .back-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 44px;
+    height: 44px;
+  }
+  .preview-note {
+    position: static;
+    margin-top: 16px;
+  }
+  .preview-note a {
+    min-height: 44px;
+  }
+}

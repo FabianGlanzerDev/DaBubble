@@ -1,0 +1,86 @@
+<nav aria-label="Arbeitsbereich">
+  <div class="workspace-title">
+    <img src="assets/images/original/devspace.svg" width="60" height="60" alt="" />
+    <h2 [attr.data-page-heading]="isOverview() ? '' : null" tabindex="-1">Devspace</h2>
+    <a
+      class="icon-button"
+      [routerLink]="[basePath(), 'neue-nachricht']"
+      aria-label="Neue Nachricht"
+    >
+      <app-icon name="edit" />
+    </a>
+  </div>
+  <div class="group">
+    <div class="group-heading">
+      <button
+        type="button"
+        class="group-toggle"
+        [attr.aria-expanded]="channelsExpanded()"
+        aria-controls="channel-links"
+        (click)="channelsExpanded.set(!channelsExpanded())"
+      >
+        <app-icon name="chevron" [class.collapsed]="!channelsExpanded()" />
+        <app-icon name="channels" /><span>Channels</span>
+      </button>
+      <button
+        class="icon-button"
+        type="button"
+        (click)="overlay.open('channel-create')"
+        aria-label="Channel erstellen"
+      >
+        <app-icon name="plus" />
+      </button>
+    </div>
+    <ul id="channel-links" [class.folded]="!channelsExpanded()" [inert]="!channelsExpanded()">
+      @for (channel of channels; track channel.id) {
+        <li>
+          <a
+            [routerLink]="[basePath(), 'channels', channel.id]"
+            routerLinkActive="active"
+            ariaCurrentWhenActive="page"
+          >
+            <app-icon name="hash" /><span>{{ channel.label }}</span>
+          </a>
+        </li>
+      }
+      <li>
+        <button class="add-channel" type="button" (click)="overlay.open('channel-create')">
+          <app-icon name="plus" />Channel hinzufügen
+        </button>
+      </li>
+    </ul>
+  </div>
+  <div class="group direct-group">
+    <button
+      type="button"
+      class="group-toggle"
+      [attr.aria-expanded]="directExpanded()"
+      aria-controls="direct-links"
+      (click)="directExpanded.set(!directExpanded())"
+    >
+      <app-icon name="chevron" [class.collapsed]="!directExpanded()" /><app-icon name="user" /><span
+        >Direktnachrichten</span
+      >
+    </button>
+    <ul id="direct-links" [class.folded]="!directExpanded()" [inert]="!directExpanded()">
+      @for (person of directMessages; track person.id) {
+        <li>
+          <a
+            [routerLink]="[basePath(), 'direkt', person.id]"
+            routerLinkActive="active"
+            ariaCurrentWhenActive="page"
+          >
+            <app-avatar-image
+              [index]="person.avatar ?? null"
+              [size]="50"
+              [presence]="person.id === 'elise-roth' ? 'away' : 'active'"
+            /><span>{{ person.label }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+  </div>
+  <p class="sidebar-note">
+    Beispielkontakte aus der Vorlage · keine echten Konten oder Online-Status.
+  </p>
+</nav>

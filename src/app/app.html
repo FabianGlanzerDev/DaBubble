@@ -1,0 +1,6 @@
+<a class="skip-link" href="#main-content" (click)="skipToMain($event)">Zum Hauptinhalt</a>
+@if (restoringRoute && session.initializing()) {
+  <p class="session-loading" role="status">Deine Sitzung wird wiederhergestellt…</p>
+}
+<router-outlet />
+<app-overlay-host />

@@ -1,0 +1,277 @@
+dialog {
+  width: 500px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 30px;
+  background: white;
+  color: var(--text);
+  box-shadow: 0 6px 10px #0003;
+  overflow-y: auto;
+}
+dialog[open] {
+  animation: dialog-in 200ms ease-out both;
+}
+dialog.closing {
+  animation: dialog-out 200ms ease-in both;
+}
+dialog::backdrop {
+  background: #0005;
+  animation: backdrop-in 200ms;
+}
+dialog.closing::backdrop {
+  animation: backdrop-out 200ms forwards;
+}
+.overlay-body {
+  padding: 40px;
+}
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+h2 {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  margin: 0;
+  font-size: 24px;
+}
+header .icon-button {
+  color: var(--text);
+}
+[data-type='channel'],
+[data-type='channel-create'] {
+  width: 872px;
+}
+[data-type='channel'] {
+  border-top-left-radius: 0;
+}
+[data-type='channel-people'] {
+  width: 710px;
+}
+[data-type='members'] {
+  width: 415px;
+}
+[data-type='add-members'] {
+  width: 514px;
+}
+[data-type='settings'] {
+  width: 280px;
+  margin: 110px 24px auto auto;
+  border-top-right-radius: 0;
+}
+[data-type='settings'] .overlay-body {
+  padding: 20px 30px 12px;
+}
+[data-type='members'],
+[data-type='add-members'] {
+  margin: 210px 40px auto auto;
+  border-top-right-radius: 0;
+}
+[data-type='emoji'] {
+  width: 360px;
+}
+[data-type='confirmation'] {
+  width: 650px;
+}
+.confirmation {
+  margin-top: 24px;
+  animation: slide-in 500ms ease-out;
+}
+@keyframes slide-in {
+  from {
+    transform: translateX(100vw);
+  }
+  to {
+    transform: none;
+  }
+}
+.settings-heading h2 {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.settings-heading .icon-button {
+  width: 32px;
+  height: 32px;
+}
+.settings-option {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  font-size: 24px;
+  font-weight: 600;
+  background: transparent;
+  border: 0;
+  border-radius: 30px;
+}
+.mobile-setting-icon {
+  display: none;
+}
+.settings-option:hover:not(:disabled) {
+  color: var(--accent-medium);
+  background: var(--accent-soft);
+}
+.settings-option:disabled {
+  background: transparent;
+}
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes dialog-out {
+  to {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+}
+@keyframes backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes backdrop-out {
+  to {
+    opacity: 0;
+  }
+}
+@media (max-width: 767px) {
+  dialog,
+  [data-type='settings'],
+  [data-type='members'],
+  [data-type='add-members'] {
+    margin: auto;
+    border-radius: 30px;
+  }
+  .overlay-body {
+    padding: 32px 20px;
+  }
+  h2 {
+    font-size: clamp(18px, 5vw, 22px);
+    gap: 8px;
+  }
+  header {
+    gap: 8px;
+  }
+  [data-type='channel'],
+  [data-type='channel-create'] {
+    max-width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0;
+    border-radius: 0;
+  }
+  [data-type='channel'] .overlay-body {
+    padding: 0 16px 24px;
+  }
+  [data-type='channel'] header,
+  [data-type='channel-create'] header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: white;
+  }
+  [data-type='channel'] header {
+    margin-inline: -16px;
+    padding: 30px 16px 12px;
+    box-shadow: 0 3px 5px #0000000d;
+  }
+  [data-type='channel'] h2 {
+    font-size: 20px;
+  }
+  [data-type='profile'] .overlay-body,
+  [data-type='profile-edit'] .overlay-body {
+    padding-block: 40px;
+  }
+  [data-type='settings'],
+  [data-type='add-members'],
+  [data-type='channel-people'] {
+    margin: auto 0 0;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 30px 30px 0 0;
+    max-height: calc(100dvh - 24px);
+  }
+  [data-type='settings'] .overlay-body {
+    padding: 50px 32px 24px;
+  }
+  [data-type='add-members'] .overlay-body,
+  [data-type='channel-people'] .overlay-body {
+    padding-top: 54px;
+  }
+  [data-type='settings']::before,
+  [data-type='add-members']::before,
+  [data-type='channel-people']::before {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 5px;
+    border-radius: 8px;
+    background: #d9d9d9;
+    top: 24px;
+    left: calc(50% - 30px);
+  }
+  .settings-heading h2 {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .settings-heading .icon-button {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+  }
+  .settings-option {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    text-align: left;
+    font-size: 20px;
+    width: fit-content;
+    min-height: 52px;
+    padding-inline: 20px;
+  }
+  .mobile-setting-icon {
+    display: inline-flex;
+  }
+  [data-type='settings'][open],
+  [data-type='add-members'][open],
+  [data-type='channel-people'][open] {
+    animation-name: sheet-in;
+  }
+  [data-type='settings'].closing,
+  [data-type='add-members'].closing,
+  [data-type='channel-people'].closing {
+    animation-name: sheet-out;
+  }
+}
+@keyframes sheet-in {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes sheet-out {
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}

@@ -1,0 +1,113 @@
+<div class="workspace-shell">
+  <app-workspace-header
+    [realAccount]="basePath === '/chat'"
+    [conversation]="hasConversation()"
+    [basePath]="basePath"
+  />
+  <button
+    class="menu-handle"
+    type="button"
+    (click)="menuOpen.set(!menuOpen())"
+    [attr.aria-expanded]="menuOpen()"
+    aria-controls="workspace-menu"
+    [attr.aria-label]="menuOpen() ? 'Menü einklappen' : 'Menü ausklappen'"
+  >
+    <app-icon name="panel" /><span>Workspace-Menü {{ menuOpen() ? 'schließen' : 'öffnen' }}</span>
+  </button>
+  <main
+    id="main-content"
+    tabindex="-1"
+    class="workspace"
+    [class.menu-collapsed]="!menuOpen()"
+    [class.thread-collapsed]="!preview.threadOpen()"
+    [class.has-conversation]="hasConversation()"
+    [class.mobile-thread-open]="hasThread() && mobile.view() === 'thread'"
+    [class.mobile-search-open]="mobile.view() === 'search' && !hasConversation()"
+  >
+    <aside id="workspace-menu" class="sidebar panel" aria-label="Channels und Direktnachrichten">
+      <h1
+        class="mobile-menu-title"
+        [attr.data-page-heading]="!hasConversation() ? '' : null"
+        tabindex="-1"
+      >
+        Arbeitsbereich
+      </h1>
+      <div class="mobile-search">
+        <app-workspace-search [mobileMenu]="true" fieldId="mobile-workspace-search" />
+      </div>
+      <app-workspace-sidebar [basePath]="basePath" [isOverview]="!hasConversation()" />
+      <a
+        class="mobile-compose icon-button"
+        [routerLink]="[basePath, 'neue-nachricht']"
+        aria-label="Neue Nachricht"
+        ><app-icon name="compose"
+      /></a>
+    </aside>
+    <section class="main-panel panel" aria-label="Chat-Ansicht">
+      @if (basePath === '/chat' && (!session.profile() || session.profileError())) {
+        <app-account-status />
+      } @else {
+        <router-outlet />
+      }
+      @if (hasThread()) {
+        <details
+          class="mobile-thread"
+          [open]="preview.mobileThreadOpen()"
+          (toggle)="syncMobileThread($event)"
+        >
+          <summary>Vorgesehenen Thread-Bereich ansehen</summary>
+          @if (preview.mobileThreadOpen()) {
+            <app-thread-panel headingId="mobile-thread-heading" />
+          }
+        </details>
+      }
+    </section>
+    @if (hasThread() && mobile.view() === 'thread') {
+      <section class="mobile-thread-view panel" aria-label="Thread-Ansicht">
+        <app-thread-panel
+          headingId="phone-thread-heading"
+          [closable]="true"
+          (closeThread)="closeMobileThread()"
+        />
+      </section>
+    }
+    <aside
+      id="workspace-thread"
+      class="thread-panel panel"
+      aria-label="Vorgesehener Thread-Bereich"
+    >
+      <app-thread-panel
+        headingId="desktop-thread-heading"
+        [closable]="true"
+        (closeThread)="closeThread()"
+      />
+    </aside>
+  </main>
+  <footer class="preview-banner">
+    <span class="mobile-notice">{{
+      basePath === '/chat' ? 'Angemeldet · Chat-Beispiele' : 'Designvorschau · kein Versand'
+    }}</span>
+    <p>
+      @if (basePath === '/chat') {
+        <strong>Angemeldet</strong> · Benutzerprofil verbunden. Chat-Inhalte bleiben
+        Designbeispiele; Nachrichten und Channels werden noch nicht gespeichert.
+      } @else {
+        <strong>Layout-Vorschau</strong> · Figma-Beispiele und lokale Entwürfe. Versand und
+        Speichern ausstehend.
+      }
+    </p>
+    <a routerLink="/anmeldung">Zur Anmeldung</a>
+    @if (hasThread()) {
+      <button
+        #threadSwitch
+        class="thread-switch"
+        type="button"
+        [attr.aria-expanded]="preview.threadOpen()"
+        aria-controls="workspace-thread"
+        (click)="preview.threadOpen.set(!preview.threadOpen())"
+      >
+        <app-icon name="thread" />Thread {{ preview.threadOpen() ? 'ausblenden' : 'anzeigen' }}
+      </button>
+    }
+  </footer>
+</div>

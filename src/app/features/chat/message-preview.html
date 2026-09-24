@@ -1,0 +1,106 @@
+<article
+  class="message"
+  [class.own]="message().own"
+  [class.editing]="editing()"
+  [class.pinned]="actionsPinned()"
+  aria-label="Statische Beispielnachricht"
+>
+  <button
+    class="avatar-button"
+    (click)="openProfile()"
+    [attr.aria-label]="'Profil von ' + message().author"
+  >
+    <app-avatar-image [index]="message().avatar" [size]="70" />
+  </button>
+  <div class="body">
+    <div class="meta">
+      <button class="author" (click)="openProfile()">{{ message().author }}</button
+      ><span>{{ message().time }} Uhr</span>
+    </div>
+    @if (editing()) {
+      <div class="message-editor">
+        <label class="sr-only" [for]="'edit-' + message().time + compact()"
+          >Beispielnachricht bearbeiten</label
+        >
+        <textarea
+          #editor
+          [id]="'edit-' + message().time + compact()"
+          [value]="draft()"
+          (input)="draft.set(editor.value)"
+          rows="3"
+        ></textarea>
+        <div class="editor-actions">
+          <button class="button secondary" (click)="editing.set(false)">Abbrechen</button
+          ><button class="button primary" disabled>Speichern</button>
+        </div>
+        <p class="overlay-note">
+          Textentwurf · Speichern benötigt eine eigene Nachricht und Datenanbindung.
+        </p>
+      </div>
+    } @else {
+      <button
+        class="bubble"
+        (click)="actionsPinned.set(!actionsPinned())"
+        [attr.aria-expanded]="actionsPinned()"
+      >
+        {{ message().text }}
+      </button>
+    }
+    @if (message().replies) {
+      <div class="replies">
+        <button
+          (click)="showThread.emit()"
+          aria-label="2 Antworten – statische Thread-Vorschau öffnen"
+        >
+          2 Antworten</button
+        ><span>Letzte Antwort 14:56</span>
+      </div>
+    }
+    @if (message().reactions; as reactions) {
+      <app-reaction-list [reactions]="reactions" [compact]="compact()" />
+    }
+  </div>
+  @if (!editing()) {
+    <div class="message-actions" aria-label="Nachrichtenaktionen">
+      <button
+        class="icon-button"
+        aria-label="Beispielreaktion Haken ansehen"
+        (click)="overlay.open('reactions')"
+      >
+        ✅
+      </button>
+      <button
+        class="icon-button"
+        aria-label="Beispielreaktion Hände ansehen"
+        (click)="overlay.open('reactions')"
+      >
+        🙌
+      </button>
+      <button
+        class="icon-button"
+        aria-label="Reaktionsauswahl ansehen"
+        (click)="overlay.open('emoji')"
+      >
+        <app-icon name="reaction" />
+      </button>
+      @if (!compact()) {
+        <button class="icon-button" aria-label="Thread öffnen" (click)="showThread.emit()">
+          <app-icon name="thread" />
+        </button>
+      }
+      @if (message().own) {
+        <button
+          class="icon-button"
+          aria-label="Weitere Nachrichtenaktionen"
+          [attr.aria-expanded]="optionsOpen()"
+          (click)="optionsOpen.set(!optionsOpen())"
+        >
+          <app-icon name="more" />
+        </button>
+      }
+    </div>
+    @if (optionsOpen()) {
+      <div class="message-options"><button (click)="edit()">Nachricht bearbeiten</button></div>
+    }
+  }
+</article>
