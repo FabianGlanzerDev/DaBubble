@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function owns(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function validProfile(uid) {
+      let data = request.resource.data;
+      return data.keys().hasAll(['uid', 'name', 'avatarId', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['uid', 'name', 'avatarId', 'createdAt', 'updatedAt'])
+        && data.uid == uid
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 80
+        && data.name.matches('^\\S(.*\\S)?$')
+        && data.avatarId is int && data.avatarId >= 0 && data.avatarId <= 5
+        && data.createdAt is timestamp && data.updatedAt == request.time;
+    }
+
+    match /users/{uid} {
+      allow get: if owns(uid);
+      allow list, delete: if false;
+      allow create: if owns(uid) && validProfile(uid)
+        && request.resource.data.createdAt == request.time;
+      allow update: if owns(uid) && validProfile(uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'avatarId', 'updatedAt']);
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
