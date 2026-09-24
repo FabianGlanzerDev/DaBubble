@@ -27,6 +27,11 @@ export class AuthSession {
   readonly pendingName = signal('');
   readonly ready = this.initialize();
 
+  async chatDatabase() {
+    await this.ready;
+    return this.requireClient().chatDatabase();
+  }
+
   private async initialize(): Promise<void> {
     try {
       const settings = await loadFirebaseSettings();

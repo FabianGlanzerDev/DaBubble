@@ -56,6 +56,10 @@ export class FirebaseRuntime {
     return user ? { uid: user.uid, email: user.email } : null;
   }
 
+  chatDatabase(): Firestore {
+    return this.database;
+  }
+
   observeUser(next: (user: AccountIdentity | null) => void): () => void {
     return onAuthStateChanged(this.auth, () => next(this.identity()));
   }
