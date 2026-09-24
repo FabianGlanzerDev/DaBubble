@@ -6,13 +6,15 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "typecheck": "ngc -p tsconfig.app.json --noEmit",
+    "typecheck": "ngc -p tsconfig.app.json --noEmit && tsc -p tsconfig.tools.json",
     "lint": "eslint src --max-warnings=0",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "test": "npm run build && playwright test",
+    "test:browser": "playwright test",
     "check:secrets": "node scripts/check-secrets.mjs",
     "check:files": "node scripts/check-file-length.mjs",
-    "check": "npm run typecheck && npm run lint && npm run format:check && npm run check:files && npm run build"
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm run check:files && npm run build && npm run test:browser"
   },
   "private": true,
   "engines": {
