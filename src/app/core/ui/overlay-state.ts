@@ -18,6 +18,8 @@ export type OverlayType =
 export interface OverlayContext {
   readonly type: OverlayType;
   readonly account?: boolean;
+  readonly live?: boolean;
+  readonly messageId?: string;
   readonly personId?: string;
   readonly channelId?: string;
   readonly draftChannelName?: string;

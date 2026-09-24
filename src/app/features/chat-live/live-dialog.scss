@@ -1,0 +1,75 @@
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+label {
+  display: block;
+  font-weight: 700;
+}
+input:not([type='checkbox']),
+textarea {
+  display: block;
+  width: 100%;
+  padding: 15px 20px;
+  border: 1px solid #adb0d9;
+  border-radius: 30px;
+  font: inherit;
+}
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+.actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.leave {
+  align-self: flex-end;
+  color: var(--accent);
+  border: 0;
+  background: white;
+  padding: 12px;
+}
+.leave:hover {
+  background: var(--page);
+  border-radius: 30px;
+}
+.people {
+  list-style: none;
+  padding: 0;
+  max-height: 32dvh;
+  overflow: auto;
+}
+.people label,
+.people button {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px;
+  border: 0;
+  background: white;
+  border-radius: 20px;
+  width: 100%;
+  text-align: left;
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+.people button:hover,
+.people label:hover {
+  background: var(--page);
+}
+.people input {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
+}
+@media (max-width: 374px) {
+  .people label,
+  .people button {
+    gap: 8px;
+  }
+}

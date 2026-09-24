@@ -18,6 +18,7 @@ import { ConfirmationMessage } from '../../shared/ui/confirmation-message';
 import { ReactionList } from '../chat/reaction-list';
 import { AuthSession } from '../../core/auth/auth-session';
 import { authIssue } from '../../core/auth/auth-errors';
+import { LiveDialog } from '../chat-live/live-dialog';
 
 const titles: Record<OverlayType, string> = {
   confirmation: 'Animationsbeispiel',
@@ -44,6 +45,7 @@ const titles: Record<OverlayType, string> = {
     EmojiPanel,
     ConfirmationMessage,
     ReactionList,
+    LiveDialog,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './overlay-host.html',
@@ -57,6 +59,8 @@ export class OverlayHost {
   private readonly dialog = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
   protected readonly title = computed(() => {
     const current = this.overlay.current();
+    if (current?.live && current.type === 'channel') return 'Channel verwalten';
+    if (current?.live && current.type === 'reactions') return 'Reaktionen';
     return current?.type === 'channel' && current.channelId === 'office-team'
       ? 'Office-team'
       : titles[current?.type ?? 'settings'];

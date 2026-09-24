@@ -1,0 +1,141 @@
+<article
+  class="message"
+  [class.own]="own()"
+  [class.editing]="editing()"
+  [class.pinned]="pinned()"
+  [attr.id]="(compact() ? 'thread-' : 'message-') + message().id"
+  [attr.data-message-id]="message().id"
+  tabindex="-1"
+  [attr.aria-label]="'Nachricht von ' + author().name"
+>
+  <button
+    class="avatar-button"
+    type="button"
+    [attr.aria-label]="'Profil von ' + author().name"
+    (click)="profile()"
+  >
+    <app-avatar-image [index]="author().avatarId" [size]="70" />
+  </button>
+  <div class="body">
+    <div class="meta">
+      <button class="author" type="button" (click)="profile()">{{ author().name }}</button>
+      <span [title]="message().createdAt | date: 'dd.MM.yyyy HH:mm'"
+        >{{ message().createdAt | date: 'HH:mm' }} Uhr
+        @if (message().updatedAt > message().createdAt && !message().deleted) {
+          · bearbeitet
+        }
+      </span>
+    </div>
+    @if (editing() && !message().deleted) {
+      <form class="message-editor" (submit)="$event.preventDefault(); save()">
+        <label class="sr-only" [for]="'edit-' + message().id">Nachricht bearbeiten</label>
+        <textarea
+          [id]="'edit-' + message().id"
+          maxlength="4000"
+          [value]="text()"
+          (input)="text.set($any($event.target).value)"
+          [disabled]="action.busy()"
+        ></textarea>
+        <div class="editor-actions">
+          <button
+            class="button secondary"
+            type="button"
+            [disabled]="action.busy()"
+            (click)="editing.set(false)"
+          >
+            Abbrechen</button
+          ><button class="button" type="submit" [disabled]="!text().trim() || action.busy()">
+            Speichern
+          </button>
+        </div>
+      </form>
+    } @else {
+      <p class="bubble">
+        @if (message().deleted) {
+          <em>Nachricht gelöscht</em>
+        } @else {
+          <app-live-message-text [text]="message().text" />
+        }
+      </p>
+    }
+    @if (!message().deleted) {
+      <app-live-reactions [message]="message()" [compact]="compact()" [own]="own()" />
+    }
+    @if (!message().rootId && !compact()) {
+      <div class="replies">
+        <button type="button" (click)="nav.thread(message().id)">
+          {{ replies().length ? replies().length + ' Antworten' : 'Im Thread antworten' }}
+        </button>
+      </div>
+    }
+    @if (removing()) {
+      <div class="delete-confirm">
+        <p>Diese Nachricht für alle löschen?</p>
+        <div class="editor-actions">
+          <button class="button secondary" type="button" (click)="removing.set(false)">
+            Abbrechen</button
+          ><button class="button" type="button" [disabled]="action.busy()" (click)="remove()">
+            Löschen bestätigen
+          </button>
+        </div>
+      </div>
+    }
+    @if (action.error()) {
+      <p class="action-error" role="alert">{{ action.error() }}</p>
+    }
+  </div>
+  @if (!message().deleted) {
+    <button
+      class="touch-actions icon-button"
+      type="button"
+      aria-label="Nachrichtenaktionen"
+      [attr.aria-expanded]="pinned()"
+      (click)="pinned.set(!pinned())"
+    >
+      <app-icon name="more" />
+    </button>
+    <div class="message-actions" aria-label="Nachrichtenaktionen">
+      @for (emoji of store.recent(); track emoji) {
+        <button
+          class="icon-button"
+          type="button"
+          [attr.aria-label]="'Mit ' + emoji + ' reagieren'"
+          [disabled]="action.busy()"
+          (click)="react(emoji)"
+        >
+          {{ emoji }}
+        </button>
+      }
+      <button class="icon-button" type="button" aria-label="Reaktion hinzufügen" (click)="emojis()">
+        <app-icon name="reaction" />
+      </button>
+      @if (!message().rootId && !compact()) {
+        <button
+          class="icon-button"
+          type="button"
+          aria-label="Thread öffnen"
+          (click)="nav.thread(message().id)"
+        >
+          <app-icon name="thread" />
+        </button>
+      }
+      @if (own()) {
+        <button
+          class="icon-button"
+          type="button"
+          aria-label="Nachricht bearbeiten"
+          (click)="beginEdit()"
+        >
+          <app-icon name="pencil" /></button
+        ><button
+          class="icon-button"
+          type="button"
+          aria-label="Nachricht löschen"
+          (click)="removing.set(true)"
+        >
+          <app-icon name="close" />
+        </button>
+      }
+    </div>
+  }
+</article>

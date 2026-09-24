@@ -25,71 +25,80 @@
           <app-icon name="close" />
         </button>
       </header>
-      @switch (current.type) {
-        @case ('settings') {
-          <button
-            class="settings-option"
-            type="button"
-            (click)="overlay.open('profile', { account: current.account })"
-          >
-            <app-icon class="mobile-setting-icon" name="user-circle" />Profil
-          </button>
-          <button
-            class="settings-option"
-            type="button"
-            [disabled]="!current.account || !session.user() || session.busy()"
-            (click)="logout()"
-          >
-            <app-icon class="mobile-setting-icon" name="logout" />{{
-              session.pending() === 'logout' ? 'Abmeldung läuft…' : 'Log out'
-            }}
-          </button>
-          @if (!current.account) {
-            <p class="overlay-note">Keine aktive Anmeldung in dieser Designvorschau.</p>
+      @if (current.live) {
+        @defer (when current.live) {
+          <app-live-dialog />
+        }
+      } @else {
+        @switch (current.type) {
+          @case ('settings') {
+            <button
+              class="settings-option"
+              type="button"
+              (click)="overlay.open('profile', { account: current.account })"
+            >
+              <app-icon class="mobile-setting-icon" name="user-circle" />Profil
+            </button>
+            <button
+              class="settings-option"
+              type="button"
+              [disabled]="!current.account || !session.user() || session.busy()"
+              (click)="logout()"
+            >
+              <app-icon class="mobile-setting-icon" name="logout" />{{
+                session.pending() === 'logout' ? 'Abmeldung läuft…' : 'Log out'
+              }}
+            </button>
+            @if (!current.account) {
+              <p class="overlay-note">Keine aktive Anmeldung in dieser Designvorschau.</p>
+            }
+            @if (logoutError()) {
+              <p class="action-error" role="alert">{{ logoutError() }}</p>
+            }
           }
-          @if (logoutError()) {
-            <p class="action-error" role="alert">{{ logoutError() }}</p>
+          @case ('profile') {
+            <app-profile-panel />
           }
-        }
-        @case ('profile') {
-          <app-profile-panel />
-        }
-        @case ('profile-edit') {
-          <app-profile-panel />
-        }
-        @case ('avatar') {
-          <app-profile-panel />
-        }
-        @case ('channel') {
-          <app-channel-panel />
-        }
-        @case ('channel-create') {
-          <app-channel-panel />
-        }
-        @case ('channel-people') {
-          <app-members-panel />
-        }
-        @case ('members') {
-          <app-members-panel />
-        }
-        @case ('add-members') {
-          <app-members-panel />
-        }
-        @case ('emoji') {
-          <app-emoji-panel />
-        }
-        @case ('reactions') {
-          <app-reaction-list [reactions]="exampleReactions" [compact]="true" />
-          <p>Frederik Beck hat auf diese Beispielnachricht reagiert.</p>
-          <p class="overlay-note">Statische Figma-Beispiele; keine neuen Reaktionen gespeichert.</p>
-        }
-        @case ('confirmation') {
-          <p class="overlay-note">
-            Animationsbeispiel · Kein Konto erstellt, keine E-Mail gesendet, kein Passwort geändert.
-          </p>
-          <div class="confirmation">
-            <app-confirmation-message [kind]="current.kind ?? 'account'" />
-          </div>
+          @case ('profile-edit') {
+            <app-profile-panel />
+          }
+          @case ('avatar') {
+            <app-profile-panel />
+          }
+          @case ('channel') {
+            <app-channel-panel />
+          }
+          @case ('channel-create') {
+            <app-channel-panel />
+          }
+          @case ('channel-people') {
+            <app-members-panel />
+          }
+          @case ('members') {
+            <app-members-panel />
+          }
+          @case ('add-members') {
+            <app-members-panel />
+          }
+          @case ('emoji') {
+            <app-emoji-panel />
+          }
+          @case ('reactions') {
+            <app-reaction-list [reactions]="exampleReactions" [compact]="true" />
+            <p>Frederik Beck hat auf diese Beispielnachricht reagiert.</p>
+            <p class="overlay-note">
+              Statische Figma-Beispiele; keine neuen Reaktionen gespeichert.
+            </p>
+          }
+          @case ('confirmation') {
+            <p class="overlay-note">
+              Animationsbeispiel · Kein Konto erstellt, keine E-Mail gesendet, kein Passwort
+              geändert.
+            </p>
+            <div class="confirmation">
+              <app-confirmation-message [kind]="current.kind ?? 'account'" />
+            </div>
+          }
         }
       }
     </div>

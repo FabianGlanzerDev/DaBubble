@@ -1,0 +1,49 @@
+.bubble {
+  overflow-wrap: anywhere;
+}
+.own .replies {
+  justify-content: flex-end;
+}
+.touch-actions {
+  display: none;
+}
+.delete-confirm {
+  border: 1px solid #adb0d9;
+  border-radius: 20px;
+  padding: 12px;
+  margin-top: 12px;
+  background: white;
+}
+.message-actions {
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+article:target {
+  outline: 2px solid var(--accent);
+}
+@media (max-width: 767px), (pointer: coarse) {
+  .touch-actions {
+    display: flex;
+    position: absolute;
+    bottom: -12px;
+    right: 0;
+    width: 32px;
+  }
+  .message-actions {
+    position: static;
+    grid-column: 1 / -1;
+    display: none;
+    width: fit-content;
+    margin-left: auto;
+    transform: none;
+  }
+  .message.pinned .message-actions {
+    display: flex;
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .message-actions .icon-button {
+    width: 40px;
+    min-width: 40px;
+  }
+}

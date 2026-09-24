@@ -1,0 +1,102 @@
+@for (channel of roots(); track channel.id) {
+  <header class="conversation-header">
+    @if (compact()) {
+      <h2>
+        Thread <span># {{ store.label(channel) }}</span>
+      </h2>
+      <button
+        class="icon-button"
+        type="button"
+        aria-label="Thread schließen"
+        (click)="nav.closeThread()"
+      >
+        <app-icon name="close" />
+      </button>
+    } @else {
+      <button
+        class="title-button title"
+        type="button"
+        (click)="details()"
+        aria-label="Gesprächsdetails"
+      >
+        <app-icon [name]="channel.kind === 'channel' ? 'hash' : 'user'" />
+        <h1 data-page-heading tabindex="-1">{{ store.label(channel) }}</h1>
+        <app-icon name="chevron" />
+      </button>
+      @if (channel.kind === 'channel') {
+        <div class="members">
+          <button
+            type="button"
+            class="member-list"
+            aria-label="Mitglieder anzeigen"
+            (click)="members()"
+          >
+            <span class="member-avatars">
+              @for (id of channel.memberIds.slice(0, 3); track id) {
+                <app-avatar-image [index]="store.person(id).avatarId" [size]="40" />
+              }</span
+            >{{ channel.memberIds.length }}
+          </button>
+          <button
+            class="icon-button"
+            type="button"
+            (click)="members()"
+            [attr.aria-label]="'Mitglieder verwalten (' + channel.memberIds.length + ')'"
+          >
+            <app-icon name="user-add" />
+          </button>
+        </div>
+      }
+    }
+  </header>
+  <div
+    #transcript
+    class="transcript"
+    [attr.aria-label]="compact() ? 'Thread-Nachrichten' : 'Nachrichten'"
+    role="region"
+    tabindex="0"
+  >
+    @if (compact()) {
+      @if (parent(); as message) {
+        <app-live-message [message]="message" [compact]="true" />
+        <div class="date-divider">
+          <span>{{ messages().length }} Antworten</span>
+        </div>
+      } @else {
+        <p>Diese Ursprungsnachricht ist nicht verfügbar.</p>
+      }
+    }
+    @for (message of messages(); track message.id; let i = $index) {
+      @if (newDay(i) && !compact()) {
+        <div class="date-divider">
+          <span>{{ message.createdAt | date: 'dd.MM.yyyy' }}</span>
+        </div>
+      }
+      <app-live-message [message]="message" [compact]="compact()" />
+    } @empty {
+      <p class="empty-conversation">
+        {{
+          compact()
+            ? 'Noch keine Antworten.'
+            : 'Hier beginnt euer Gespräch. Schreibe die erste Nachricht.'
+        }}
+      </p>
+    }
+  </div>
+  @if (!compact() || parent()) {
+    @for (id of [root()]; track id) {
+      <app-live-composer
+        [roomId]="channel.id"
+        [rootId]="id"
+        [fieldId]="compact() ? 'thread-message' : 'chat-message'"
+      />
+    }
+  }
+} @empty {
+  <div class="missing">
+    <h1 data-page-heading tabindex="-1">
+      {{ store.loading() ? 'Gespräch wird geladen…' : 'Gespräch nicht verfügbar' }}
+    </h1>
+    <p>Nur Mitglieder können dieses Gespräch öffnen.</p>
+  </div>
+}

@@ -1,0 +1,11 @@
+.desktop-search {
+  flex: 1;
+  --search-height: 70px;
+  --search-font: 24px;
+  --search-border: 0;
+}
+@media (max-width: 767px) {
+  .desktop-search {
+    display: none;
+  }
+}

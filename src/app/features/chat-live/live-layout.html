@@ -1,0 +1,62 @@
+<div class="workspace-shell">
+  <app-live-header [conversation]="nav.active()" />
+  <button
+    class="menu-handle"
+    type="button"
+    (click)="menuOpen.set(!menuOpen())"
+    [attr.aria-expanded]="menuOpen()"
+    aria-controls="workspace-menu"
+    [attr.aria-label]="menuOpen() ? 'Menü einklappen' : 'Menü ausklappen'"
+  >
+    <app-icon name="panel" /><span>Workspace-Menü {{ menuOpen() ? 'schließen' : 'öffnen' }}</span>
+  </button>
+  @if (store.error()) {
+    <div class="chat-error" role="alert">
+      <span>{{ store.error() }}</span
+      ><button class="button secondary" type="button" (click)="store.retry()">Erneut laden</button
+      ><a routerLink="/vorschau">Designvorschau öffnen</a>
+    </div>
+  }
+  @if (store.loading()) {
+    <p class="loading" role="status">Gespräche werden geladen…</p>
+  }
+  <main
+    id="main-content"
+    tabindex="-1"
+    class="workspace"
+    [class.menu-collapsed]="!menuOpen()"
+    [class.thread-collapsed]="!nav.threadId()"
+    [class.has-conversation]="nav.active()"
+    [class.mobile-thread-open]="!!nav.threadId()"
+  >
+    <aside id="workspace-menu" class="sidebar panel" aria-label="Channels und Direktnachrichten">
+      <h1
+        class="mobile-menu-title"
+        [attr.data-page-heading]="!nav.active() ? '' : null"
+        tabindex="-1"
+      >
+        Arbeitsbereich
+      </h1>
+      <div class="mobile-search"><app-live-search fieldId="mobile-live-search" /></div>
+      <app-live-sidebar />
+      <a
+        class="mobile-compose icon-button"
+        routerLink="/chat/neue-nachricht"
+        aria-label="Neue Nachricht"
+        ><app-icon name="compose"
+      /></a>
+    </aside>
+    <section class="main-panel panel" aria-label="Chat-Ansicht">
+      @if (!store.session.profile() || store.session.profileError()) {
+        <app-account-status />
+      } @else {
+        <router-outlet />
+      }
+    </section>
+    @if (nav.threadId()) {
+      <aside class="thread-panel live-thread panel" aria-label="Thread-Ansicht">
+        <app-live-conversation [compact]="true" />
+      </aside>
+    }
+  </main>
+</div>

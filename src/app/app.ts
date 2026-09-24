@@ -43,7 +43,7 @@ export class App {
   }
 
   private focusDestination(): void {
-    if (this.focusMobileSearch()) return;
+    if (this.focusMobileSearch() || this.focusLiveComposer()) return;
     const target = this.document.querySelector<HTMLElement>('#message-draft, #recipient-search');
     if (this.document.documentElement.clientWidth >= 768 && target?.checkVisibility()) {
       target.focus({ preventScroll: true });
@@ -51,6 +51,16 @@ export class App {
     }
     const headings = this.document.querySelectorAll<HTMLElement>('[data-page-heading]');
     [...headings].find((heading) => heading.checkVisibility())?.focus();
+  }
+
+  private focusLiveComposer(): boolean {
+    const fields = this.document.querySelectorAll<HTMLTextAreaElement>(
+      '#thread-message, #chat-message',
+    );
+    const field = [...fields].reverse().find((element) => element.checkVisibility());
+    if (!field) return false;
+    field.focus({ preventScroll: true });
+    return true;
   }
 
   private focusMobileSearch(): boolean {

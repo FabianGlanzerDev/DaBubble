@@ -1,6 +1,32 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/auth.guard';
 
+const liveChildren: Routes = [
+  {
+    path: '',
+    pathMatch: 'full',
+    title: 'Arbeitsbereich · DaBubble',
+    loadComponent: () => import('./features/chat-live/live-overview').then((m) => m.LiveOverview),
+  },
+  {
+    path: 'neue-nachricht',
+    title: 'Neue Nachricht · DaBubble',
+    loadComponent: () => import('./features/chat-live/live-overview').then((m) => m.LiveOverview),
+  },
+  {
+    path: 'channels/:id',
+    title: 'Channel · DaBubble',
+    loadComponent: () =>
+      import('./features/chat-live/live-conversation').then((m) => m.LiveConversation),
+  },
+  {
+    path: 'direkt/:id',
+    title: 'Direktnachricht · DaBubble',
+    loadComponent: () =>
+      import('./features/chat-live/live-conversation').then((m) => m.LiveConversation),
+  },
+];
+
 const workspaceChildren: Routes = [
   {
     path: 'neue-nachricht',
@@ -103,8 +129,8 @@ export const routes: Routes = [
     path: 'chat',
     canActivate: [authGuard],
     canActivateChild: [authGuard],
-    loadComponent: () => import('./features/chat/chat-layout').then((m) => m.ChatLayout),
-    children: workspaceChildren,
+    loadComponent: () => import('./features/chat-live/live-layout').then((m) => m.LiveLayout),
+    children: liveChildren,
   },
   {
     path: 'vorschau',

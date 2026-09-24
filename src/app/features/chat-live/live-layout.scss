@@ -1,0 +1,57 @@
+.workspace {
+  padding-bottom: 20px;
+}
+.chat-error {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 24px;
+  background: white;
+  max-height: 35dvh;
+  overflow: auto;
+}
+.chat-error span {
+  flex: 1 1 280px;
+}
+.loading {
+  margin: 0;
+  text-align: center;
+}
+.live-thread {
+  display: flex;
+  flex-direction: column;
+}
+@media (min-width: 768px) and (max-width: 1199px) {
+  .workspace.mobile-thread-open {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .mobile-thread-open .sidebar {
+    display: none;
+  }
+  .mobile-thread-open .live-thread {
+    display: flex;
+  }
+}
+@media (max-width: 767px) {
+  .workspace {
+    padding-bottom: 0;
+  }
+  .mobile-thread-open .main-panel,
+  .mobile-thread-open .sidebar {
+    display: none;
+  }
+  .live-thread {
+    display: flex;
+    margin: 0;
+    width: 100%;
+  }
+  .mobile-search {
+    position: relative;
+    z-index: 5;
+  }
+  .chat-error {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+}
