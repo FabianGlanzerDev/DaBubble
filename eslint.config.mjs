@@ -5,6 +5,15 @@ import angular from 'angular-eslint';
 export default tseslint.config(
   { ignores: ['dist/**', 'node_modules/**', '.angular/**', 'test-results/**'] },
   {
+    files: ['scripts/serve-static.mjs'],
+    extends: [js.configs.recommended],
+    languageOptions: { globals: { console: 'readonly', process: 'readonly' } },
+  },
+  {
+    files: ['scripts/account-deletion/**/*.mts'],
+    extends: [js.configs.recommended, ...tseslint.configs.recommended],
+  },
+  {
     files: ['src/**/*.ts'],
     extends: [
       js.configs.recommended,

@@ -11,7 +11,7 @@ const ignored = new Set([
   'package-lock.json',
   'tmp',
 ]);
-const extensions = new Set(['.ts', '.mjs', '.html', '.scss', '.json', '.md', '.rules']);
+const extensions = new Set(['.ts', '.mts', '.mjs', '.html', '.scss', '.json', '.md', '.rules']);
 const oversized = [];
 let checked = 0;
 
