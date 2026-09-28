@@ -1,0 +1,320 @@
+<p>Stand: 28. September 2026</p>
+
+<h2>1. Wer verantwortlich ist</h2>
+<p>
+  DaBubble ist mein Abschlussprojekt an der Developer Akademie. Ich, Fabian Glanzer, betreibe die
+  Anwendung und bin für die Verarbeitung deiner personenbezogenen Daten verantwortlich.
+</p>
+<address>
+  Fabian Glanzer<br />
+  Neue Frauengasse 8<br />
+  8750 Judenburg, Österreich<br />
+  E-Mail: <a href="mailto:fabsdev@gmx.at">fabsdev&#64;gmx.at</a>
+</address>
+
+<h2>2. Website und technischer Betrieb</h2>
+<p>
+  Die Developer Akademie GmbH stellt den Webspace bereit. Die Website-Dateien werden per FTP dorthin
+  übertragen. Konten und Chatdaten verarbeitet die App direkt über Firebase Authentication und Cloud
+  Firestore von Google; sie sind nicht Teil dieses Datei-Uploads.
+</p>
+<p>
+  Beim Seitenaufruf erhält der Webserver deine IP-Adresse, die angeforderte Adresse und die vom
+  Browser übermittelten Verbindungsinformationen. Dies ist für die Auslieferung der Website nötig.
+  Rechtsgrundlage ist Art. 6 Abs. 1 Buchst. f DSGVO: Mein berechtigtes Interesse ist, die
+  angeforderte Website zuverlässig bereitzustellen und den Dienst gegen Missbrauch abzusichern.
+</p>
+<p>
+  Zu einem weiteren technischen Hosting-Anbieter, dem Serverstandort sowie Art und Dauer möglicher
+  Serverprotokolle und Sicherungen liegen mir keine verlässlichen Angaben vor. Die
+  datenschutzrechtliche Rollen- und Vertragsregelung für den Webspace ist ebenfalls nicht
+  nachgewiesen. Die Bereitstellung durch die Akademie entbindet mich nicht von meiner Verantwortung
+  für DaBubble.
+</p>
+
+<h2>3. Konten, Profile und Chat</h2>
+<p>
+  Für Registrierung und Anmeldung übermittelt die App deine E-Mail-Adresse und dein Passwort an
+  Firebase Authentication. Der Dienst verwaltet dein Konto mit einer Benutzerkennung. Dein Passwort
+  wird nicht in den Profil- oder Chatdokumenten gespeichert. Beim Passwort-Reset fordert die App
+  über Firebase eine E-Mail mit einem persönlichen Link an. Firebase prüft dessen Gültigkeit.
+</p>
+<p>
+  Wenn du Google ausdrücklich als Anmeldemethode wählst, öffnet die App ein Google-Anmeldefenster.
+  Google und Firebase verarbeiten dabei deine Google-Kennung, E-Mail-Adresse und den Anzeigenamen.
+  Dein Google-Passwort wird nicht an DaBubble übermittelt. Neue Nutzer wählen ihren Namen und Avatar
+  anschließend in DaBubble; ein Google-Profilfoto wird nicht in Firestore übernommen. Eine Zuordnung
+  zu einem bestehenden Konto kann bei derselben bestätigten E-Mail-Adresse erfolgen. Die App erklärt
+  dies vor der Anmeldung und verlangt deine Bestätigung. Getrennte Benutzerkennungen und
+  Chatbestände werden nicht zusammengeführt. Du kannst Google auch ausdrücklich als zusätzlichen
+  Zugang mit deinem bereits angemeldeten Konto verknüpfen.
+</p>
+<p>
+  Der Gäste-Zugang legt in Firebase Authentication ein anonymes Konto mit Benutzerkennung an. Gäste
+  können Channels, Nachrichten, Direktnachrichten, Threads und Reaktionen verwenden und ihr
+  Gastprofil bearbeiten. Dafür werden dieselben Profildaten und Chatdaten wie bei dauerhaften Konten
+  gespeichert. Fremde private Profildokumente bleiben gesperrt; für Gespräche gelten dieselben
+  Mitgliedschafts- und Autorenrechte. Ein neues dauerhaftes Konto kann ausdrücklich mit dem
+  Gastkonto verknüpft werden; Benutzerkennung, Profil und bisherige Chatdaten bleiben dabei
+  erhalten. Ist der gewählte Zugang schon vergeben, bleibt das Gastkonto bestehen. Getrennte Konten
+  und Chatbestände werden nicht zusammengeführt.
+</p>
+<p>Cloud Firestore speichert und synchronisiert folgende Daten:</p>
+<ul>
+  <li>
+    Profil: Benutzerkennung, Name, ausgewählter vorgegebener Avatar und Zeitpunkte der Anlage und
+    Änderung.
+  </li>
+  <li>
+    Unterhaltungen: Channel-Name und Beschreibung, Mitglieder- und Erstellerkennungen sowie
+    Zeitpunkte.
+  </li>
+  <li>
+    Nachrichten und Threads: Text, Verfasserkennung, Zeitpunkte, Gesprächs- und Threadzuordnung
+    sowie Löschkennzeichen.
+  </li>
+  <li>Reaktionen: Emojis, Benutzerkennung, zugehörige Nachricht und Änderungszeitpunkt.</li>
+</ul>
+<p>
+  Dein Name, Avatar und deine Benutzerkennung erscheinen in einem für angemeldete Nutzer,
+  einschließlich Gäste, lesbaren Verzeichnis. Deine E-Mail-Adresse steht dort nicht. Ohne Anmeldung
+  ist dieses Verzeichnis nicht lesbar. Unterhaltungen, Nachrichten und Reaktionen sind über die App
+  nur für die jeweiligen Mitglieder zugänglich. Neu hinzugefügte Channel-Mitglieder können auch
+  bisherige Beiträge lesen. Ein Austritt entfernt deine bisherigen Beiträge nicht.
+  Projektadministratoren mit entsprechenden Berechtigungen und Google als Dienstleister haben
+  technisch Zugriff auf gespeicherte Daten. Die Chats sind nicht Ende-zu-Ende-verschlüsselt.
+</p>
+<p>
+  Für den Online-Status nutzt die App zusätzlich die Firebase Realtime Database. Sie speichert unter
+  deiner Benutzerkennung für jeden verbundenen Tab beziehungsweise jedes Gerät eine zufällige
+  Verbindungskennung mit einem Aktiv-Kennzeichen. Es werden dabei keine Nachrichtentexte,
+  E-Mail-Adressen, „Zuletzt online“-Zeiten oder Anwesenheitsverläufe gespeichert. Angemeldete Nutzer
+  einschließlich Gäste können den Status anderer Nutzer sehen; private Profile und Gespräche werden
+  dadurch nicht freigegeben. Grün bedeutet, dass mindestens eine Verbindung zur Status-Datenbank
+  besteht, grau, dass keine besteht. Das ist kein Nachweis, dass eine Person gerade auf den
+  Bildschirm schaut. Ist der Status nicht abrufbar, zeigt die App ihn als nicht verfügbar an.
+</p>
+<p>
+  Der jeweilige Verbindungseintrag wird beim Abmelden, beim Schließen des Tabs oder nach einem vom
+  Server erkannten Verbindungsabbruch entfernt. Bei einem unbemerkten Netzausfall kann die Erkennung
+  verzögert erfolgen. Beim Schließen eines Tabs bleiben andere aktive Verbindungen berücksichtigt.
+  Eine Abmeldung gilt auch für weitere Tabs derselben App-Adresse im selben Browserprofil;
+  unabhängig angemeldete Browser und Geräte bleiben angemeldet und online, solange ihre Verbindung
+  besteht. Dies löscht weder dein Konto noch deine Chatdaten.
+</p>
+<p>
+  Die für das von dir angeforderte Nutzerkonto und die Chatnutzung erforderliche Verarbeitung
+  erfolgt nach Art. 6 Abs. 1 Buchst. b DSGVO zur Erbringung dieser Leistung. Das gilt auch für den
+  von dir angeforderten Gastzugang und die von dir gewählte Google-Anmeldung. Ein neues dauerhaftes
+  Konto benötigt E-Mail-Adresse und Passwort oder einen Google-Zugang; für den Chat benötigt die App
+  außerdem einen Namen und einen Avatar. Nachrichten gibst du freiwillig ein. Firebase verarbeitet
+  auch IP-Adressen und Browserinformationen zum Schutz vor Missbrauch. Für die Absicherung meines
+  Dienstes ist Art. 6 Abs. 1 Buchst. f DSGVO die Rechtsgrundlage. Es findet in der App keine
+  automatisierte Entscheidung mit rechtlicher Wirkung und kein Profiling statt. Die Kenntnisnahme
+  dieser Erklärung ist keine pauschale Einwilligung in beliebige Datenverarbeitungen.
+</p>
+
+<h2>4. Daten im Browser und weitere Inhalte</h2>
+<p>
+  Während der Registrierung merkt sich die App Name, E-Mail-Adresse, ausgewählten Avatar und
+  Einrichtungsfortschritt im Session Storage dieses Tabs. Nach der Kontoanlage wird der Entwurf der
+  zugehörigen Nutzerkennung zugeordnet, damit ein Neuladen die Avatar-Auswahl nicht unterbricht.
+  Passwörter werden darin nicht gespeichert. Beim Abschluss der Einrichtung und Wechsel zum Chat
+  oder beim Abmelden entfernt die App diesen Entwurf; er gehört nicht zum dauerhaften
+  Browserspeicher.
+</p>
+<p>
+  Firebase speichert den Anmeldestatus mit Sitzungstoken vorrangig in IndexedDB, ersatzweise in
+  Local Storage oder Session Storage. Das hält die gewünschte Anmeldung bei Seitenwechseln und
+  Neuladen aufrecht; bei dauerhaftem Speicher auch nach einem Browserneustart. Abmelden beendet die
+  lokale Sitzung und löscht weder ein dauerhaftes Konto noch ein Gastkonto oder dessen Chatdaten.
+  Die App löscht Gastdaten auch nach einzelnen Chataktionen, beim Schließen des Browsers oder
+  Entfernen der Website-Daten nicht automatisch. Ohne vorherige Verknüpfung mit E-Mail/Passwort oder
+  Google kannst du nach dem Abmelden oder Verlust der Browserdaten nicht gezielt zu demselben
+  Gastkonto zurückkehren. Ein erneuter Gäste-Login legt dann ein neues Gastkonto an. Die App weist
+  vor der Gastabmeldung darauf hin und verlangt eine ausdrückliche Bestätigung. Du kannst
+  Website-Daten in den Browsereinstellungen entfernen. Firestore nutzt in dieser App keinen
+  dauerhaften Offline-Speicher, sondern Arbeitsspeicher.
+</p>
+<p>
+  Zur Abstimmung einer Abmeldung zwischen Tabs speichert die App eine zufällige Abmeldemarkierung im
+  Local Storage und übermittelt sie zwischen offenen Tabs derselben Website. Sie enthält keine
+  Kontokennung oder Zugangsdaten und wird nicht an einen Server gesendet. Sie verhindert, dass ein
+  älterer Anmeldeversuch eine bereits abgeschlossene Abmeldung rückgängig macht. Die Markierung wird
+  bei der nächsten Abmeldung ersetzt und beim Entfernen der Website-Daten gelöscht.
+</p>
+<p>
+  Das Intro erscheint bei jedem neuen Öffnen der Anmeldung und nach einem Neuladen. Es speichert
+  keine Besuchsmarkierung. Die frühere Markierung <code>dabubble-intro-played</code> wird beim
+  nächsten Intro-Aufruf entfernt; Anmeldedaten und Chatdaten bleiben dabei unverändert.
+</p>
+<p>
+  Die App bindet kein Firebase Analytics und keine anderen Analyse- oder Werbedienste ein.
+  Schriftarten, Logo und Avatare kommen vom Webspace; externe Videos, Karten oder
+  Social-Media-Inhalte sind nicht eingebettet. Foto- und Dateiuploads sind nicht eingebunden. Für
+  die ausdrücklich gewählte Google-Anmeldung lädt die App die Firebase- und Google-Anmeldedienste.
+  Bei Verbindungsfehlern kann die Firestore-Netzwerkbibliothek zur Erreichbarkeitsprüfung ein
+  Testbild von <code>www.google.com/images/cleardot.gif</code> abrufen. Dabei erhält Google deine
+  IP-Adresse. Externe Informationslinks verbinden dich erst beim Öffnen mit der jeweiligen Website.
+</p>
+
+<h2>5. Firebase und Verarbeitung außerhalb der EU</h2>
+<p>
+  Nach den
+  <a href="https://firebase.google.com/support/privacy">Datenschutzinformationen von Google</a>
+  verarbeitet Firebase Authentication Daten in den USA. Eine ausschließlich europäische Verarbeitung
+  kann ich daher nicht zusagen. Der eingestellte Firestore-Standort ist nicht bestätigt. Für dieses
+  Projekt sind auch die zuständige Google-Vertragsgesellschaft, die anwendbaren
+  Auftragsverarbeitungsvereinbarungen und die konkrete Grundlage samt Garantien der
+  Drittlandübermittlung noch nicht nachgewiesen. Deshalb kann ich hierfür derzeit keinen geprüften
+  Garantienachweis oder dessen Bezugsmöglichkeit nennen.
+</p>
+
+<h2>6. Speicherdauer und Kontolöschung</h2>
+<p>
+  Maßgeblich für die Aufbewahrung ist, ob die Daten noch für dein Nutzerkonto und die angeforderte
+  Kommunikation erforderlich sind. Entfällt dieser Zweck oder besteht ein berechtigter
+  Löschanspruch, müssen die betroffenen Daten entfernt werden, sofern keine gesetzliche Ausnahme
+  greift. Die App enthält keine zeitgesteuerte Kontolöschung oder Löschung zum Projektende. Eine
+  feste allgemeine Aufbewahrungsfrist für Konten und Chatdaten ist nicht festgelegt. Das gilt auch
+  für Gastkonten; es gibt keinen automatischen Gast-Bereinigungsauftrag in der App. Ob in Firebase
+  eine automatische Bereinigung anonymer Konten aktiviert ist, wurde nicht bestätigt. Für
+  Löschanfragen zu einem Gastkonto ist dessen eindeutige Zuordnung gesondert zu prüfen, insbesondere
+  ohne hinterlegte E-Mail-Adresse. Das schränkt deine gesetzlichen Löschrechte nicht ein.
+</p>
+<p>
+  Es gibt keine Schaltfläche zur Kontolöschung in der App. Ich bearbeite Löschanfragen persönlich
+  über den unten beschriebenen Kontaktweg. Nach Prüfung der Kontoinhaberschaft, des Umfangs und
+  deiner ausdrücklichen Bestätigung kann die technische Bereinigung manuell mit einem geschützten
+  Verwaltungswerkzeug erfolgen. Dessen Vorschau zeigt das betroffene Konto, die Gespräche und die
+  Auswirkungen auf Beiträge anderer Personen. Bei unerwarteten Datenstrukturen ist vor einer
+  Fortsetzung eine gesonderte Prüfung erforderlich. Die E-Mail-Anfrage allein löst keine Löschung
+  aus.
+</p>
+<p>
+  Dieser technische Ablauf wurde ausschließlich mit eigens angelegten Konten im lokalen
+  Firebase-Emulator geprüft. Im echten Projekt setzt er passende veröffentlichte Sicherheitsregeln
+  und Verwaltungszugriff voraus. Dieser Verwaltungszugriff ist noch nicht eingerichtet; eine
+  produktive Kontolöschung wurde damit noch nicht geprüft.
+</p>
+<p>
+  Der Ablauf sperrt das Konto und seine weiteren Datenzugriffe. Er entfernt das Profil und den
+  Eintrag im Nutzerverzeichnis, Mitgliedschaften, die Erstellerkennung in Gesprächen, eigene
+  Nachrichten und eigene Emoji-Reaktionen. Reaktionen anderer Personen auf entfernte eigene
+  Nachrichten werden ebenfalls entfernt. Zuletzt wird das Konto in Firebase Authentication gelöscht.
+  Unterbrochene Vorgänge können erneut aufgenommen werden; ein Fehler wird nicht als erfolgreiche
+  Löschung ausgegeben.
+</p>
+<p>
+  Bei eingerichteter Status-Datenbank entfernt der bestätigte administrative Löschablauf auch die
+  zugehörigen Anwesenheitseinträge. Ein zusätzlicher, nicht öffentlich lesbarer Sperrvermerk
+  verhindert dort Zugriffe mit noch gültigen alten Sitzungstoken. Er wird zusammen mit dem
+  nachstehend beschriebenen Kontosperrvermerk frühestens nach dessen Schutzfrist nachbereinigt.
+</p>
+<p>
+  Fremde Nachrichten bleiben erhalten. Benötigen fremde Thread-Antworten eine eigene
+  Ursprungsnachricht, bleibt dafür ein leerer Platzhalter ohne Text und Autorenkennung bestehen.
+  Seine Nachrichtenkennung, Zeitpunkte und Threadbezüge bleiben erhalten. Direktgespräche mit
+  verbleibenden fremden Beiträgen erhalten eine neue zufällige Gesprächskennung und werden für die
+  verbleibenden Mitglieder als schreibgeschütztes Archiv angezeigt. Die alte Gesprächskennung mit
+  der gelöschten Nutzerkennung und die alten Nachrichtendokumente werden entfernt. Eigene
+  Selbstgespräche und Gespräche ohne verbleibende Mitglieder, Nachrichten oder Reaktionen werden
+  vollständig aus der aktiven Datenbank entfernt; bei Channels auch der zugehörige Namenseintrag.
+</p>
+<p>
+  Zum Schutz vor noch gültigen Sitzungstoken bleibt zunächst ein nicht öffentlich lesbarer
+  Sperrvermerk mit der Nutzerkennung und einem technischen Bereinigungszeitpunkt bestehen. Er kann
+  frühestens 65 Minuten nach erfolgreichem Abschluss durch einen gesonderten Verwaltungsaufruf
+  entfernt werden. Bis zu diesem Aufruf bleibt er gespeichert. Nicht abgeschlossene Vorgänge
+  behalten die für ihre Wiederaufnahme notwendigen Sperrdaten.
+</p>
+<p>
+  Texte und Zitate anderer Personen sowie gemeinsam verwendete Channel-Namen und Beschreibungen
+  werden nicht automatisch umgeschrieben und können weiterhin personenbezogene Angaben enthalten.
+  Diese Inhalte müssen bei einer entsprechenden Löschanfrage gesondert geprüft werden. Auch Kopien
+  bei Empfängern sowie mögliche Sicherungen oder Exporte werden durch das Werkzeug nicht entfernt.
+  Eine restlose Löschung aus allen Systemen wird deshalb nicht zugesagt.
+</p>
+<p>
+  Die einzelne Aktion „Nachricht löschen“ in der Chatoberfläche bleibt davon zu unterscheiden: Sie
+  entfernt nur den Text und setzt ein Löschkennzeichen. Verfasserkennung, Zeitpunkte, Threadbezüge,
+  vorhandene Antworten und Reaktionen bleiben dabei bestehen. Entfernst du deine letzte
+  Emoji-Reaktion an einer Nachricht, wird dein zugehöriger Reaktionsdatensatz gelöscht.
+</p>
+<p>
+  Google nennt für protokollierte IP-Adressen bei Firebase Authentication einige Wochen. Andere
+  Authentifizierungsdaten bleiben laut Google bis zur veranlassten Kontolöschung gespeichert und
+  werden danach innerhalb von 180 Tagen aus Live- und Sicherungssystemen entfernt. Diese
+  Anbieterangabe gilt nicht als Löschfrist für unsere Firestore-Chatdaten. Die tatsächlichen
+  Firestore-Sicherungen, Wiederherstellungs- und Ablaufregeln sind nicht bestätigt.
+  <a href="https://firebase.google.com/support/privacy">Quelle: Firebase-Datenschutzinformationen</a
+  >.
+</p>
+
+<h2>7. So erreichst du mich für eine Löschanfrage</h2>
+<p>
+  Sende deine Anfrage an <a href="mailto:fabsdev@gmx.at">fabsdev&#64;gmx.at</a> oder per Post an die
+  oben genannte Anschrift. Nenne das betroffene Konto und, soweit möglich, die Daten oder Gespräche,
+  um die es geht. Bitte sende keine Passwörter oder Reset-Links. Die Anfrage ist auch ohne Zugriff
+  auf dein Konto möglich. Bei begründeten Zweifeln an deiner Identität darf ich nur die zur
+  Bestätigung erforderlichen zusätzlichen Informationen verlangen.
+</p>
+<p>
+  Bei einem Gastkonto gibt es keine hinterlegte E-Mail-Adresse. Solange deine Sitzung noch aktiv
+  ist, findest du deine Gastkennung im Profilmenü unter „Log out“ → „Gastkennung für Löschanfragen“.
+  Die Kennung allein beweist nicht, dass das Konto dir gehört. Über den E-Mail-Kontakt können wir
+  eine vorübergehende Änderung deines eigenen Profilnamens mit einem für deine Anfrage neu
+  vereinbarten Prüfwert abgleichen. Dieser Name ist auch im Nutzerverzeichnis sichtbar; verwende
+  dafür keine vertraulichen Angaben. Ich prüfe die Änderung direkt am betroffenen Konto und
+  bestätige dir den Abgleich. Eine Registrierung ist für diesen Nachweis nicht erforderlich.
+</p>
+<p>
+  Nach dem Abmelden ohne Kontoumwandlung kann die App den Gastzugang nicht wiederherstellen. Ohne
+  aktive Sitzung oder bereits dokumentierten Nachweis lässt sich eine Kontoinhaberschaft anhand von
+  Kennung, Namen oder Screenshots allein nicht sicher bestätigen. Du kannst trotzdem eine Anfrage
+  stellen. Ich prüfe geeignete zusätzliche Angaben und konkret betroffene Daten im Einzelfall; ohne
+  gesicherte Zuordnung lösche ich nicht pauschal ein möglicherweise fremdes Konto.
+</p>
+<p>
+  <a class="request-link" [href]="deletionRequestUrl">Löschanfrage per E-Mail vorbereiten</a>
+</p>
+<p>
+  Der Link öffnet einen E-Mail-Entwurf in deinem eingerichteten Mailprogramm. Du prüfst und
+  versendest ihn selbst. Er löscht keine Daten und ist keine automatische Löschbestätigung. Vor der
+  Ausführung prüfe ich die Zuordnung zu deinem Konto und kläre mit dir den Umfang und die Folgen.
+  Erst nach deiner ausdrücklichen Bestätigung und mit den erforderlichen Verwaltungsrechten kann ich
+  den beschriebenen manuellen Ablauf ausführen. Ein Aufruf des Verwaltungswerkzeugs ersetzt diese
+  Prüfung und Bestätigung nicht.
+</p>
+<p>
+  Die Kontolöschung entfernt nicht pauschal alle gemeinsamen Unterhaltungen. Die eigenen Beiträge
+  anderer Personen bleiben nach dem oben beschriebenen Verfahren erhalten. Über verbliebene Daten
+  und einen gegebenenfalls nötigen gesonderten Prüfbedarf wirst du informiert.
+</p>
+<p>
+  Absenderadresse, Anfrageinhalt und Korrespondenz dienen der Bearbeitung deiner Datenschutzrechte
+  nach Art. 6 Abs. 1 Buchst. c in Verbindung mit Art. 12 bis 22 DSGVO. Beim E-Mail-Versand
+  verarbeiten die beteiligten E-Mail-Anbieter die Nachricht. Aufzubewahren sind nur die für
+  Bearbeitung und erforderlichen Nachweis nötigen Angaben; fällt dieser Bedarf weg, sind sie zu
+  löschen. Für die Information über ergriffene Maßnahmen gilt grundsätzlich höchstens ein Monat ab
+  Eingang. Eine erforderliche Verlängerung um bis zu zwei weitere Monate muss innerhalb des ersten
+  Monats begründet mitgeteilt werden.
+</p>
+
+<h2>8. Deine Rechte</h2>
+<p>
+  Nach den gesetzlichen Voraussetzungen hast du Anspruch auf Auskunft, Berichtigung, Löschung,
+  Einschränkung der Verarbeitung und Datenübertragbarkeit. Einer Verarbeitung aufgrund berechtigter
+  Interessen kannst du aus Gründen deiner besonderen Situation widersprechen. Soweit eine
+  Verarbeitung auf Einwilligung beruht, kannst du diese jederzeit für die Zukunft widerrufen.
+</p>
+<p>
+  Du kannst dich bei einer Datenschutzaufsichtsbehörde beschweren, insbesondere an deinem
+  Aufenthalts- oder Arbeitsort oder am Ort des vermuteten Verstoßes. In Österreich erreichst du die
+  <a href="https://dsb.gv.at/ueber-die-datenschutzbehoerde/kontakt">Datenschutzbehörde</a> unter
+  Barichgasse 40–42, 1030 Wien, und <a href="mailto:dsb@dsb.gv.at">dsb&#64;dsb.gv.at</a>.
+</p>
+<p class="sources">
+  Rechtsgrundlage deiner Rechte:
+  <a href="https://eur-lex.europa.eu/eli/reg/2016/679/oj?locale=de">Datenschutz-Grundverordnung</a>.
+</p>
