@@ -4,7 +4,7 @@ test('four desktop layouts reclaim space and keep thread controls keyboard acces
   page,
 }, testInfo) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/vorschau/channels/entwicklerteam');
+  await page.goto('/#/vorschau/channels/entwicklerteam');
   await page.evaluate(() => document.fonts.ready);
   const main = page.getByRole('region', { name: 'Chat-Ansicht', exact: true });
   const menu = page.getByRole('navigation', { name: 'Arbeitsbereich', exact: true });
@@ -60,7 +60,7 @@ test('mobile reply link opens the layout preview, composer and return navigation
   page,
 }) => {
   await page.setViewportSize({ width: 320, height: 568 });
-  await page.goto('/vorschau/channels/entwicklerteam');
+  await page.goto('/#/vorschau/channels/entwicklerteam');
   await page
     .getByRole('button', { name: '2 Antworten – statische Thread-Vorschau öffnen' })
     .click();
@@ -95,7 +95,7 @@ test('earlier preview links retain a destination after adopting the reference na
     ['channels/projekt', 'channels/entwicklerteam'],
     ['direkt/beispielkontakt', 'direkt/noah-braun'],
   ]) {
-    await page.goto(`/vorschau/${oldPath}`);
-    await expect(page).toHaveURL(`http://dabubble.test/vorschau/${destination}`);
+    await page.goto(`/#/vorschau/${oldPath}`);
+    await expect(page).toHaveURL(`http://dabubble.test/#/vorschau/${destination}`);
   }
 });

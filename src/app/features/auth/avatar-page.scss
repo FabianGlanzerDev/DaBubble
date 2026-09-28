@@ -16,14 +16,16 @@
 }
 h1 {
   white-space: nowrap;
+  transform: translate(7px, -1px);
 }
 .back-link {
   left: -24px;
+  top: 3px;
 }
 .selected-avatar {
   display: flex;
   justify-content: center;
-  margin-top: 52px;
+  margin-top: 53.5px;
 }
 h2 {
   overflow-wrap: anywhere;
@@ -44,6 +46,9 @@ h2 {
   justify-content: center;
   gap: 16px;
   flex-wrap: wrap;
+}
+.mobile-label {
+  display: none;
 }
 .avatar-options button {
   display: inline-flex;
@@ -69,6 +74,10 @@ h2 {
   justify-content: flex-end;
   margin-top: 66px;
 }
+.continue-row .auth-button {
+  min-height: 49px;
+  padding-block: 11.5px;
+}
 
 @media (max-width: 767px) {
   .back-link {
@@ -76,20 +85,21 @@ h2 {
     top: -6px;
   }
   .auth-screen {
-    transform: none;
+    transform: translateY(-1px);
   }
   .auth-card {
     padding: 24px 20px;
-    min-height: 0;
+    min-height: 520px;
   }
   h1 {
+    transform: none;
     white-space: normal;
     max-width: 300px;
     padding-inline: 24px;
     margin: auto;
   }
   .selected-avatar {
-    margin-top: 32px;
+    margin-top: 30.8px;
     zoom: 0.714286;
   }
   h2 {
@@ -102,16 +112,23 @@ h2 {
     text-align: left;
   }
   .avatar-options {
-    gap: 8px;
-    max-width: none;
+    gap: 12px;
+    max-width: 348px;
     margin: auto;
-    justify-content: space-between;
+    justify-content: center;
   }
   .avatar-options app-avatar-image {
     zoom: 0.75;
   }
   .continue-row {
     margin-top: 28px;
+    padding-right: 1px;
+  }
+  .desktop-label {
+    display: none;
+  }
+  .mobile-label {
+    display: inline;
   }
 }
 @media (max-width: 374px) {

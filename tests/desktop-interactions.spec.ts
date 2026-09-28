@@ -16,7 +16,7 @@ test('channel dialogs: local drafts, duplicate feedback, member selection, keybo
   page,
 }, info) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/vorschau/channels/entwicklerteam');
+  await page.goto('/#/vorschau/channels/entwicklerteam');
   const create = page.getByRole('button', { name: 'Channel erstellen', exact: true });
   await create.click();
   let dialog = page.getByRole('dialog');
@@ -60,7 +60,7 @@ test('profiles, member list, settings and avatar drafts preserve sample data', a
   page,
 }, info) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/vorschau/channels/entwicklerteam');
+  await page.goto('/#/vorschau/channels/entwicklerteam');
   await page.locator('.profile').click();
   await capture(page, info, '64-profile-menu');
   await expect(page.getByRole('button', { name: 'Log out' })).toBeDisabled();
@@ -92,7 +92,7 @@ test('profiles, member list, settings and avatar drafts preserve sample data', a
     ['steffen-hoffmann', 'Steffen Hoffmann'],
     ['frederik-beck', 'Frederik Beck'],
   ]) {
-    await page.goto(`/vorschau/direkt/${id}`);
+    await page.goto(`/#/vorschau/direkt/${id}`);
     await capture(page, info, `12-direct-${id}`);
     await page.locator('.title-button').click();
     await expect(
@@ -111,7 +111,7 @@ test('message hover, edit layouts, reaction details, local emoji and mention dra
   page,
 }, info) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/vorschau/channels/entwicklerteam');
+  await page.goto('/#/vorschau/channels/entwicklerteam');
   const own = page.locator('app-conversation .message.own');
   await own.hover();
   await expect(own.locator('.message-actions')).toHaveCSS('opacity', '1');
@@ -169,7 +169,7 @@ test('search, new-message navigation, form feedback and enabled button hover', a
   page,
 }, info) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/vorschau/neue-nachricht');
+  await page.goto('/#/vorschau/neue-nachricht');
   await capture(page, info, '11-new-message');
   const recipient = page.getByRole('searchbox', { name: 'Empfänger aus Designbeispielen wählen' });
   await recipient.fill('sofia.muel@beispiel.com');
@@ -186,7 +186,7 @@ test('search, new-message navigation, form feedback and enabled button hover', a
   await page.locator('.results:visible a').click();
   await capture(page, info, '10-office');
   await expect(page.locator('.thread-panel')).toBeHidden();
-  await page.goto('/registrierung');
+  await page.goto('/#/registrierung');
   await page.getByLabel('E-Mail-Adresse', { exact: true }).fill('falsch');
   await page.getByLabel('Passwort', { exact: true }).fill('kurz');
   await page.getByLabel('Name', { exact: true }).fill('Design Test');
@@ -196,15 +196,11 @@ test('search, new-message navigation, form feedback and enabled button hover', a
   await page.getByLabel('E-Mail-Adresse', { exact: true }).fill('test@example.com');
   await page.getByLabel('Passwort', { exact: true }).fill('beispielpasswort');
   await page.getByRole('checkbox').check();
-  const next = page.getByRole('button', { name: 'Weiter zur Avatar-Vorschau' });
-  await expect(next).toBeEnabled();
-  await next.hover();
-  await expect(next).toHaveCSS('background-color', 'rgb(121, 126, 243)');
-  await capture(page, info, 'register-enabled-hover');
-  await next.click();
-  await expect(page.getByRole('heading', { level: 2 })).toHaveText('Design Test');
-  await expect(page.getByRole('button', { name: 'Weiter', exact: true })).toBeDisabled();
-  await page.goto('/passwort-reset/neues-passwort');
+  const next = page.getByRole('button', { name: 'Weiter zur Avatar-Auswahl' });
+  await expect(next).toBeDisabled();
+  await expect(page.locator('app-auth-note')).toHaveCount(0);
+  await capture(page, info, 'register-unavailable');
+  await page.goto('/#/passwort-reset/neues-passwort');
   await page.getByLabel('Neues Passwort', { exact: true }).fill('beispielpasswort');
   await page.getByLabel('Neues Kennwort bestätigen').fill('anderes');
   await page.getByRole('heading', { level: 1 }).click();
@@ -217,7 +213,7 @@ test('dialog keyboard focus stays inside, closes on Escape and returns to trigge
   page,
 }, info) => {
   await page.setViewportSize({ width: 320, height: 568 });
-  await page.goto('/vorschau');
+  await page.goto('/#/vorschau');
   await page.getByRole('button', { name: 'Channel erstellen', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Dialog schließen' })).toBeFocused();
   await page.keyboard.press('Shift+Tab');

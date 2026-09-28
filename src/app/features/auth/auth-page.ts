@@ -1,31 +1,40 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+  untracked,
+  viewChildren,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PublicLayout } from '../../shared/layout/public-layout';
 import { Icon } from '../../shared/ui/icon';
 import { FormField, fieldError } from '../../shared/ui/form-field';
-import { RegistrationPreview } from './registration-preview';
 import { AuthSession } from '../../core/auth/auth-session';
-import { AuthIssue, authIssue } from '../../core/auth/auth-errors';
+import { AuthIssue, authIssue, guestIssue } from '../../core/auth/auth-errors';
+import { SessionNotice } from './session-notice';
 
 const pages = {
   login: {
     title: 'Anmeldung',
     description:
       'Wir empfehlen dir, die E-Mail-Adresse zu nutzen, die du bei der Arbeit verwendest.',
-    notice: 'Layout-Vorschau · Anmeldung, Google- und Gäste-Login sind noch nicht verfügbar.',
   },
   register: {
     title: 'Konto erstellen',
     description: 'Mit deinem Namen und deiner E-Mail-Adresse hast du dein neues DABubble-Konto.',
-    notice: 'Layout-Vorschau · Keine Registrierung. „Weiter“ öffnet nur die Avatar-Vorschau.',
   },
 } as const;
 type Mode = keyof typeof pages;
 
 @Component({
   selector: 'app-auth-page',
-  imports: [PublicLayout, Icon, RouterLink, FormField],
+  imports: [PublicLayout, Icon, RouterLink, FormField, SessionNotice],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './auth-page.html',
   styleUrl: './auth-page.scss',
@@ -35,16 +44,22 @@ export class AuthPage {
   protected readonly issue = signal<AuthIssue | null>(null);
   protected readonly submitted = signal(false);
   private readonly router = inject(Router);
-  private readonly registration = inject(RegistrationPreview);
+  private readonly destroy = inject(DestroyRef);
+  private readonly fields = viewChildren(FormField);
   protected readonly name = signal('');
   protected readonly email = signal('');
   protected readonly password = signal('');
   protected readonly consent = signal(false);
+  protected readonly confirmedGuestUid = signal('');
+  protected readonly progress = computed(() =>
+    this.session.registration.forUser(this.session.user()),
+  );
+  protected readonly resuming = computed(() => this.mode() === 'register' && !!this.progress());
   protected readonly valid = computed(
     () =>
       !fieldError('name', this.name()) &&
       !fieldError('email', this.email()) &&
-      !fieldError('password', this.password()) &&
+      (this.resuming() || !fieldError('password', this.password())) &&
       this.consent(),
   );
   protected readonly loginValid = computed(
@@ -53,10 +68,11 @@ export class AuthPage {
   protected readonly notice = computed(
     () =>
       this.session.setupError() ||
-      (this.session.configured()
-        ? (this.session.emulated() ? 'Lokaler Firebase-Emulator. ' : '') +
-          'E-Mail-Anmeldung verfügbar. Google- und Gäste-Login sind nicht eingerichtet.'
-        : this.page().notice),
+      (this.session.initializing()
+        ? 'Anmeldung wird vorbereitet…'
+        : this.session.configured()
+          ? ''
+          : 'Die Anmeldung ist derzeit nicht verfügbar. Bitte versuche es später erneut.'),
   );
   readonly embedded = input(false);
   private readonly route = inject(ActivatedRoute);
@@ -70,6 +86,31 @@ export class AuthPage {
     () => this.query().get('hinweis') === 'anmeldung-ausstehend',
   );
 
+  constructor() {
+    effect(() => this.restoreRegistration());
+    effect(() => {
+      if (this.mode() === 'login' && !this.session.initializing() && !this.session.user())
+        untracked(() => this.clearLogin());
+    });
+  }
+
+  private restoreRegistration(): void {
+    const draft = this.progress();
+    if (!this.resuming() || !draft) return;
+    this.name.set(draft.name);
+    this.email.set(draft.email);
+    this.consent.set(true);
+  }
+
+  private clearLogin(): void {
+    this.email.set('');
+    this.password.set('');
+    if (!this.issue()?.retainOnSignOut) this.issue.set(null);
+    this.submitted.set(false);
+    this.confirmedGuestUid.set('');
+    for (const field of this.fields()) field.reset();
+  }
+
   protected async submit(event: Event): Promise<void> {
     event.preventDefault();
     if (this.session.busy()) return;
@@ -79,26 +120,38 @@ export class AuthPage {
     else if (this.loginValid() && this.session.configured()) await this.login();
   }
 
-  private async register(): Promise<void> {
-    if (!this.valid()) return;
-    this.registration.name.set(this.name().trim());
-    if (!this.session.configured()) return this.openPreview();
+  protected openAccess(kind: 'google' | 'gast'): void {
+    if (this.session.busy()) return;
+    if (kind === 'gast') void this.startGuest();
+    else if (this.session.googleAvailable()) void this.router.navigateByUrl('/zugang/' + kind);
+  }
+
+  private async startGuest(): Promise<void> {
+    this.issue.set(null);
     try {
-      await this.session.register(this.email(), this.password(), this.name());
+      await this.session.guest();
+      if (!this.destroy.destroyed) await this.router.navigateByUrl('/chat');
+    } catch (error) {
+      this.issue.set(guestIssue(error));
+    }
+  }
+
+  private async register(): Promise<void> {
+    if (!this.valid() || !this.session.configured()) return;
+    try {
+      if (this.resuming())
+        this.session.registration.update(this.session.user(), this.name().trim());
+      else await this.session.register(this.email(), this.password(), this.name());
       this.password.set('');
-      await this.router.navigateByUrl('/avatar-auswahl');
+      if (!this.destroy.destroyed) await this.router.navigateByUrl('/avatar-auswahl');
     } catch (error) {
       this.issue.set(authIssue(error));
     }
   }
 
-  private openPreview(): void {
-    void this.router.navigateByUrl('/avatar-vorschau');
-  }
-
   private async login(): Promise<void> {
     try {
-      await this.session.login(this.email(), this.password());
+      await this.session.login(this.email(), this.password(), this.confirmedGuestUid());
       this.password.set('');
       const destination = this.query().get('returnUrl') ?? '/chat';
       await this.router.navigateByUrl(

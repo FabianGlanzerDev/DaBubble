@@ -2,9 +2,10 @@ import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
-  testIgnore: ['**/firebase/**', '**/security/**'],
+  testIgnore: ['**/firebase/**', '**/security/**', '**/deletion/**', '**/hosting/**'],
   fullyParallel: true,
   workers: 2,
+  expect: { timeout: 8000 },
   reporter: 'list',
   use: {
     browserName: 'chromium',

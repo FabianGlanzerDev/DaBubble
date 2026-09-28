@@ -1,9 +1,9 @@
 import { test, expect } from './browser-fixture';
 
 test('intro, account navigation and unavailable forms', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#/');
   await expect(page).toHaveURL(/\/intro$/);
-  await page.getByRole('link', { name: 'Zur Anmeldung', exact: true }).click();
+  await expect(page).toHaveURL(/\/anmeldung$/, { timeout: 7000 });
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Anmeldung');
   await expect(page.getByRole('button', { name: 'Anmelden', exact: true })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Anmelden mit Google' })).toBeDisabled();
@@ -21,8 +21,9 @@ test('intro, account navigation and unavailable forms', async ({ page }) => {
 test('avatar preview navigation and selection do not register or persist an account', async ({
   page,
 }) => {
-  await page.goto('/registrierung');
-  await page.getByRole('link', { name: 'Avatar-Design direkt ansehen' }).click();
+  await page.goto('/#/registrierung');
+  await expect(page.locator('app-auth-note')).toHaveCount(0);
+  await page.goto('/#/avatar-vorschau');
   await expect(page).toHaveURL(/\/avatar-vorschau$/);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Wähle deinen Avatar');
   await expect(page.getByRole('button', { name: 'Weiter', exact: true })).toBeDisabled();
@@ -38,24 +39,27 @@ test('avatar preview navigation and selection do not register or persist an acco
   await expect(thirdAvatar).toHaveAttribute('aria-pressed', 'false');
   await page.getByRole('link', { name: 'Zur Registrierung' }).click();
   await expect(page).toHaveURL(/\/registrierung$/);
-  await page.goto('/chat');
+  await page.goto('/#/chat');
   await expect(page).toHaveURL(/\/anmeldung\?/);
 });
 
 test('protected deep links fail closed, preview creates no login', async ({ page }) => {
-  await page.goto('/chat/channels/entwicklerteam');
+  await page.goto('/#/chat/channels/entwicklerteam');
   await expect(page).toHaveURL(/\/anmeldung\?returnUrl=/);
   await expect(page.getByRole('status')).toContainText('Chat-Ansicht ist geschützt');
-  expect(new URL(page.url()).searchParams.get('returnUrl')).toBe('/chat/channels/entwicklerteam');
-  await page.getByRole('link', { name: 'Layout-Vorschau öffnen' }).click();
+  expect(new URL(new URL(page.url()).hash.slice(1), page.url()).searchParams.get('returnUrl')).toBe(
+    '/chat/channels/entwicklerteam',
+  );
+  await expect(page.locator('app-auth-note')).toHaveCount(0);
+  await page.goto('/#/vorschau');
   await expect(page).toHaveURL(/\/vorschau$/);
-  await page.goto('/chat');
+  await page.goto('/#/chat');
   await expect(page).toHaveURL(/\/anmeldung\?/);
 });
 
 test('desktop menu, active routes, history, direct links and thread region', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/vorschau');
+  await page.goto('/#/vorschau');
   const menu = page.getByRole('navigation', { name: 'Arbeitsbereich', exact: true });
   const channels = page.getByRole('button', { name: 'Channels', exact: true });
   await channels.click();
@@ -88,7 +92,7 @@ test('desktop menu, active routes, history, direct links and thread region', asy
 
 test('keyboard controls expose focus and expand state', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/vorschau/channels/entwicklerteam');
+  await page.goto('/#/vorschau/channels/entwicklerteam');
   await expect(
     page.getByRole('textbox', { name: 'Nachrichtenentwurf', exact: true }),
   ).toBeFocused();
@@ -121,20 +125,22 @@ test('keyboard controls expose focus and expand state', async ({ page }) => {
 });
 
 test('unknown routes and unknown conversations are explained', async ({ page }) => {
-  await page.goto('/unbekannt');
+  await page.goto('/#/unbekannt');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Seite nicht gefunden');
-  await page.goto('/vorschau/channels/unbekannt');
+  await page.goto('/#/vorschau/channels/unbekannt');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Eintrag nicht gefunden');
 });
 
 test('skip link focuses the visible main area without changing route', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 568 });
   for (const path of ['/anmeldung', '/vorschau', '/vorschau/channels/entwicklerteam']) {
-    await page.goto(path);
+    await page.goto('/#' + path);
+    if (path === '/anmeldung')
+      await expect(page.getByRole('heading', { name: 'Anmeldung', exact: true })).toBeVisible();
     await expect(page.locator('[data-page-heading]:visible').first()).toBeVisible();
     await page.getByRole('link', { name: 'Zum Hauptinhalt' }).focus();
     await page.keyboard.press('Enter');
     await expect(page.locator('#main-content')).toBeFocused();
-    expect(new URL(page.url()).pathname).toBe(path);
+    expect(new URL(page.url()).hash).toBe('#' + path);
   }
 });

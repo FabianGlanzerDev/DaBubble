@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/auth.guard';
+import { loginEntryGuard } from './core/ui/login-entry.guard';
 
 const liveChildren: Routes = [
   {
@@ -79,6 +80,7 @@ export const routes: Routes = [
   },
   {
     path: 'anmeldung',
+    canActivate: [loginEntryGuard],
     title: 'Anmeldung · DaBubble',
     data: { mode: 'login' },
     loadComponent: () => import('./features/auth/auth-page').then((m) => m.AuthPage),
@@ -88,6 +90,11 @@ export const routes: Routes = [
     title: 'Registrierung · DaBubble',
     data: { mode: 'register' },
     loadComponent: () => import('./features/auth/auth-page').then((m) => m.AuthPage),
+  },
+  {
+    path: 'zugang/:art',
+    title: 'Zugang wählen · DaBubble',
+    loadComponent: () => import('./features/auth/access-page').then((m) => m.AccessPage),
   },
   {
     path: 'passwort-reset',

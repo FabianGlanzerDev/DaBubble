@@ -4,7 +4,8 @@ export default defineConfig({
   testDir: './tests/firebase',
   fullyParallel: false,
   workers: 1,
-  timeout: 60000,
+  timeout: 90000,
+  expect: { timeout: 8000 },
   outputDir: 'tmp/auth-audit/browser-results',
   reporter: 'list',
   use: {

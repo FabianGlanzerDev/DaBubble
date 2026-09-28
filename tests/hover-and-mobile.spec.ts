@@ -4,7 +4,7 @@ test('buttons, icons, links and fields expose reference hover and focus states',
   page,
 }, info) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/vorschau/channels/entwicklerteam');
+  await page.goto('/#/vorschau/channels/entwicklerteam');
   const contact = page.getByRole('link', { name: 'Sofia Müller', exact: true });
   await contact.hover();
   await expect(contact).toHaveCSS('background-color', 'rgb(236, 238, 254)');
@@ -36,7 +36,7 @@ test('buttons, icons, links and fields expose reference hover and focus states',
 
 test('mobile channel, member, edit and emoji dialogs stay within 320px', async ({ page }, info) => {
   await page.setViewportSize({ width: 320, height: 568 });
-  await page.goto('/vorschau/channels/entwicklerteam');
+  await page.goto('/#/vorschau/channels/entwicklerteam');
   await page.getByRole('button', { name: 'Channel-Details öffnen' }).click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();

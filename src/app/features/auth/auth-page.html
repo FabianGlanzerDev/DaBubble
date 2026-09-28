@@ -26,6 +26,26 @@
         </h1>
       </header>
       <p class="description">{{ page().description }}</p>
+      @if (mode() === 'login' && !embedded()) {
+        <app-session-notice [(confirmedGuestUid)]="confirmedGuestUid" />
+      }
+      @if (resuming()) {
+        <p class="access-note">
+          Dein Konto ist bereits angelegt. Du kannst deinen Namen anpassen und die Avatar-Auswahl
+          fortsetzen.
+        </p>
+      } @else if (progress()) {
+        <p class="access-note">
+          Dein Konto ist angelegt. <a routerLink="/avatar-auswahl">Registrierung fortsetzen</a>
+        </p>
+      }
+      @if (session.isGuest() && mode() === 'register') {
+        <p class="access-note">
+          Gastzugang · „Konto erstellen“ behält deine Benutzerkennung und deine Chatdaten. Für die
+          Anmeldung an einem bestehenden Konto zuerst
+          <a routerLink="/zugang/gast">Gastzugang beenden</a>.
+        </p>
+      }
       @if (accessBlocked()) {
         <p class="access-note" role="status">
           Die Chat-Ansicht ist geschützt. Bitte melde dich an.
@@ -56,26 +76,34 @@
           (valueChange)="issue.set(null)"
           [serverError]="fieldIssue('email')"
           [submitted]="submitted()"
-          [disabled]="!!session.pending()"
+          [disabled]="embedded() || session.busy() || resuming()"
         />
-        <app-form-field
-          fieldId="auth-password"
-          kind="password"
-          label="Passwort"
-          icon="lock"
-          placeholder="Passwort"
-          [autocomplete]="mode() === 'login' ? 'current-password' : 'new-password'"
-          [(value)]="password"
-          (valueChange)="issue.set(null)"
-          [serverError]="fieldIssue('password')"
-          [submitted]="submitted()"
-          [disabled]="!!session.pending()"
-        />
+        @if (!resuming()) {
+          <app-form-field
+            fieldId="auth-password"
+            kind="password"
+            label="Passwort"
+            icon="lock"
+            placeholder="Passwort"
+            [autocomplete]="mode() === 'login' ? 'current-password' : 'new-password'"
+            [(value)]="password"
+            (valueChange)="issue.set(null)"
+            [serverError]="fieldIssue('password')"
+            [submitted]="submitted()"
+            [disabled]="embedded() || session.busy()"
+          />
+        }
       </div>
       @if (mode() === 'login') {
         <a class="reset-link" routerLink="/passwort-reset">Passwort vergessen?</a>
         <div class="divider"><span>ODER</span></div>
-        <button class="google-button" type="button" disabled aria-describedby="auth-note">
+        <button
+          class="google-button"
+          type="button"
+          [disabled]="!session.googleAvailable() || session.busy()"
+          (click)="openAccess('google')"
+          aria-describedby="auth-note"
+        >
           <span class="google-mark" aria-hidden="true"></span>Anmelden mit Google
         </button>
         <div class="login-actions">
@@ -87,31 +115,37 @@
           >
             {{ session.pending() === 'login' ? 'Anmeldung läuft…' : 'Anmelden' }}
           </button>
-          <button class="auth-button secondary" type="button" disabled aria-describedby="auth-note">
-            Gäste-Login
+          <button
+            class="auth-button secondary"
+            type="button"
+            [disabled]="!session.configured() || session.busy()"
+            (click)="openAccess('gast')"
+            aria-describedby="auth-note"
+          >
+            {{ session.pending() === 'guest' ? 'Gastzugang wird geöffnet…' : 'Gäste-Login' }}
           </button>
         </div>
       } @else {
-        <label class="consent"
-          ><input
-            #consentField
-            type="checkbox"
-            [checked]="consent()"
-            (change)="consent.set(consentField.checked)"
-            aria-describedby="auth-note"
-          /><span
-            >Ich stimme der
-            <a class="privacy-label" routerLink="/datenschutz">Datenschutzerklärung</a> zu.</span
-          ></label
-        >
+        @if (!resuming()) {
+          <label class="consent"
+            ><input
+              #consentField
+              type="checkbox"
+              [checked]="consent()"
+              (change)="consent.set(consentField.checked)"
+              aria-describedby="auth-note"
+            /><span
+              >Ich stimme der
+              <a class="privacy-label" routerLink="/datenschutz">Datenschutzerklärung</a> zu.</span
+            ></label
+          >
+        }
         <div class="continue-row">
           <button
             class="auth-button"
             type="submit"
-            [disabled]="!valid() || session.busy()"
-            [attr.aria-label]="
-              session.configured() ? 'Weiter zur Avatar-Auswahl' : 'Weiter zur Avatar-Vorschau'
-            "
+            [disabled]="!session.configured() || !valid() || session.busy()"
+            aria-label="Weiter zur Avatar-Auswahl"
             aria-describedby="auth-note"
           >
             {{ session.pending() === 'register' ? 'Konto wird erstellt…' : 'Weiter' }}
@@ -122,15 +156,10 @@
         <p class="action-error" role="alert">{{ fieldIssue('general') }}</p>
       }
     </form>
-    <aside class="preview-note" aria-label="Stand der Vorschau">
-      <p id="auth-note">{{ notice() }}</p>
-      @if (session.user()) {
-        <a routerLink="/chat">Zum angemeldeten Arbeitsbereich</a>
-      }
-      @if (mode() === 'register') {
-        <a routerLink="/avatar-vorschau">Avatar-Design direkt ansehen</a>
-      }
-      <a routerLink="/vorschau">Layout-Vorschau öffnen</a>
-    </aside>
+    @if (!session.configured() && !session.initializing()) {
+      <p id="auth-note" class="action-error" role="alert">{{ notice() }}</p>
+    } @else {
+      <p id="auth-note" class="sr-only">{{ notice() }}</p>
+    }
   </div>
 </app-public-layout>

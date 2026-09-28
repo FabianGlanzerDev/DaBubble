@@ -17,7 +17,7 @@ export class App {
   private readonly document = inject(DOCUMENT);
   protected readonly session = inject(AuthSession);
   protected readonly restoringRoute = /^\/(?:chat|avatar-auswahl)(?:\/|$)/.test(
-    this.document.location.pathname,
+    this.document.location.hash.slice(1).split('?')[0] ?? '',
   );
   private readonly injector = inject(Injector);
   private readonly overlays = inject(OverlayState);
@@ -64,7 +64,9 @@ export class App {
   }
 
   private focusMobileSearch(): boolean {
-    const search = this.document.querySelector<HTMLInputElement>('.mobile-expanded input');
+    const search = this.document.querySelector<HTMLInputElement>(
+      '.mobile-expanded input, #mobile-live-search:focus',
+    );
     if (!search?.checkVisibility()) return false;
     search.focus({ preventScroll: true });
     return true;

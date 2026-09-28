@@ -26,9 +26,9 @@ async function expectNoOverflow(page: Page) {
   );
 }
 
-for (const width of [320, 375, 768, 1024, 1440, 1920]) {
+for (const width of [320, 375, 430, 768, 1024, 1440, 1920]) {
   test(`all routes fit at ${width}px`, async ({ page }, testInfo) => {
-    await page.setViewportSize({ width, height: width === 1920 ? 1080 : 900 });
+    await page.setViewportSize({ width, height: width === 1920 ? 1080 : 932 });
     for (const route of [
       '/intro',
       '/anmeldung',
@@ -46,7 +46,7 @@ for (const width of [320, 375, 768, 1024, 1440, 1920]) {
       '/vorschau/neue-nachricht',
       '/unbekannt',
     ]) {
-      await page.goto(route);
+      await page.goto('/#' + route);
       await expect(page.locator('[data-page-heading]:visible').first()).toBeVisible();
       await page.evaluate(() => document.fonts.ready);
       await page.waitForTimeout(280);
@@ -57,7 +57,7 @@ for (const width of [320, 375, 768, 1024, 1440, 1920]) {
       });
       expect(duplicates, 'Unique IDs for labels and aria-controls').toEqual([]);
       if (
-        [320, 1440, 1920].includes(width) &&
+        [320, 375, 430, 1440, 1920].includes(width) &&
         [
           '/intro',
           '/anmeldung',
@@ -81,7 +81,7 @@ for (const width of [320, 375, 768, 1024, 1440, 1920]) {
 
 test('320px: menu and conversation are separate, back and thread work', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 568 });
-  await page.goto('/vorschau');
+  await page.goto('/#/vorschau');
   const menu = page.getByRole('navigation', { name: 'Arbeitsbereich', exact: true });
   await expect(menu).toBeVisible();
   await expect(page.getByRole('region', { name: 'Chat-Ansicht' })).toBeHidden();
@@ -109,7 +109,7 @@ test('320px: menu and conversation are separate, back and thread work', async ({
 
 test('desktop collapsed menu becomes available after mobile resize', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/vorschau/channels/entwicklerteam');
+  await page.goto('/#/vorschau/channels/entwicklerteam');
   await page.getByRole('button', { name: 'Menü einklappen' }).click();
   await page.setViewportSize({ width: 320, height: 568 });
   await page.getByRole('link', { name: 'Zurück zum Menü' }).click();

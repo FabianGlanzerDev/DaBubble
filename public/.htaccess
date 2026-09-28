@@ -1,0 +1,9 @@
+# DaBubble: Angular routes at the domain root.
+# Merge after existing hosting/access rules; never replace an unreviewed server file.
+# The query string (including Firebase action parameters) is retained.
+RewriteEngine On
+RewriteBase /
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ /index.html [L]

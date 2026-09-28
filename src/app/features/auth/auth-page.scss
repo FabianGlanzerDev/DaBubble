@@ -12,7 +12,7 @@
   min-height: 669px;
 }
 .registration-screen {
-  transform: translateY(16px);
+  margin-top: 32px;
 }
 .description {
   margin: 28px 0 42px;
@@ -81,6 +81,10 @@
   flex: 0 0 auto;
   background: url('/assets/images/original/google.svg') center / contain no-repeat;
 }
+.google-button:hover:not(:disabled) {
+  box-shadow: inset 0 0 0 1px var(--accent);
+  color: var(--accent-hover);
+}
 .login-actions {
   display: flex;
   justify-content: center;
@@ -134,7 +138,7 @@
     min-height: 0;
   }
   .registration-screen {
-    transform: none;
+    margin-top: 0;
   }
   .description,
   .login-card .description {
@@ -162,8 +166,8 @@
     margin-top: 20px;
   }
   .login-actions .auth-button {
-    padding: 12px 20px;
-    font-size: 17px;
+    padding: 12px 24px;
+    font-size: 18px;
   }
   .consent {
     font-size: 16px;
@@ -182,16 +186,18 @@
     margin-inline: 8px;
   }
 }
-@media (max-width: 374px) {
-  h1 {
-    padding-inline: 24px;
-  }
+@media (max-width: 399px) {
   .login-actions {
     gap: 8px;
   }
   .login-actions .auth-button {
     padding-inline: 12px;
     font-size: 16px;
+  }
+}
+@media (max-width: 374px) {
+  h1 {
+    padding-inline: 24px;
   }
   .consent,
   .privacy-label {

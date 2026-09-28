@@ -5,7 +5,7 @@ test.use({ hasTouch: true });
 for (const width of [320, 375, 430]) {
   test(`${width}px touch: search, thread, dialogs and browser history`, async ({ page }, info) => {
     await page.setViewportSize({ width, height: 932 });
-    await page.goto('/vorschau');
+    await page.goto('/#/vorschau');
     const menu = page.getByRole('navigation', { name: 'Arbeitsbereich', exact: true });
     const search = page.locator('#mobile-workspace-search');
     await search.tap();
@@ -65,7 +65,7 @@ test('mobile keyboard navigation, direct thread entry and short viewport keep co
   page,
 }) => {
   await page.setViewportSize({ width: 320, height: 568 });
-  await page.goto('/vorschau/channels/entwicklerteam?view=thread');
+  await page.goto('/#/vorschau/channels/entwicklerteam?view=thread');
   const thread = page.getByRole('region', { name: 'Thread-Ansicht', exact: true });
   await expect(thread.getByRole('textbox')).toBeInViewport();
   await thread.getByRole('button', { name: 'Thread schließen' }).focus();
@@ -75,6 +75,7 @@ test('mobile keyboard navigation, direct thread entry and short viewport keep co
   );
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/\/channels\/entwicklerteam$/);
+  await expect(page.locator('app-conversation [data-page-heading]').first()).toBeFocused();
   await page.getByRole('link', { name: 'Zurück zum Menü' }).focus();
   await page.keyboard.press('Enter');
   const search = page.locator('#mobile-workspace-search');
@@ -92,7 +93,7 @@ test('touch exposes message actions, local edit, mentions and reachable thread r
   page,
 }, info) => {
   await page.setViewportSize({ width: 320, height: 568 });
-  await page.goto('/vorschau/channels/entwicklerteam');
+  await page.goto('/#/vorschau/channels/entwicklerteam');
   const own = page.locator('app-conversation .message.own');
   await own.locator('.bubble').tap();
   await own.getByRole('button', { name: 'Weitere Nachrichtenaktionen' }).tap();
@@ -105,7 +106,7 @@ test('touch exposes message actions, local edit, mentions and reachable thread r
   await composer.getByRole('textbox').fill('@So');
   await composer.getByRole('button', { name: '@Sofia Müller', exact: true }).tap();
   await expect(composer.getByRole('textbox')).toHaveValue('@Sofia Müller ');
-  await page.goto('/vorschau/channels/entwicklerteam?view=thread');
+  await page.goto('/#/vorschau/channels/entwicklerteam?view=thread');
   const first = page.locator('app-thread-panel .message').first();
   await first.locator('.bubble').tap();
   await page.screenshot({ path: info.outputPath('mobile-thread-actions.png') });
@@ -120,7 +121,7 @@ test('mobile intro animates its original centered logo, reveals the word and doc
   page,
 }, info) => {
   await page.setViewportSize({ width: 430, height: 932 });
-  await page.goto('/intro?replay=true');
+  await page.goto('/#/intro?replay=true');
   const started = Date.now();
   const brand = page.locator('.animated-brand');
   await expect(brand).toBeVisible();
@@ -149,6 +150,6 @@ test('mobile intro animates its original centered logo, reveals the word and doc
   expect((await finalBrand.boundingBox())!.y).toBeCloseTo(72, 0);
   await finalBrand.getByRole('link').tap();
   await expect(page).toHaveURL(/\/intro\?replay=true$/);
-  await page.getByRole('link', { name: 'Zur Anmeldung', exact: true }).tap();
-  await expect(page).toHaveURL(/\/anmeldung$/);
+  await expect(page.getByText('Intro überspringen')).toHaveCount(0);
+  await expect(page).toHaveURL(/\/anmeldung$/, { timeout: 7000 });
 });

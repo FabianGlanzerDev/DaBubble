@@ -59,23 +59,6 @@ h1 {
   background: var(--accent-medium);
   color: white;
 }
-.preview-note {
-  position: absolute;
-  top: calc(100% + 12px);
-  width: 100%;
-  text-align: center;
-  color: #52576e;
-  font-size: 12px;
-}
-.preview-note p {
-  margin: 0;
-  line-height: 1.5;
-}
-.preview-note a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-}
 @media (max-width: 767px) {
   h1 {
     font-size: 32px;
@@ -87,11 +70,14 @@ h1 {
     width: 44px;
     height: 44px;
   }
-  .preview-note {
-    position: static;
-    margin-top: 16px;
-  }
-  .preview-note a {
-    min-height: 44px;
-  }
+}
+
+.preview-note p {
+  margin: 0;
+  line-height: 1.5;
+}
+.preview-note a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }

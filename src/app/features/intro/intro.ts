@@ -6,12 +6,12 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthPage } from '../auth/auth-page';
 
 @Component({
   selector: 'app-intro',
-  imports: [RouterLink, AuthPage],
+  imports: [AuthPage],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<div class="destination" inert aria-hidden="true">
       <app-auth-page [embedded]="true" />
@@ -25,13 +25,6 @@ import { AuthPage } from '../auth/auth-page';
           <div class="word-clip"><span>DABubble</span></div>
         </div>
       </div>
-      <a
-        class="skip-intro"
-        routerLink="/anmeldung"
-        (click)="rememberIntro()"
-        aria-label="Zur Anmeldung"
-        >Intro überspringen</a
-      >
     </main>`,
   styleUrl: './intro.scss',
 })
@@ -45,42 +38,30 @@ export class Intro {
     afterNextRender(() => this.startIntro());
   }
 
+  /** Plays on every entry; reduced motion keeps a brief static introduction. */
   private startIntro(): void {
-    if (this.shouldSkipIntro()) {
-      this.finishIntro();
-      return;
-    }
-    const reveal = setTimeout(() => this.departing.set(true), 3500);
-    const finish = setTimeout(() => this.finishIntro(), 5000);
+    this.removeLegacyMarker();
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const reveal = setTimeout(() => this.departing.set(true), reduced ? 250 : 3500);
+    const finish = setTimeout(() => this.finishIntro(), reduced ? 500 : 5000);
     this.destroy.onDestroy(() => {
       clearTimeout(reveal);
       clearTimeout(finish);
     });
   }
 
-  private shouldSkipIntro(): boolean {
-    const replay = this.route.snapshot.queryParamMap.get('replay') === 'true';
-    return matchMedia('(prefers-reduced-motion: reduce)').matches || (!replay && this.hasPlayed());
-  }
-
-  private hasPlayed(): boolean {
+  /** Remove only the obsolete intro preference, never authentication or chat storage. */
+  private removeLegacyMarker(): void {
     try {
-      return localStorage.getItem('dabubble-intro-played') === 'true';
+      localStorage.removeItem('dabubble-intro-played');
     } catch {
-      return false;
-    }
-  }
-
-  protected rememberIntro(): void {
-    try {
-      localStorage.setItem('dabubble-intro-played', 'true');
-    } catch {
-      /* The animation also works when storage is unavailable. */
+      /* Animation does not require browser storage. */
     }
   }
 
   private finishIntro(): void {
-    this.rememberIntro();
-    void this.router.navigateByUrl('/anmeldung', { replaceUrl: true });
+    const queryParams = { ...this.route.snapshot.queryParams };
+    delete queryParams['replay'];
+    void this.router.navigate(['/anmeldung'], { queryParams, replaceUrl: true });
   }
 }

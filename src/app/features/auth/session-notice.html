@@ -1,0 +1,47 @@
+@if (session.initializing()) {
+  <p class="session-notice" role="status">Gespeicherte Anmeldung wird geprüft…</p>
+} @else if (session.user(); as user) {
+  <section
+    class="session-notice"
+    aria-label="Aktuelle Anmeldung"
+    [attr.data-session-kind]="user.isAnonymous ? 'guest' : 'regular'"
+    [attr.data-session-uid]="user.uid"
+  >
+    @if (user.isAnonymous) {
+      <p>
+        <strong>Gastzugang · {{ session.profile()?.name || 'Gastkonto' }}</strong>
+      </p>
+      <p>
+        <a routerLink="/registrierung">Konto erstellen</a> behält deine Gastkennung und Chats. Die
+        Anmeldung unten wechselt stattdessen zu einem bestehenden Konto und führt keine Chats
+        zusammen.
+      </p>
+      <p id="guest-switch-warning">
+        Bei erfolgreichem Kontowechsel verlierst du ohne vorherige Kontoumwandlung dauerhaft den
+        Zugang zu diesem Gastkonto. Gastkonto und Beiträge bleiben gespeichert. Bei einer
+        fehlgeschlagenen Anmeldung bleibt dein Gastzugang aktiv.
+      </p>
+      <label>
+        <input
+          #approval
+          type="checkbox"
+          [checked]="confirmedGuestUid() === user.uid"
+          [disabled]="session.busy()"
+          aria-describedby="guest-switch-warning"
+          (change)="confirmGuest(approval.checked)"
+        />
+        <span>Ich möchte zu einem bestehenden Konto wechseln und verliere den Gastzugang.</span>
+      </label>
+      <a routerLink="/zugang/gast">Gastkonto sichern oder abmelden</a>
+    } @else {
+      <p>Eine Sitzung ist noch aktiv.</p>
+      <button type="button" [disabled]="session.busy()" (click)="switchAccount()">
+        {{ session.pending() === 'logout' ? 'Abmeldung läuft…' : 'Abmelden' }}
+      </button>
+    }
+    <a routerLink="/chat">Mit diesem Konto zum Chat</a>
+    @if (error()) {
+      <p class="error" role="alert">{{ error() }}</p>
+    }
+  </section>
+}

@@ -143,6 +143,10 @@ function identityFieldError(kind: 'name' | 'email', value: string): string {
   `,
 })
 export class FormField {
+  reset(): void {
+    this.touched.set(false);
+  }
+
   readonly kind = input.required<FieldKind>();
   readonly label = input.required<string>();
   readonly fieldId = input.required<string>();

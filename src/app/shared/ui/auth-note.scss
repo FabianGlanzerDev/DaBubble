@@ -1,0 +1,33 @@
+.preview-note {
+  position: fixed;
+  z-index: 5;
+  top: 12px;
+  right: 24px;
+  max-width: min(398px, calc(100vw - 32px));
+  color: #52576e;
+  font-size: 14px;
+  border-radius: 20px;
+}
+.preview-note summary {
+  cursor: pointer;
+  padding: 12px 16px;
+  min-height: 44px;
+  border-radius: 24px;
+}
+.preview-note summary:hover {
+  background: white;
+  color: var(--accent);
+}
+.preview-note[open] {
+  background: white;
+  box-shadow: 0 2px 10px #0002;
+}
+.note-content {
+  padding: 0 16px 12px;
+}
+@media (max-width: 767px) {
+  .preview-note {
+    top: 4px;
+    right: 16px;
+  }
+}

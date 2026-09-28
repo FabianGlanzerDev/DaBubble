@@ -1,0 +1,52 @@
+.session-notice {
+  margin: 0 0 24px;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--page);
+  font-size: 15px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+p {
+  margin: 0 0 10px;
+}
+a,
+button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 4px 0;
+}
+button {
+  color: var(--accent);
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-weight: 700;
+}
+button:hover:not(:disabled) {
+  text-decoration: underline;
+}
+.session-notice > a,
+.session-notice > button {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+}
+label {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+input {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: var(--accent);
+}
+.error {
+  color: var(--danger, #b00020);
+}

@@ -17,7 +17,7 @@ import { RouterLink } from '@angular/router';
   styles: `
     a {
       display: inline-flex;
-      gap: 0.9rem;
+      gap: var(--brand-gap, 0.9rem);
       align-items: center;
       color: var(--text);
       text-decoration: none;

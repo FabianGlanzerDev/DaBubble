@@ -77,23 +77,6 @@ img {
     font-size 1500ms,
     color 500ms;
 }
-.skip-intro {
-  position: absolute;
-  right: 28px;
-  bottom: 24px;
-  padding: 12px 18px;
-  border-radius: 30px;
-  color: white;
-  text-decoration: none;
-}
-.skip-intro:hover,
-.skip-intro:focus-visible {
-  background: #ffffff24;
-  outline-color: white;
-}
-.departing .skip-intro {
-  color: var(--accent);
-}
 @keyframes expand-brand {
   to {
     width: 280px;

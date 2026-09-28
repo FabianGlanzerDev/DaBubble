@@ -1,0 +1,79 @@
+<app-public-layout variant="avatar" [attr.inert]="completed() ? '' : null">
+  <div class="auth-screen">
+    <section class="auth-card" aria-labelledby="avatar-title" aria-describedby="avatar-note">
+      <header class="card-heading">
+        <a
+          class="back-link icon-button"
+          [routerLink]="backRoute"
+          [attr.aria-label]="backRoute === '/registrierung' ? 'Zur Registrierung' : 'Zur Anmeldung'"
+        >
+          <app-icon name="arrow" />
+        </a>
+        <h1 id="avatar-title" data-page-heading tabindex="-1">Wähle deinen Avatar</h1>
+      </header>
+      <div class="selected-avatar"><app-avatar-image [index]="selection()" [size]="168" /></div>
+      <h2>{{ realAccount ? name() : registration.name() }}</h2>
+      @if (needsName) {
+        <app-form-field
+          fieldId="profile-setup-name"
+          kind="name"
+          label="Name"
+          placeholder="Name und Nachname"
+          [(value)]="name"
+          [disabled]="session.busy()"
+        />
+      }
+      <p class="list-label">
+        <span class="desktop-label">Aus der Liste wählen</span
+        ><span class="mobile-label" lang="en">Choose your avatar....</span>
+      </p>
+      <div class="avatar-options" role="group" aria-label="Avatar auswählen">
+        @for (avatar of avatars; track avatar) {
+          <button
+            type="button"
+            [attr.aria-label]="'Avatar ' + (avatar + 1)"
+            [attr.aria-pressed]="selection() === avatar"
+            (click)="select(avatar)"
+            [disabled]="realAccount && session.busy()"
+          >
+            <app-avatar-image [index]="avatar" />
+          </button>
+        }
+      </div>
+      <div class="continue-row">
+        <button
+          class="auth-button"
+          type="button"
+          [disabled]="!realAccount || !valid() || session.busy()"
+          (click)="save()"
+          aria-describedby="avatar-note"
+        >
+          {{ session.pending() === 'profile' ? 'Profil wird gespeichert…' : 'Weiter' }}
+        </button>
+      </div>
+      @if (error()) {
+        <p class="action-error" role="alert">{{ error() }}</p>
+      }
+      @if (realAccount) {
+        <p id="avatar-note" class="sr-only">
+          Dein Konto ist angelegt. Wähle einen Avatar, um dein Profil zu vervollständigen.
+        </p>
+      }
+    </section>
+    @if (!realAccount) {
+      <app-auth-note class="preview-note">
+        <p id="avatar-note">
+          Layout-Vorschau · Beispielprofil. Die Auswahl wird nicht gespeichert; es wird kein Konto
+          erstellt.
+        </p>
+        <nav aria-label="Weitere Designvorschauen">
+          <a routerLink="/vorschau">Layout-Vorschau öffnen</a
+          ><a routerLink="/meldungen-vorschau">Bestätigungsmeldungen ansehen</a>
+        </nav>
+      </app-auth-note>
+    }
+  </div>
+</app-public-layout>
+@if (completed()) {
+  <app-success-overlay kind="account" (finished)="finish()" />
+}
