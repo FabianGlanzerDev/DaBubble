@@ -38,7 +38,11 @@ export class ChatApi extends ChatRoomApi {
       collection(this.db, 'conversations'),
       where('memberIds', 'array-contains', this.uid),
     );
-    return this.listen(source, (rows) => next(rows as unknown as ChatRoom[]), fail);
+    return this.listen(source, (rows) => next(rows.map((row) => this.room(row))), fail);
+  }
+
+  private room(row: DocumentData): ChatRoom {
+    return { ...row, createdAt: row['createdAt']?.toMillis() ?? 0 } as ChatRoom;
   }
 
   messages(

@@ -11,6 +11,8 @@ export interface ChatRoom {
   description: string;
   memberIds: string[];
   createdBy: string;
+  createdAt?: number;
+  archived?: boolean;
 }
 export interface ChatMessage {
   id: string;
@@ -52,6 +54,7 @@ export const chatEmojis = [
 ];
 
 export function channelNameError(name: string): string {
+  if (!name.trim()) return 'Bitte gib einen Channel-Namen ein.';
   return /^[a-zäöüß0-9][a-zäöüß0-9 _-]{0,79}$/i.test(name.trim())
     ? ''
     : 'Bitte verwende 1–80 Buchstaben, Zahlen, Leerzeichen, - oder _. Beginne mit einem Buchstaben oder einer Zahl.';

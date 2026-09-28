@@ -6,6 +6,7 @@ import type { ChatApi } from './chat-api';
 @Injectable({ providedIn: 'root' })
 export class ChatStore {
   readonly session = inject(AuthSession);
+  private readonly accountUid = computed(() => this.session.user()?.uid);
   private readonly destroy = inject(DestroyRef);
   private client: ChatApi | null = null;
   private revision = 0;
@@ -17,12 +18,16 @@ export class ChatStore {
   readonly reactions = signal<Record<string, ChatReaction[]>>({});
   readonly error = signal('');
   readonly loading = signal(true);
-  readonly channels = computed(() => this.rooms().filter((room) => room.kind === 'channel'));
+  readonly channels = computed(() =>
+    this.rooms()
+      .filter((room) => room.kind === 'channel')
+      .sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0) || a.id.localeCompare(b.id)),
+  );
   readonly recent = signal<string[]>(['✅', '🙌']);
 
   constructor() {
     effect(() => {
-      const uid = this.session.user()?.uid;
+      const uid = this.accountUid();
       untracked(() => this.connect(uid));
     });
     effect(() => this.publish(this.session.profile()));
@@ -53,13 +58,13 @@ export class ChatStore {
     const fail = (error: unknown) => {
       if (revision === this.revision) this.fail(error);
     };
-    this.stops.push(
-      this.api().people(
-        (people) => this.people.set(people.sort((a, b) => a.name.localeCompare(b.name))),
-        fail,
-      ),
-    );
+    this.stops.push(this.api().people((people) => this.acceptPeople(people), fail));
     this.stops.push(this.api().rooms((rooms) => this.acceptRooms(rooms), fail));
+  }
+
+  private acceptPeople(people: ChatPerson[]): void {
+    this.people.set(people.sort((a, b) => a.name.localeCompare(b.name)));
+    this.session.watchPresence(people.map((person) => person.uid));
   }
 
   private acceptRooms(rooms: ChatRoom[]): void {
@@ -110,7 +115,7 @@ export class ChatStore {
     this.roomStops.forEach((stops) => stops.forEach((stop) => stop()));
     this.roomStops.clear();
     this.client = null;
-    this.people.set([]);
+    this.acceptPeople([]);
     this.rooms.set([]);
     this.messages.set({});
     this.reactions.set({});
@@ -135,12 +140,14 @@ export class ChatStore {
   }
 
   person(uid: string): ChatPerson {
+    if (!uid) return { uid: '', name: 'Gelöschtes Konto', avatarId: 0 };
     return (
       this.people().find((person) => person.uid === uid) ?? { uid, name: 'Mitglied', avatarId: 0 }
     );
   }
 
   label(room: ChatRoom): string {
+    if (room.archived) return 'Direktgespräch · Konto gelöscht';
     const uid =
       room.memberIds.find((id) => id !== this.session.user()?.uid) ?? room.memberIds[0] ?? '';
     return room.kind === 'channel' ? room.name : this.person(uid).name;
