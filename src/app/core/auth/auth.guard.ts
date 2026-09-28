@@ -7,6 +7,7 @@ export const authGuard: CanActivateFn = async (_route, state) => {
   const session = inject(AuthSession);
   const router = inject(Router);
   await session.ready;
+  if (!session.profile() && state.url.startsWith('/chat')) await session.reloadProfile();
   return (
     session.user() !== null ||
     router.createUrlTree(['/anmeldung'], {

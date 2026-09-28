@@ -1,9 +1,21 @@
 export interface AuthIssue {
   field: 'email' | 'password' | 'name' | 'general';
   message: string;
+  retainOnSignOut?: boolean;
 }
 
 const issues: Record<string, AuthIssue> = {
+  'auth/session-ended': {
+    field: 'general',
+    retainOnSignOut: true,
+    message:
+      'Eine Abmeldung in einem anderen Tab hat diesen Anmeldeversuch beendet. Bitte melde dich erneut an.',
+  },
+  'registration/storage-unavailable': {
+    field: 'general',
+    message:
+      'Der Registrierungsfortschritt kann nicht gespeichert werden. Bitte erlaube den Sitzungsspeicher für diese Website und versuche es erneut.',
+  },
   'auth/email-already-in-use': {
     field: 'email',
     message: 'Diese E-Mail-Adresse wird bereits verwendet.',
@@ -51,9 +63,73 @@ const issues: Record<string, AuthIssue> = {
     message:
       'Dieser Link ist ungültig oder wurde bereits verwendet. Bitte fordere eine neue Reset-E-Mail an.',
   },
+  'auth/unsupported-email-action': {
+    field: 'general',
+    message:
+      'Diese E-Mail-Aktion wird in DaBubble noch nicht unterstützt. Hier kannst du ausschließlich dein Passwort zurücksetzen. Bitte kontaktiere den Betreiber, wenn du eine andere Kontoaktion durchführen möchtest.',
+  },
   'auth/operation-not-allowed': {
     field: 'general',
-    message: 'Die Anmeldung mit E-Mail und Passwort ist im Firebase-Projekt noch nicht aktiviert.',
+    message: 'Diese Anmeldemethode ist im Firebase-Projekt noch nicht aktiviert.',
+  },
+  'auth/admin-restricted-operation': {
+    field: 'general',
+    message: 'Diese Kontoaktion ist derzeit gesperrt. Bitte kontaktiere den Betreiber.',
+  },
+  'auth/popup-closed-by-user': {
+    field: 'general',
+    message: 'Google-Anmeldung abgebrochen. Dein bisheriger Zugang bleibt erhalten.',
+  },
+  'auth/cancelled-popup-request': {
+    field: 'general',
+    message: 'Google-Anmeldung abgebrochen. Bitte starte nur ein Anmeldefenster.',
+  },
+  'auth/popup-blocked': {
+    field: 'general',
+    message:
+      'Das Anmeldefenster wurde blockiert. Erlaube Pop-ups für diese Website und versuche es erneut.',
+  },
+  'auth/unauthorized-domain': {
+    field: 'general',
+    message: 'Diese Domain ist für die Firebase-Anmeldung noch nicht freigegeben.',
+  },
+  'auth/account-exists-with-different-credential': {
+    field: 'general',
+    message:
+      'Für diese E-Mail-Adresse besteht bereits ein anderer Zugang. Melde dich damit an und wähle im Profilmenü „Google verknüpfen“. Es wurden keine Chatdaten zusammengeführt.',
+  },
+  'auth/credential-already-in-use': {
+    field: 'general',
+    message:
+      'Dieses Google-Konto gehört bereits zu einem anderen DaBubble-Konto. Dein bisheriger Zugang bleibt erhalten. Es werden keine Konten zusammengeführt.',
+  },
+  'auth/provider-already-linked': {
+    field: 'general',
+    message: 'Google ist mit diesem Konto bereits verknüpft.',
+  },
+  'auth/session-active': {
+    field: 'general',
+    message:
+      'Es besteht bereits eine Anmeldung. Wähle auf der Anmeldeseite „Abmelden“, wenn du ein anderes Konto verwenden möchtest.',
+  },
+  'auth/sign-out-incomplete': {
+    field: 'general',
+    message:
+      'Die Abmeldung wurde nicht abgeschlossen. Bitte versuche es erneut. Dein Konto bleibt erhalten.',
+  },
+  'auth/guest-switch-confirmation-required': {
+    field: 'general',
+    message:
+      'Bitte bestätige vor dem Kontowechsel den Verlust des Gastzugangs. Mit „Konto erstellen“ kannst du stattdessen dein Gastkonto mit seinen Chats behalten.',
+  },
+  'auth/guest-account-active': {
+    field: 'general',
+    message:
+      'Ein persönliches Konto ist aktiv. Melde dich zuerst ab, um den Gastzugang zu öffnen. Dein Konto bleibt erhalten.',
+  },
+  'auth/requires-recent-login': {
+    field: 'general',
+    message: 'Bitte melde dich erneut an, bevor du diese Kontoaktion ausführst.',
   },
   'auth/unauthorized-continue-uri': {
     field: 'general',
@@ -71,7 +147,7 @@ const issues: Record<string, AuthIssue> = {
   'firebase/configuration': {
     field: 'general',
     message:
-      'Firebase ist noch nicht eingerichtet. Die Webkonfiguration deines eigenen Projekts fehlt oder ist ungültig.',
+      'Die Anmeldung ist derzeit nicht verfügbar. Bitte versuche es später erneut oder kontaktiere den Betreiber.',
   },
   'auth/busy': {
     field: 'general',
@@ -91,4 +167,26 @@ export function authIssue(error: unknown): AuthIssue {
       message: 'Die Aktion konnte nicht abgeschlossen werden. Bitte versuche es erneut.',
     }
   );
+}
+
+/** Guest-specific feedback; never expose raw Firebase responses or credentials. */
+export function guestIssue(error: unknown): AuthIssue {
+  const code = errorCode(error);
+  if (['auth/admin-restricted-operation', 'auth/operation-not-allowed'].includes(code))
+    return {
+      field: 'general',
+      message:
+        'Der Gastzugang ist noch nicht aktiviert oder wurde vom Betreiber gesperrt. Bitte nutze die Anmeldung oder kontaktiere den Betreiber.',
+    };
+  return issues[code] ?? unknownGuestIssue(code);
+}
+
+function unknownGuestIssue(code: string): AuthIssue {
+  const reference = /^auth\/[a-z][a-z0-9-]{1,80}$/.test(code) ? ` (Fehlercode: ${code})` : '';
+  return {
+    field: 'general',
+    message:
+      'Der Gastzugang konnte nicht geöffnet werden. Bitte versuche es erneut oder nutze die Anmeldung.' +
+      reference,
+  };
 }

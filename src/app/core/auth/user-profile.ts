@@ -1,6 +1,9 @@
 export interface AccountIdentity {
   uid: string;
   email: string | null;
+  isAnonymous: boolean;
+  displayName: string | null;
+  providerIds: string[];
 }
 
 export interface ProfileDraft {

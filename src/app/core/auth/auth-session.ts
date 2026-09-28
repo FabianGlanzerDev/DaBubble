@@ -4,23 +4,30 @@ import { FirebaseSettings, loadFirebaseSettings } from '../firebase/firebase-set
 import type { FirebaseRuntime } from '../firebase/firebase-runtime';
 import { AccountIdentity, ProfileDraft, UserProfile } from './user-profile';
 import { authIssue } from './auth-errors';
+import { RegistrationProgress } from './registration-progress';
+import { PresenceState } from '../presence/presence-state';
 
-type Action = 'login' | 'register' | 'logout' | 'profile' | 'reset' | 'verify-reset';
+type Action =
+  'login' | 'register' | 'logout' | 'profile' | 'reset' | 'verify-reset' | 'google' | 'guest';
 
 @Injectable({ providedIn: 'root' })
 export class AuthSession {
   private readonly destroy = inject(DestroyRef);
   private readonly router = inject(Router);
+  readonly registration = inject(RegistrationProgress);
+  readonly presence = inject(PresenceState);
   private client: FirebaseRuntime | null = null;
   private revision = 0;
   private profileLoad: Promise<void> = Promise.resolve();
   readonly user = signal<AccountIdentity | null>(null);
+  readonly isGuest = computed(() => this.user()?.isAnonymous === true);
   readonly profile = signal<UserProfile | null>(null);
   readonly profileLoading = signal(false);
   readonly profileError = signal('');
   readonly initializing = signal(true);
   readonly configured = signal(false);
   readonly emulated = signal(false);
+  readonly googleAvailable = computed(() => this.configured());
   readonly setupError = signal('');
   readonly pending = signal<Action | null>(null);
   readonly busy = computed(() => this.initializing() || this.pending() !== null);
@@ -30,6 +37,10 @@ export class AuthSession {
   async chatDatabase() {
     await this.ready;
     return this.requireClient().chatDatabase();
+  }
+
+  watchPresence(uids: string[]): void {
+    this.client?.presence.watch(uids);
   }
 
   private async initialize(): Promise<void> {
@@ -48,7 +59,8 @@ export class AuthSession {
 
   private async connect(settings: FirebaseSettings): Promise<void> {
     const { FirebaseRuntime } = await import('../firebase/firebase-runtime');
-    this.client = new FirebaseRuntime(settings);
+    this.client = new FirebaseRuntime(settings, this.presence);
+    this.destroy.onDestroy(() => this.client?.destroy());
     this.emulated.set(settings.emulators);
   }
 
@@ -62,7 +74,8 @@ export class AuthSession {
   }
 
   private changeUser(user: AccountIdentity | null): Promise<void> {
-    if (this.user()?.uid === user?.uid) return this.profileLoad;
+    this.syncRegistration(user);
+    if (this.refreshIdentity(user)) return this.profileLoad;
     const wasSignedIn = !!this.user();
     this.user.set(user);
     this.profile.set(null);
@@ -74,9 +87,23 @@ export class AuthSession {
     return this.profileLoad;
   }
 
+  private refreshIdentity(user: AccountIdentity | null): boolean {
+    const same = this.user()?.uid === user?.uid && this.user()?.isAnonymous === user?.isAnonymous;
+    if (same) this.user.set(user);
+    return same;
+  }
+
+  private syncRegistration(user: AccountIdentity | null): void {
+    this.registration.attach(user);
+    if (user?.uid !== this.user()?.uid) this.pendingName.set('');
+    if (!user && this.user()) this.registration.clear();
+  }
+
   private async fetchProfile(uid: string, revision: number): Promise<void> {
     try {
-      const profile = await this.limitProfileRead(this.requireClient().loadProfile(uid));
+      const profile = await this.limitProfileRead(
+        this.requireClient().loadProfile(uid, this.isGuest()),
+      );
       if (revision === this.revision) this.profile.set(profile);
     } catch (error) {
       if (revision === this.revision) this.profileError.set(authIssue(error).message);
@@ -106,26 +133,57 @@ export class AuthSession {
     await this.profileLoad;
   }
 
-  async login(email: string, password: string): Promise<void> {
+  async login(email: string, password: string, confirmedGuestUid?: string): Promise<void> {
     await this.perform('login', async (client) => {
-      await client.login(email, password);
+      await client.login(email, password, confirmedGuestUid);
       await this.changeUser(client.identity());
     });
   }
 
   async register(email: string, password: string, name: string): Promise<void> {
     await this.perform('register', async (client) => {
-      await client.register(email, password);
+      this.registration.prepare(email, name);
+      await this.createRegistration(client, email, password);
       this.pendingName.set(name.trim());
       await this.changeUser(client.identity());
     });
   }
 
+  private async createRegistration(
+    client: FirebaseRuntime,
+    email: string,
+    password: string,
+  ): Promise<void> {
+    try {
+      await client.register(email, password);
+    } catch (error) {
+      this.registration.cancelPreparation();
+      throw error;
+    }
+  }
+
   async logout(): Promise<void> {
     await this.perform('logout', async (client) => {
       await client.logout();
+      this.registration.clear();
       this.pendingName.set('');
       await this.changeUser(null);
+    });
+    await this.router.navigateByUrl('/anmeldung', { replaceUrl: true });
+  }
+
+  async google(linkExisting = false): Promise<void> {
+    await this.perform('google', async (client) => {
+      await client.google(linkExisting);
+      this.pendingName.set(client.identity()?.displayName?.trim().slice(0, 80) ?? '');
+      await this.changeUser(client.identity());
+    });
+  }
+
+  async guest(): Promise<void> {
+    await this.perform('guest', async (client) => {
+      await client.guest();
+      await this.changeUser(client.identity());
     });
   }
 

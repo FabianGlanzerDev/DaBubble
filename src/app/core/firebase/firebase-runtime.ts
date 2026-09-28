@@ -8,11 +8,18 @@ import {
   connectAuthEmulator,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  onAuthStateChanged,
+  onIdTokenChanged,
   signOut,
   sendPasswordResetEmail,
   verifyPasswordResetCode,
   confirmPasswordReset,
+  browserPopupRedirectResolver,
+  GoogleAuthProvider,
+  signInWithPopup,
+  linkWithPopup,
+  signInAnonymously,
+  linkWithCredential,
+  EmailAuthProvider,
 } from 'firebase/auth';
 import {
   Firestore,
@@ -25,6 +32,10 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import { FirebaseSettings } from './firebase-settings';
+import { loadGuestProfile } from './guest-profile';
+import { LogoutFence } from './logout-fence';
+import { PresenceClient } from '../presence/presence-client';
+import { PresenceState } from '../presence/presence-state';
 import {
   AccountIdentity,
   ProfileDraft,
@@ -37,9 +48,12 @@ import {
 export class FirebaseRuntime {
   private readonly auth: Auth;
   private readonly database: Firestore;
+  private readonly logoutFence: LogoutFence;
+  readonly presence: PresenceClient;
 
-  constructor(settings: FirebaseSettings) {
+  constructor(settings: FirebaseSettings, presence: PresenceState) {
     const app = initializeApp(settings.firebase, 'dabubble');
+    this.logoutFence = new LogoutFence(settings.firebase.projectId!);
     this.auth = initializeAuth(app, {
       persistence: [indexedDBLocalPersistence, browserLocalPersistence, browserSessionPersistence],
     });
@@ -49,11 +63,20 @@ export class FirebaseRuntime {
       connectAuthEmulator(this.auth, 'http://127.0.0.1:9099', { disableWarnings: true });
       connectFirestoreEmulator(this.database, '127.0.0.1', 8080);
     }
+    this.presence = new PresenceClient(app, settings, presence, this.auth);
   }
 
   identity(): AccountIdentity | null {
     const user = this.auth.currentUser;
-    return user ? { uid: user.uid, email: user.email } : null;
+    return user
+      ? {
+          uid: user.uid,
+          email: user.email,
+          isAnonymous: user.isAnonymous,
+          displayName: user.displayName,
+          providerIds: user.providerData.map((entry) => entry.providerId),
+        }
+      : null;
   }
 
   chatDatabase(): Firestore {
@@ -61,24 +84,103 @@ export class FirebaseRuntime {
   }
 
   observeUser(next: (user: AccountIdentity | null) => void): () => void {
-    return onAuthStateChanged(this.auth, () => next(this.identity()));
+    return onIdTokenChanged(this.auth, () => {
+      next(this.identity());
+    });
   }
 
-  async login(email: string, password: string): Promise<void> {
+  login(email: string, password: string, confirmedGuestUid?: string): Promise<void> {
+    return this.authenticate(() => this.signInEmail(email, password, confirmedGuestUid));
+  }
+
+  private async signInEmail(
+    email: string,
+    password: string,
+    confirmedGuestUid?: string,
+  ): Promise<void> {
+    await this.auth.authStateReady();
+    const current = this.auth.currentUser;
+    if (current?.isAnonymous && current.uid !== confirmedGuestUid)
+      throw new Error('auth/guest-switch-confirmation-required');
+    // Firebase replaces the current session only after the new credentials succeed.
+    // Do not sign out first: a failed login must retain the original account's access.
     await signInWithEmailAndPassword(this.auth, email.trim(), password);
   }
 
-  async register(email: string, password: string): Promise<void> {
-    await createUserWithEmailAndPassword(this.auth, email.trim(), password);
+  register(email: string, password: string): Promise<void> {
+    return this.authenticate(() => this.createOrLink(email, password));
   }
 
-  logout(): Promise<void> {
-    return signOut(this.auth);
+  private async createOrLink(email: string, password: string): Promise<void> {
+    const user = this.auth.currentUser;
+    if (user?.isAnonymous) {
+      await linkWithCredential(user, EmailAuthProvider.credential(email.trim(), password));
+      await user.getIdToken(true);
+    } else {
+      if (user) throw new Error('auth/session-active');
+      await createUserWithEmailAndPassword(this.auth, email.trim(), password);
+    }
+  }
+
+  google(linkExisting: boolean): Promise<void> {
+    return this.authenticate(() => this.signInGoogle(linkExisting));
+  }
+
+  private async signInGoogle(linkExisting: boolean): Promise<void> {
+    const user = this.auth.currentUser;
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    if (user?.isAnonymous || (user && linkExisting)) {
+      await linkWithPopup(user, provider, browserPopupRedirectResolver);
+      await user.getIdToken(true);
+    } else {
+      if (user || linkExisting) throw new Error('auth/session-active');
+      await signInWithPopup(this.auth, provider, browserPopupRedirectResolver);
+    }
+  }
+
+  guest(): Promise<void> {
+    return this.authenticate(() => this.signInGuest());
+  }
+
+  private async signInGuest(): Promise<void> {
+    await this.auth.authStateReady();
+    const user = this.auth.currentUser;
+    if (user?.isAnonymous) return;
+    if (user) throw new Error('auth/guest-account-active');
+    await signInAnonymously(this.auth);
+  }
+
+  async logout(): Promise<void> {
+    await this.auth.authStateReady();
+    this.presence.identify('');
+    try {
+      await signOut(this.auth);
+      if (this.auth.currentUser) throw new Error('auth/sign-out-incomplete');
+      this.logoutFence.publish();
+    } catch (error) {
+      this.presence.identify(this.auth.currentUser?.uid ?? '');
+      throw error;
+    }
+  }
+
+  /** A late Firebase response must not undo a completed logout in another tab. */
+  private async authenticate(operation: () => Promise<unknown>): Promise<void> {
+    const version = this.logoutFence.version();
+    await operation();
+    if (version === this.logoutFence.version()) return;
+    await this.logout();
+    throw new Error('auth/session-ended');
+  }
+
+  destroy(): void {
+    this.presence.destroy();
+    this.logoutFence.destroy();
   }
 
   sendReset(email: string): Promise<void> {
     return sendPasswordResetEmail(this.auth, email.trim(), {
-      url: new URL('/anmeldung', location.origin).href,
+      url: new URL('/#/anmeldung', location.origin).href,
     });
   }
 
@@ -90,7 +192,8 @@ export class FirebaseRuntime {
     return confirmPasswordReset(this.auth, code, password);
   }
 
-  async loadProfile(uid: string): Promise<UserProfile | null> {
+  async loadProfile(uid: string, guest = false): Promise<UserProfile | null> {
+    if (guest) return loadGuestProfile(this.database, uid);
     const snapshot = await getDocFromServer(doc(this.database, 'users', uid));
     return snapshot.exists() ? readUserProfile(snapshot.data(), uid) : null;
   }
