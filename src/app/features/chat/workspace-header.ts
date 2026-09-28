@@ -31,15 +31,19 @@ import { RouterLink } from '@angular/router';
       [attr.aria-label]="
         realAccount()
           ? 'Profilmenü für ' + name() + ' öffnen'
-          : 'Profilmenü für Beispielprofil Frederik Beck öffnen'
+          : session.isGuest()
+            ? 'Gastmenü öffnen'
+            : 'Profilmenü für Beispielprofil Frederik Beck öffnen'
       "
       aria-haspopup="dialog"
     >
       <span>{{ name() }}</span>
       <app-avatar-image
-        [index]="realAccount() ? (session.profile()?.avatarId ?? null) : 2"
+        [index]="
+          realAccount() ? (session.profile()?.avatarId ?? null) : session.isGuest() ? null : 2
+        "
         [size]="70"
-        [presence]="realAccount() ? null : 'active'"
+        [uid]="realAccount() ? (session.user()?.uid ?? null) : null"
       />
       <app-icon name="chevron" />
     </button>
@@ -52,7 +56,11 @@ export class WorkspaceHeader {
   readonly realAccount = input(false);
   protected readonly session = inject(AuthSession);
   protected readonly name = computed(() =>
-    this.realAccount() ? (this.session.profile()?.name ?? 'Mein Konto') : 'Frederik Beck',
+    this.realAccount()
+      ? (this.session.profile()?.name ?? 'Mein Konto')
+      : this.session.isGuest()
+        ? 'Gast'
+        : 'Frederik Beck',
   );
   protected readonly overlay = inject(OverlayState);
 }

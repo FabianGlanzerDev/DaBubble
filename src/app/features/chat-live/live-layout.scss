@@ -50,6 +50,22 @@
     position: relative;
     z-index: 5;
   }
+  .mobile-search-open app-live-sidebar {
+    display: none;
+  }
+  .mobile-search-open .mobile-compose {
+    bottom: 24px;
+    margin: 0 16px 24px auto;
+    flex-shrink: 0;
+    z-index: 6;
+  }
+  .mobile-search-open .sidebar {
+    display: flex;
+    flex-direction: column;
+  }
+  .mobile-search-open .mobile-search {
+    flex: 1;
+  }
   .chat-error {
     font-size: 14px;
     padding: 8px 16px;

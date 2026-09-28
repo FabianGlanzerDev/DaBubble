@@ -4,6 +4,11 @@
   --search-font: 24px;
   --search-border: 0;
 }
+.guest-label {
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 600;
+}
 @media (max-width: 767px) {
   .desktop-search {
     display: none;

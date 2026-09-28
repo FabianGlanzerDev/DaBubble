@@ -1,0 +1,124 @@
+.channel-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 5px 0 20px;
+  color: var(--accent);
+  font-size: 18px;
+  overflow-wrap: anywhere;
+}
+.channel-name app-icon {
+  flex-shrink: 0;
+}
+.selection {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #adb0d9;
+  border-radius: 30px;
+  padding: 6px 20px;
+  min-height: 56px;
+}
+.selection:focus-within {
+  border-color: var(--accent);
+}
+.selection:has(input:focus-visible) {
+  outline: 3px solid var(--focus);
+  outline-offset: 4px;
+}
+.selection input:focus-visible {
+  outline: none;
+}
+.selection input {
+  border: 0;
+  background: transparent;
+  min-width: 0;
+  width: 120px;
+  flex: 1 1 120px;
+  min-height: 42px;
+  font: inherit;
+  font-size: 18px;
+}
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 4px 3px 8px;
+  min-width: 0;
+  max-width: 100%;
+  border-radius: 30px;
+  background: var(--page);
+}
+.chip > span {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.chip app-avatar-image,
+.chip button {
+  flex-shrink: 0;
+}
+.chip button {
+  width: 40px;
+  height: 40px;
+}
+.search-results {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 12px 8px;
+  border: 1px solid #adb0d9;
+  border-radius: 0 20px 20px 20px;
+  box-shadow: 0 2px 10px #0002;
+  max-height: 230px;
+  overflow-y: auto;
+}
+.search-results button {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border: 0;
+  border-radius: 30px;
+  background: transparent;
+  padding: 8px 12px;
+  min-height: 60px;
+  width: 100%;
+  text-align: left;
+  font-size: 18px;
+}
+.search-results button:hover {
+  background: var(--page);
+}
+.search-results button:active {
+  color: var(--accent);
+}
+.search-results app-avatar-image {
+  flex-shrink: 0;
+}
+.search-results span {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.empty {
+  padding: 12px;
+}
+.actions {
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+.saved {
+  margin: 12px 0 0;
+}
+@media (max-width: 767px) {
+  .channel-name {
+    display: none;
+  }
+  .selection {
+    margin-top: 20px;
+  }
+  .selection {
+    padding-inline: 16px;
+  }
+  .chip {
+    gap: 6px;
+  }
+}

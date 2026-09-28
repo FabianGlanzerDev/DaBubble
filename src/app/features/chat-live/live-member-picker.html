@@ -1,0 +1,64 @@
+<p class="channel-name"><app-icon name="hash" />{{ room().name }}</p>
+<label class="sr-only" for="member-query">Leute hinzufügen</label>
+<div class="selection" [class.has-selection]="selected().length">
+  @for (id of selected(); track id) {
+    <span class="chip">
+      <app-avatar-image [index]="store.person(id).avatarId" [size]="34" />
+      <span>{{ store.person(id).name }}</span>
+      <button
+        class="icon-button"
+        type="button"
+        [disabled]="action.busy()"
+        [attr.aria-label]="store.person(id).name + ' aus Auswahl entfernen'"
+        (click)="remove(id, field)"
+      >
+        <app-icon name="close" />
+      </button>
+    </span>
+  }
+  <input
+    #field
+    id="member-query"
+    placeholder="Name eingeben"
+    autocomplete="off"
+    aria-controls="member-results"
+    [attr.aria-expanded]="!!query().trim()"
+    [disabled]="action.busy()"
+    [value]="query()"
+    (input)="query.set(field.value)"
+  />
+</div>
+@if (query().trim()) {
+  <ul class="search-results" id="member-results" aria-label="Passende Personen">
+    @for (person of candidates(); track person.uid) {
+      <li>
+        <button
+          type="button"
+          [disabled]="action.busy()"
+          (click)="select(person.uid, field)"
+          [attr.aria-description]="store.session.presence.label(person.uid)"
+        >
+          <app-avatar-image [index]="person.avatarId" [size]="50" [uid]="person.uid" /><span>{{
+            person.name
+          }}</span>
+        </button>
+      </li>
+    } @empty {
+      <li class="empty">Keine weiteren passenden Mitglieder.</li>
+    }
+  </ul>
+}
+<p class="action-error" role="alert" [hidden]="!action.error()">{{ action.error() }}</p>
+@if (saved()) {
+  <p class="saved" role="status">Mitglieder hinzugefügt.</p>
+}
+<div class="actions">
+  <button
+    type="button"
+    class="button"
+    [disabled]="!selected().length || action.busy()"
+    (click)="add()"
+  >
+    {{ action.busy() ? 'Wird hinzugefügt…' : 'Hinzufügen' }}
+  </button>
+</div>

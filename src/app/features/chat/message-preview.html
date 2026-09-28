@@ -88,7 +88,7 @@
           <app-icon name="thread" />
         </button>
       }
-      @if (message().own) {
+      @if (message().own && !session.isGuest()) {
         <button
           class="icon-button"
           aria-label="Weitere Nachrichtenaktionen"

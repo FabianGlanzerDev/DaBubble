@@ -13,12 +13,15 @@
     type="button"
     [attr.aria-label]="'Profil von ' + author().name"
     (click)="profile()"
+    [disabled]="!message().authorId"
   >
-    <app-avatar-image [index]="author().avatarId" [size]="70" />
+    <app-avatar-image [index]="message().authorId ? author().avatarId : null" [size]="70" />
   </button>
   <div class="body">
     <div class="meta">
-      <button class="author" type="button" (click)="profile()">{{ author().name }}</button>
+      <button class="author" type="button" (click)="profile()" [disabled]="!message().authorId">
+        {{ author().name }}
+      </button>
       <span [title]="message().createdAt | date: 'dd.MM.yyyy HH:mm'"
         >{{ message().createdAt | date: 'HH:mm' }} Uhr
         @if (message().updatedAt > message().createdAt && !message().deleted) {
@@ -28,9 +31,9 @@
     </div>
     @if (editing() && !message().deleted) {
       <form class="message-editor" (submit)="$event.preventDefault(); save()">
-        <label class="sr-only" [for]="'edit-' + message().id">Nachricht bearbeiten</label>
+        <label class="sr-only" [for]="editorId()">Nachricht bearbeiten</label>
         <textarea
-          [id]="'edit-' + message().id"
+          [id]="editorId()"
           maxlength="4000"
           [value]="text()"
           (input)="text.set($any($event.target).value)"
@@ -59,9 +62,14 @@
       </p>
     }
     @if (!message().deleted) {
-      <app-live-reactions [message]="message()" [compact]="compact()" [own]="own()" />
+      <app-live-reactions
+        [message]="message()"
+        [compact]="compact()"
+        [own]="own()"
+        [readonly]="archived()"
+      />
     }
-    @if (!message().rootId && !compact()) {
+    @if (!message().rootId && !compact() && (!archived() || replies().length)) {
       <div class="replies">
         <button type="button" (click)="nav.thread(message().id)">
           {{ replies().length ? replies().length + ' Antworten' : 'Im Thread antworten' }}
@@ -84,7 +92,7 @@
       <p class="action-error" role="alert">{{ action.error() }}</p>
     }
   </div>
-  @if (!message().deleted) {
+  @if (!message().deleted && !archived()) {
     <button
       class="touch-actions icon-button"
       type="button"

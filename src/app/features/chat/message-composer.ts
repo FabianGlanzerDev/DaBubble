@@ -12,6 +12,7 @@ import { Icon } from '../../shared/ui/icon';
 import { OverlayState } from '../../core/ui/overlay-state';
 import { channels, directMessages } from './workspace-items';
 import { AvatarImage } from '../../shared/ui/avatar-image';
+import { AuthSession } from '../../core/auth/auth-session';
 
 @Component({
   selector: 'app-message-composer',
@@ -21,6 +22,7 @@ import { AvatarImage } from '../../shared/ui/avatar-image';
   styleUrl: './message-composer.scss',
 })
 export class MessageComposer {
+  protected readonly session = inject(AuthSession);
   readonly fieldId = input.required<string>();
   readonly placeholder = input.required<string>();
   readonly reply = input(false);

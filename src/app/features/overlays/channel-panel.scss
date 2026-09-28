@@ -78,6 +78,7 @@ hr {
 @media (max-width: 767px) {
   .mobile-members {
     display: block;
+    --member-row-padding: 15px;
   }
   .mobile-members h3 {
     font-size: 24px;
@@ -109,11 +110,19 @@ hr {
     border-radius: 50%;
     width: 44px;
     height: 44px;
-    background: var(--page);
+    background: radial-gradient(circle, var(--page) 15px, transparent 16px);
+    margin-block: -7px;
     color: black;
   }
   .channel-section {
     padding: 20px;
+    margin-top: 24px;
+  }
+  .channel-section:first-child {
+    margin-top: 20px;
+  }
+  .creator {
+    font-size: 20px;
   }
   .section-heading {
     gap: 8px;

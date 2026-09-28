@@ -1,63 +1,40 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  afterRenderEffect,
+  computed,
+  inject,
+  input,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { ChatStore } from '../../core/chat/chat-store';
 import { ChatNavigation } from '../../core/chat/chat-navigation';
 import { ChatAction } from '../../core/chat/chat-action';
 import { AvatarImage } from '../../shared/ui/avatar-image';
 import { RouterLink } from '@angular/router';
 import { Icon } from '../../shared/ui/icon';
+import { MobileNavigation } from '../../core/ui/mobile-navigation';
 
 @Component({
   selector: 'app-live-search',
   imports: [AvatarImage, RouterLink, Icon],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <label class="sr-only" [for]="fieldId()">{{
-      recipient() ? 'Empfänger' : 'Devspace durchsuchen'
-    }}</label>
-    <input
-      [id]="fieldId()"
-      type="search"
-      autocomplete="off"
-      [value]="query()"
-      [placeholder]="recipient() ? 'An: #channel oder @Name' : 'Devspace durchsuchen'"
-      (input)="query.set($any($event.target).value)"
-      (keydown.escape)="query.set('')"
-    />
-    @if (!recipient()) {
-      <app-icon class="search-icon" name="search" />
-    }
-    @if (query().trim()) {
-      <div class="results" aria-label="Suchergebnisse">
-        @for (room of channels(); track room.id) {
-          <a [routerLink]="nav.path(room)" (click)="query.set('')"># {{ room.name }}</a>
-        }
-        @for (person of people(); track person.uid) {
-          <button type="button" [disabled]="action.busy()" (click)="direct(person.uid)">
-            <app-avatar-image [index]="person.avatarId" [size]="40" />{{ person.name }}
-          </button>
-        }
-        @for (result of messages(); track result.message.id) {
-          <button type="button" (click)="openMessage(result)">
-            <span
-              ><strong>{{ store.label(result.room) }}</strong
-              ><br />{{ result.message.text }}</span
-            >
-          </button>
-        }
-        @if (!channels().length && !people().length && !messages().length) {
-          <p>Keine Treffer.</p>
-        }
-        @if (action.error()) {
-          <p role="alert">{{ action.error() }}</p>
-        }
-      </div>
-    }
-  `,
+  templateUrl: './live-search.html',
   styleUrl: './live-search.scss',
 })
 export class LiveSearch {
   readonly recipient = input(false);
   readonly fieldId = input('live-search');
+  readonly mobileMenu = input(false);
+  protected readonly mobile = inject(MobileNavigation);
+  protected readonly mobileExpanded = computed(
+    () => this.mobileMenu() && this.mobile.view() === 'search',
+  );
+  private readonly field = viewChild.required<ElementRef<HTMLInputElement>>('field');
+  private readonly results = viewChild<ElementRef<HTMLElement>>('results');
+  private wasMobileExpanded = false;
   protected readonly store = inject(ChatStore);
   protected readonly nav = inject(ChatNavigation);
   protected readonly action = new ChatAction();
@@ -78,7 +55,7 @@ export class LiveSearch {
           .filter((person) => person.name.toLocaleLowerCase().includes(this.term())),
   );
   protected readonly messages = computed(() =>
-    this.recipient() || /^[@#]/.test(this.query())
+    this.recipient() || !this.term() || /^[@#]/.test(this.query())
       ? []
       : this.store
           .rooms()
@@ -91,6 +68,36 @@ export class LiveSearch {
               .map((message) => ({ room, message })),
           ),
   );
+
+  constructor() {
+    afterRenderEffect(() => this.restoreSearchFocus());
+  }
+
+  private restoreSearchFocus(): void {
+    const expanded = this.mobileExpanded();
+    if (!expanded && this.wasMobileExpanded) {
+      this.query.set('');
+      const field = this.field().nativeElement;
+      if (field.checkVisibility()) field.focus({ preventScroll: true });
+    }
+    this.wasMobileExpanded = expanded;
+  }
+
+  protected changeQuery(event: Event): void {
+    this.query.set((event.target as HTMLInputElement).value);
+    if (this.mobileMenu() && this.mobile.isMobile()) this.mobile.open('search');
+  }
+
+  protected focusResult(event: Event): void {
+    event.preventDefault();
+    this.results()?.nativeElement.querySelector<HTMLElement>('a, button:not(:disabled)')?.focus();
+  }
+
+  protected dismiss(): void {
+    this.query.set('');
+    if (this.mobileExpanded()) this.mobile.close();
+    else this.field().nativeElement.focus({ preventScroll: true });
+  }
 
   protected direct(uid: string): void {
     void this.action.run(async () => {

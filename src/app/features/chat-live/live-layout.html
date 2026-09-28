@@ -28,6 +28,7 @@
     [class.thread-collapsed]="!nav.threadId()"
     [class.has-conversation]="nav.active()"
     [class.mobile-thread-open]="!!nav.threadId()"
+    [class.mobile-search-open]="mobile.view() === 'search'"
   >
     <aside id="workspace-menu" class="sidebar panel" aria-label="Channels und Direktnachrichten">
       <h1
@@ -37,7 +38,9 @@
       >
         Arbeitsbereich
       </h1>
-      <div class="mobile-search"><app-live-search fieldId="mobile-live-search" /></div>
+      <div class="mobile-search">
+        <app-live-search fieldId="mobile-live-search" [mobileMenu]="true" />
+      </div>
       <app-live-sidebar />
       <a
         class="mobile-compose icon-button"

@@ -16,7 +16,7 @@ import { OverlayState } from '../../core/ui/overlay-state';
           [attr.aria-pressed]="reaction.mine"
           [title]="reaction.names.join(', ')"
           [attr.aria-label]="reaction.emoji + ': ' + reaction.names.join(', ')"
-          [disabled]="action.busy()"
+          [disabled]="action.busy() || readonly()"
           (click)="toggle(reaction.emoji)"
         >
           {{ reaction.emoji }} {{ reaction.names.length }}
@@ -98,6 +98,7 @@ export class LiveReactions {
   readonly message = input.required<ChatMessage>();
   readonly compact = input(false);
   readonly own = input(false);
+  readonly readonly = input(false);
   private readonly store = inject(ChatStore);
   private readonly overlay = inject(OverlayState);
   protected readonly action = new ChatAction();

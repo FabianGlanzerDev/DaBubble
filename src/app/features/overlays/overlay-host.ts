@@ -19,6 +19,7 @@ import { ReactionList } from '../chat/reaction-list';
 import { AuthSession } from '../../core/auth/auth-session';
 import { authIssue } from '../../core/auth/auth-errors';
 import { LiveDialog } from '../chat-live/live-dialog';
+import { RouterLink } from '@angular/router';
 
 const titles: Record<OverlayType, string> = {
   confirmation: 'Animationsbeispiel',
@@ -38,6 +39,7 @@ const titles: Record<OverlayType, string> = {
 @Component({
   selector: 'app-overlay-host',
   imports: [
+    RouterLink,
     Icon,
     ProfilePanel,
     ChannelPanel,
@@ -49,7 +51,7 @@ const titles: Record<OverlayType, string> = {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './overlay-host.html',
-  styleUrl: './overlay-host.scss',
+  styleUrls: ['./overlay-base.scss', './overlay-host.scss'],
 })
 export class OverlayHost {
   protected readonly session = inject(AuthSession);
@@ -59,7 +61,7 @@ export class OverlayHost {
   private readonly dialog = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
   protected readonly title = computed(() => {
     const current = this.overlay.current();
-    if (current?.live && current.type === 'channel') return 'Channel verwalten';
+    if (current?.live && current.type === 'channel') return current.title?.() ?? 'Channel';
     if (current?.live && current.type === 'reactions') return 'Reaktionen';
     return current?.type === 'channel' && current.channelId === 'office-team'
       ? 'Office-team'

@@ -1,5 +1,8 @@
 @for (channel of roots(); track channel.id) {
-  <header class="conversation-header">
+  <header
+    class="conversation-header"
+    [class.direct-header]="channel.kind === 'direct' && !compact()"
+  >
     @if (compact()) {
       <h2>
         Thread <span># {{ store.label(channel) }}</span>
@@ -18,10 +21,28 @@
         type="button"
         (click)="details()"
         aria-label="Gesprächsdetails"
+        [attr.aria-description]="
+          channel.kind === 'direct' && !channel.archived
+            ? store.session.presence.label(partner().uid)
+            : null
+        "
+        [disabled]="channel.archived === true"
       >
-        <app-icon [name]="channel.kind === 'channel' ? 'hash' : 'user'" />
-        <h1 data-page-heading tabindex="-1">{{ store.label(channel) }}</h1>
-        <app-icon name="chevron" />
+        @if (channel.kind === 'channel') {
+          <app-icon name="hash" />
+        } @else {
+          <app-avatar-image
+            [index]="channel.archived ? null : partner().avatarId"
+            [size]="50"
+            [uid]="channel.archived ? null : partner().uid"
+          />
+        }
+        <h1 data-page-heading tabindex="-1">
+          {{ store.label(channel) }}{{ selfConversation() && !channel.archived ? ' (Du)' : '' }}
+        </h1>
+        @if (channel.kind === 'channel' && !channel.archived) {
+          <app-icon name="chevron" />
+        }
       </button>
       @if (channel.kind === 'channel') {
         <div class="members">
@@ -74,21 +95,65 @@
       }
       <app-live-message [message]="message" [compact]="compact()" />
     } @empty {
-      <p class="empty-conversation">
-        {{
-          compact()
-            ? 'Noch keine Antworten.'
-            : 'Hier beginnt euer Gespräch. Schreibe die erste Nachricht.'
-        }}
-      </p>
+      @if (compact() || channel.archived) {
+        <p class="empty-conversation">
+          {{ compact() ? 'Noch keine Antworten.' : 'Keine verbliebenen Nachrichten.' }}
+        </p>
+      } @else {
+        <section class="empty-conversation" aria-label="Gesprächsbeginn">
+          <button class="empty-person" type="button" (click)="details()">
+            @if (channel.kind === 'direct') {
+              <app-avatar-image [index]="partner().avatarId" [size]="100" />
+            }
+            <strong
+              >{{ channel.kind === 'channel' ? '# ' : '' }}{{ store.label(channel)
+              }}{{ selfConversation() ? ' (Du)' : '' }}</strong
+            >
+          </button>
+          @if (channel.kind === 'channel') {
+            <p>
+              Das ist der Anfang des Channels
+              <button class="text-button" type="button" (click)="details()">
+                # {{ channel.name }}</button
+              >.
+            </p>
+          } @else if (selfConversation()) {
+            <p>
+              <strong>Dieser Raum ist nur für dich da.</strong> Mache dir Notizen, liste deine
+              To-dos auf oder bewahre Links griffbereit auf. Du kannst hier auch gerne Dinge mit dir
+              selbst besprechen.
+            </p>
+          } @else {
+            <p>
+              Diese Unterhaltung findet nur zwischen
+              <button class="text-button" type="button" (click)="details()">
+                &#64;{{ partner().name }}
+              </button>
+              und dir statt.
+            </p>
+          }
+        </section>
+      }
     }
   </div>
-  @if (!compact() || parent()) {
+  @if (channel.archived) {
+    <p class="archive-note" role="note">
+      Archiv nach Kontolöschung. Die verbliebenen Beiträge sind nur lesbar.
+    </p>
+  } @else if (!compact() || parent()) {
     @for (id of [root()]; track id) {
       <app-live-composer
         [roomId]="channel.id"
         [rootId]="id"
         [fieldId]="compact() ? 'thread-message' : 'chat-message'"
+        [placeholder]="
+          compact()
+            ? 'Antworten…'
+            : 'Nachricht an ' +
+              (channel.kind === 'channel' ? '#' : '') +
+              store.label(channel) +
+              (selfConversation() ? ' (Du)' : '')
+        "
       />
     }
   }

@@ -25,7 +25,19 @@
           <app-icon name="close" />
         </button>
       </header>
-      @if (current.live) {
+      @if (
+        session.isGuest() &&
+        !current.live &&
+        !current.account &&
+        ['profile-edit', 'avatar', 'channel-create', 'channel-people', 'add-members'].includes(
+          current.type
+        )
+      ) {
+        <p>
+          Designvorschau · Änderungen werden hier nicht gespeichert. Öffne dafür den echten Chat.
+        </p>
+        <a routerLink="/chat" (click)="overlay.close()">Zum Chat</a>
+      } @else if (current.live) {
         @defer (when current.live) {
           <app-live-dialog />
         }
@@ -39,21 +51,42 @@
             >
               <app-icon class="mobile-setting-icon" name="user-circle" />Profil
             </button>
-            <button
-              class="settings-option"
-              type="button"
-              [disabled]="!current.account || !session.user() || session.busy()"
-              (click)="logout()"
-            >
-              <app-icon class="mobile-setting-icon" name="logout" />{{
-                session.pending() === 'logout' ? 'Abmeldung läuft…' : 'Log out'
-              }}
-            </button>
-            @if (!current.account) {
-              <p class="overlay-note">Keine aktive Anmeldung in dieser Designvorschau.</p>
-            }
-            @if (logoutError()) {
-              <p class="action-error" role="alert">{{ logoutError() }}</p>
+            @if (session.isGuest()) {
+              <a class="settings-option" routerLink="/zugang/gast" (click)="overlay.close()"
+                ><app-icon class="mobile-setting-icon" name="logout" />Log out</a
+              >
+            } @else {
+              <button
+                class="settings-option"
+                type="button"
+                [disabled]="!current.account || !session.user() || session.busy()"
+                (click)="logout()"
+              >
+                <app-icon class="mobile-setting-icon" name="logout" />{{
+                  session.pending() === 'logout' ? 'Abmeldung läuft…' : 'Log out'
+                }}
+              </button>
+              @if (!current.account) {
+                <p class="overlay-note">Keine aktive Anmeldung in dieser Designvorschau.</p>
+                <a routerLink="/anmeldung" class="text-button" (click)="overlay.close()"
+                  >Zur Anmeldung</a
+                >
+              }
+              @if (
+                session.googleAvailable() &&
+                current.account &&
+                !session.user()?.providerIds?.includes('google.com')
+              ) {
+                <a
+                  class="settings-option"
+                  routerLink="/zugang/verknuepfen"
+                  (click)="overlay.close()"
+                  >Google verknüpfen</a
+                >
+              }
+              @if (logoutError()) {
+                <p class="action-error" role="alert">{{ logoutError() }}</p>
+              }
             }
           }
           @case ('profile') {

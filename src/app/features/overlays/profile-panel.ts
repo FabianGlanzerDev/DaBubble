@@ -7,10 +7,11 @@ import { findPerson } from '../chat/workspace-people';
 import { AuthSession } from '../../core/auth/auth-session';
 import { ProfileDraftState } from '../../core/auth/profile-draft';
 import { authIssue } from '../../core/auth/auth-errors';
+import { PresenceLabel } from '../../shared/ui/presence-label';
 
 @Component({
   selector: 'app-profile-panel',
-  imports: [RouterLink, AvatarImage, Icon],
+  imports: [RouterLink, AvatarImage, Icon, PresenceLabel],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './profile-panel.html',
   styleUrl: './profile-panel.scss',
@@ -26,7 +27,7 @@ export class ProfilePanel {
           id: this.session.user()?.uid ?? '',
           name: this.session.profile()?.name ?? '',
           avatar: this.session.profile()?.avatarId ?? 0,
-          email: this.session.user()?.email ?? '',
+          email: this.session.user()?.email ?? 'Keine E-Mail-Adresse (Gastkonto)',
           away: false,
         }
       : findPerson(this.overlay.current()?.personId),

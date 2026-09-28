@@ -1,0 +1,156 @@
+<form novalidate (submit)="$event.preventDefault(); save()" [attr.aria-busy]="action.busy()">
+  @if (room(); as channel) {
+    <section class="channel-section" [class.editing]="editing() === 'name'">
+      <div class="section-heading">
+        <h3>Channel-Name</h3>
+        @if (editing() === 'name') {
+          <button
+            class="text-button"
+            type="submit"
+            [disabled]="action.busy() || !!validation()"
+            aria-label="Speichern: Channel-Name"
+          >
+            <span class="edit-label">Speichern</span
+            ><app-icon class="mobile-edit" name="check-circle" />
+          </button>
+        } @else {
+          <button
+            class="text-button"
+            type="button"
+            [disabled]="action.busy()"
+            (click)="startEdit('name')"
+            aria-label="Bearbeiten: Channel-Name"
+          >
+            <span class="edit-label">Bearbeiten</span><app-icon class="mobile-edit" name="pencil" />
+          </button>
+        }
+      </div>
+      @if (editing() === 'name') {
+        <label class="sr-only" for="channel-name">Channel-Name</label>
+        <ng-container [ngTemplateOutlet]="nameField" />
+      } @else {
+        <p class="channel-label"><app-icon name="hash" />{{ channel.name }}</p>
+      }
+    </section>
+    <section class="channel-section" [class.editing]="editing() === 'description'">
+      <div class="section-heading">
+        <h3>Beschreibung</h3>
+        @if (editing() === 'description') {
+          <button
+            class="text-button"
+            type="button"
+            [disabled]="action.busy()"
+            (click)="saveField('description')"
+            aria-label="Speichern: Beschreibung"
+          >
+            <span class="edit-label">Speichern</span
+            ><app-icon class="mobile-edit" name="check-circle" />
+          </button>
+        } @else {
+          <button
+            class="text-button"
+            type="button"
+            [disabled]="action.busy()"
+            (click)="startEdit('description')"
+            aria-label="Bearbeiten: Beschreibung"
+          >
+            <span class="edit-label">Bearbeiten</span><app-icon class="mobile-edit" name="pencil" />
+          </button>
+        }
+      </div>
+      @if (editing() === 'description') {
+        <label class="sr-only" for="channel-description">Beschreibung (optional)</label>
+        <textarea
+          #descriptionInput
+          id="channel-description"
+          class="overlay-input"
+          [value]="description()"
+          (input)="description.set($any($event.target).value); descriptionEdited.set(true)"
+          rows="3"
+          maxlength="1000"
+          [disabled]="action.busy()"
+        ></textarea>
+      } @else {
+        <p class="description">{{ channel.description || 'Noch keine Beschreibung.' }}</p>
+      }
+      <hr />
+      <h3>Erstellt von</h3>
+      <button class="creator text-button" type="button" (click)="creator()">
+        {{ store.person(channel.createdBy).name }}
+      </button>
+    </section>
+    <section class="channel-section mobile-members">
+      <h3>Mitglieder</h3>
+      <app-live-member-list [room]="channel" />
+    </section>
+  } @else {
+    <p class="channel-description">
+      Channels dienen deinem Team zur Kommunikation. Am besten sollten sie themenbezogen sein,
+      #marketing zum Beispiel.
+    </p>
+    <label class="field-label" for="channel-name">Channel-Name</label>
+    <ng-container [ngTemplateOutlet]="nameField" />
+    <label class="field-label" for="channel-description"
+      >Beschreibung <span>(optional)</span></label
+    >
+    <input
+      id="channel-description"
+      class="overlay-input"
+      placeholder="Dein Text hier"
+      [value]="description()"
+      (input)="description.set($any($event.target).value); descriptionEdited.set(true)"
+      maxlength="1000"
+      [disabled]="action.busy()"
+    />
+  }
+  <p id="channel-error" class="action-error" role="alert" [hidden]="!error()">
+    {{ error() }}
+  </p>
+  @if (!room()) {
+    <div class="actions end">
+      <button class="button" type="submit" [disabled]="action.busy() || !!validation()">
+        {{ action.busy() ? 'Wird erstellt…' : 'Erstellen' }}
+      </button>
+    </div>
+  } @else if (confirmLeave()) {
+    <p>Du verlierst den Zugriff auf diesen Channel und seine Nachrichten.</p>
+    <div class="actions end">
+      <button class="button secondary" type="button" (click)="confirmLeave.set(false)">
+        Abbrechen
+      </button>
+      <button class="button" type="button" [disabled]="action.busy()" (click)="leave()">
+        {{ action.busy() ? 'Channel wird verlassen…' : 'Austritt bestätigen' }}
+      </button>
+    </div>
+  } @else {
+    <div class="actions end">
+      <button
+        type="button"
+        class="button"
+        [disabled]="action.busy()"
+        (click)="confirmLeave.set(true)"
+      >
+        Channel verlassen
+      </button>
+    </div>
+  }
+</form>
+<ng-template #nameField>
+  <div class="with-icon">
+    <app-icon name="hash" />
+    <input
+      #nameInput
+      id="channel-name"
+      class="overlay-input"
+      placeholder="z.B. Kooperationsprojekte"
+      [value]="name()"
+      (input)="name.set($any($event.target).value); nameEdited.set(true)"
+      (blur)="nameTouched.set(true)"
+      maxlength="80"
+      required
+      [disabled]="action.busy()"
+      [attr.aria-invalid]="nameTouched() && !!validation()"
+      aria-describedby="channel-error"
+    />
+  </div>
+</ng-template>

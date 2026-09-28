@@ -36,7 +36,9 @@
   >
     <app-avatar-image [index]="draftAvatar()" [size]="200" />
   </button>
-  <label class="name-label" for="profile-name"><app-icon name="user" />Vollständiger Name</label>
+  <label class="name-label" for="profile-name"
+    ><app-icon name="user-circle" />Vollständiger Name</label
+  >
   <input
     class="overlay-input"
     id="profile-name"
@@ -78,11 +80,9 @@
     }
   </div>
   @if (!realAccount()) {
-    <p class="presence" [class.away]="person().away">
-      <span></span>{{ person().away ? 'Abwesend' : 'Aktiv' }}<small> · Designbeispiel</small>
-    </p>
+    <p class="presence unavailable">Kein Live-Status · Designbeispiel</p>
   } @else {
-    <p>Angemeldet</p>
+    <app-presence-label class="presence" [uid]="person().id" />
   }
   <div class="email">
     <h4><app-icon name="mail" />E-Mail-Adresse</h4>

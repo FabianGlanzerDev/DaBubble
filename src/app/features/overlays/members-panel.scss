@@ -1,5 +1,5 @@
 .members-list {
-  margin: 20px 0;
+  margin: 12px 0 20px;
   padding: 0;
   list-style: none;
 }
@@ -11,9 +11,12 @@
   text-align: left;
   border: 0;
   border-radius: 30px;
-  padding: 8px 12px;
+  padding: 8px var(--member-row-padding, 20px);
   background: transparent;
   font-size: 18px;
+}
+.members-list li + li {
+  margin-top: 5px;
 }
 .members-list button:hover {
   background: var(--accent-soft);
@@ -21,14 +24,26 @@
 }
 .members-list span {
   overflow-wrap: anywhere;
+  min-width: 0;
+}
+.members-list app-avatar-image {
+  flex-shrink: 0;
+}
+.add-members app-icon {
+  flex-shrink: 0;
+  background: var(--page);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  padding: 4px;
 }
 .add-members {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 25px;
   border: 0;
   border-radius: 30px;
-  padding: 12px;
+  padding: 12px 28px;
   background: transparent;
   font-size: 18px;
   text-align: left;
@@ -82,9 +97,16 @@
   padding: 8px;
 }
 @media (max-width: 767px) {
+  .members-list {
+    margin-top: 16px;
+  }
+  .add-members {
+    gap: 15px;
+    padding-inline: var(--member-row-padding, 28px);
+  }
   .members-list button,
   .add-members,
   .radio {
-    font-size: 16px;
+    font-size: 18px;
   }
 }

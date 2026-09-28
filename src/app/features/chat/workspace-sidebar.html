@@ -70,11 +70,9 @@
             routerLinkActive="active"
             ariaCurrentWhenActive="page"
           >
-            <app-avatar-image
-              [index]="person.avatar ?? null"
-              [size]="50"
-              [presence]="person.id === 'elise-roth' ? 'away' : 'active'"
-            /><span>{{ person.label }}</span>
+            <app-avatar-image [index]="person.avatar ?? null" [size]="50" /><span>{{
+              person.label
+            }}</span>
           </a>
         </li>
       }

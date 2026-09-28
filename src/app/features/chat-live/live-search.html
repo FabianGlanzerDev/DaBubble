@@ -1,0 +1,81 @@
+<div
+  class="search-wrapper"
+  [class.mobile-expanded]="mobileExpanded()"
+  (keydown.escape)="dismiss()"
+  tabindex="-1"
+>
+  @if (mobileExpanded()) {
+    <header class="search-heading">
+      <h1>Suche</h1>
+      <button class="icon-button" type="button" aria-label="Suche schließen" (click)="dismiss()">
+        <app-icon name="close" />
+      </button>
+    </header>
+  }
+  <div class="search-field">
+    <label class="sr-only" [for]="fieldId()">{{
+      recipient() ? 'Empfänger' : 'Devspace durchsuchen'
+    }}</label>
+    <input
+      #field
+      [id]="fieldId()"
+      type="search"
+      autocomplete="off"
+      [value]="query()"
+      [placeholder]="
+        recipient() ? 'An: #channel oder @Name' : mobileMenu() ? 'Gehe zu…' : 'Devspace durchsuchen'
+      "
+      (input)="changeQuery($event)"
+      (keydown.arrowdown)="focusResult($event)"
+      [attr.aria-controls]="fieldId() + '-results'"
+      [attr.aria-expanded]="!!query().trim() || mobileExpanded()"
+    />
+    @if (!recipient()) {
+      <app-icon class="search-icon" name="search" />
+    }
+  </div>
+  @if (query().trim() || mobileExpanded()) {
+    <div
+      #results
+      class="results"
+      [class.channel-results]="query().startsWith('#')"
+      [id]="fieldId() + '-results'"
+      aria-label="Suchergebnisse"
+    >
+      @for (room of channels(); track room.id) {
+        <a
+          [routerLink]="nav.path(room)"
+          [attr.aria-label]="'# ' + room.name"
+          (click)="query.set('')"
+          ><app-icon name="hash" /><span>{{ room.name }}</span></a
+        >
+      }
+      @for (person of people(); track person.uid) {
+        <button
+          type="button"
+          [disabled]="action.busy()"
+          (click)="direct(person.uid)"
+          [attr.aria-description]="store.session.presence.label(person.uid)"
+        >
+          <app-avatar-image [index]="person.avatarId" [size]="40" [uid]="person.uid" />{{
+            person.name
+          }}
+        </button>
+      }
+      @for (result of messages(); track result.message.id) {
+        <button type="button" (click)="openMessage(result)">
+          <span
+            ><strong>{{ store.label(result.room) }}</strong
+            ><br />{{ result.message.text }}</span
+          >
+        </button>
+      }
+      @if (!channels().length && !people().length && !messages().length) {
+        <p>Keine Treffer.</p>
+      }
+      @if (action.error()) {
+        <p role="alert">{{ action.error() }}</p>
+      }
+    </div>
+  }
+</div>

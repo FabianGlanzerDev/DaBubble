@@ -29,6 +29,9 @@ export class LiveMessage {
   protected readonly own = computed(
     () => this.message().authorId === this.store.session.user()?.uid,
   );
+  protected readonly archived = computed(
+    () => this.store.rooms().find((room) => room.id === this.message().roomId)?.archived === true,
+  );
   protected readonly replies = computed(() =>
     (this.store.messages()[this.message().roomId] ?? []).filter(
       (item) => item.rootId === this.message().id,
@@ -38,6 +41,9 @@ export class LiveMessage {
   protected readonly removing = signal(false);
   protected readonly pinned = signal(false);
   protected readonly text = signal('');
+  protected readonly editorId = computed(
+    () => 'edit-' + (this.compact() ? 'thread-' : 'main-') + this.message().id,
+  );
 
   protected profile(): void {
     this.overlay.open('profile', { live: true, personId: this.message().authorId });

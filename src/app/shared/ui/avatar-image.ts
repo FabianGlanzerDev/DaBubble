@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { PresenceState } from '../../core/presence/presence-state';
 
 /** Original SVG assets supplied with the accepted comparison project. */
 @Component({
@@ -19,8 +20,8 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
         [height]="size()"
         alt=""
     /></picture>
-    @if (presence()) {
-      <span class="presence" [class.away]="presence() === 'away'"></span>
+    @if (uid()) {
+      <span class="presence" [attr.data-presence]="status()" [title]="state.label(uid()!)"></span>
     }`,
   styles: `
     :host {
@@ -36,10 +37,16 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
       height: 14px;
       border: 2px solid white;
       border-radius: 50%;
-      background: #92c83e;
+      background: white;
+      box-shadow: inset 0 0 0 1px #686868;
     }
-    .presence.away {
+    .presence[data-presence='online'] {
+      background: #92c83e;
+      box-shadow: none;
+    }
+    .presence[data-presence='offline'] {
       background: #686868;
+      box-shadow: none;
     }
     img {
       display: block;
@@ -49,7 +56,9 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 })
 export class AvatarImage {
   protected readonly assetOrder = [1, 2, 6, 3, 5, 4] as const;
+  protected readonly state = inject(PresenceState);
+  protected readonly status = computed(() => this.state.status(this.uid() ?? ''));
   readonly index = input<number | null>(null);
   readonly size = input(64);
-  readonly presence = input<'active' | 'away' | null>(null);
+  readonly uid = input<string | null>(null);
 }

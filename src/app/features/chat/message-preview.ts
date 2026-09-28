@@ -12,6 +12,7 @@ import { Icon } from '../../shared/ui/icon';
 import { OverlayState } from '../../core/ui/overlay-state';
 import { examplePeople } from './workspace-people';
 import { ReactionList } from './reaction-list';
+import { AuthSession } from '../../core/auth/auth-session';
 
 export interface PreviewMessage {
   readonly author: string;
@@ -36,6 +37,7 @@ export interface PreviewMessage {
   styleUrl: './message-preview.scss',
 })
 export class MessagePreview {
+  protected readonly session = inject(AuthSession);
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   protected readonly actionsPinned = signal(false);
   readonly message = input.required<PreviewMessage>();

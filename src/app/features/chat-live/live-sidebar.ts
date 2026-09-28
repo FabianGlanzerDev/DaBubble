@@ -38,7 +38,7 @@ import { AvatarImage } from '../../shared/ui/avatar-image';
       <ul id="live-channels" [class.folded]="!channelsOpen()">
         @for (room of store.channels(); track room.id) {
           <li>
-            <a [routerLink]="nav.path(room)" routerLinkActive="active"
+            <a [routerLink]="nav.path(room)" routerLinkActive="active" ariaCurrentWhenActive="page"
               ><app-icon name="hash" /><span>{{ room.name }}</span></a
             >
           </li>
@@ -63,9 +63,16 @@ import { AvatarImage } from '../../shared/ui/avatar-image';
       <ul id="live-direct" [class.folded]="!directOpen()">
         @for (room of directs(); track room.id) {
           <li>
-            <a [routerLink]="nav.path(room)" routerLinkActive="active"
+            <a
+              [routerLink]="nav.path(room)"
+              routerLinkActive="active"
+              ariaCurrentWhenActive="page"
+              [attr.aria-description]="
+                room.archived ? null : store.session.presence.label(partner(room.memberIds))
+              "
               ><app-avatar-image
-                [index]="store.person(partner(room.memberIds)).avatarId"
+                [index]="room.archived ? null : store.person(partner(room.memberIds)).avatarId"
+                [uid]="room.archived ? null : partner(room.memberIds)"
                 [size]="50"
               /><span>{{ store.label(room) }}</span></a
             >

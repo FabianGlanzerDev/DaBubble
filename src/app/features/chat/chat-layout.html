@@ -83,31 +83,38 @@
       />
     </aside>
   </main>
-  <footer class="preview-banner">
-    <span class="mobile-notice">{{
-      basePath === '/chat' ? 'Angemeldet · Chat-Beispiele' : 'Designvorschau · kein Versand'
-    }}</span>
-    <p>
-      @if (basePath === '/chat') {
-        <strong>Angemeldet</strong> · Benutzerprofil verbunden. Chat-Inhalte bleiben
-        Designbeispiele; Nachrichten und Channels werden noch nicht gespeichert.
-      } @else {
-        <strong>Layout-Vorschau</strong> · Figma-Beispiele und lokale Entwürfe. Versand und
-        Speichern ausstehend.
+  @if (session.isGuest()) {
+    <footer class="guest-banner" aria-label="Gastzugang">
+      <strong>Designvorschau · Kein Versand</strong>
+      <a routerLink="/chat">Zurück zum echten Chat</a>
+    </footer>
+  } @else {
+    <footer class="preview-banner">
+      <span class="mobile-notice">{{
+        basePath === '/chat' ? 'Angemeldet · Chat-Beispiele' : 'Designvorschau · kein Versand'
+      }}</span>
+      <p>
+        @if (basePath === '/chat') {
+          <strong>Angemeldet</strong> · Benutzerprofil verbunden. Chat-Inhalte bleiben
+          Designbeispiele; Nachrichten und Channels werden noch nicht gespeichert.
+        } @else {
+          <strong>Layout-Vorschau</strong> · Figma-Beispiele und lokale Entwürfe. Versand und
+          Speichern ausstehend.
+        }
+      </p>
+      <a routerLink="/anmeldung">Zur Anmeldung</a>
+      @if (hasThread()) {
+        <button
+          #threadSwitch
+          class="thread-switch"
+          type="button"
+          [attr.aria-expanded]="preview.threadOpen()"
+          aria-controls="workspace-thread"
+          (click)="preview.threadOpen.set(!preview.threadOpen())"
+        >
+          <app-icon name="thread" />Thread {{ preview.threadOpen() ? 'ausblenden' : 'anzeigen' }}
+        </button>
       }
-    </p>
-    <a routerLink="/anmeldung">Zur Anmeldung</a>
-    @if (hasThread()) {
-      <button
-        #threadSwitch
-        class="thread-switch"
-        type="button"
-        [attr.aria-expanded]="preview.threadOpen()"
-        aria-controls="workspace-thread"
-        (click)="preview.threadOpen.set(!preview.threadOpen())"
-      >
-        <app-icon name="thread" />Thread {{ preview.threadOpen() ? 'ausblenden' : 'anzeigen' }}
-      </button>
-    }
-  </footer>
+    </footer>
+  }
 </div>

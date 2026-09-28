@@ -68,6 +68,7 @@ textarea {
 .mentions button {
   display: block;
   width: 100%;
+  overflow-wrap: anywhere;
   text-align: left;
   border: 0;
   background: white;

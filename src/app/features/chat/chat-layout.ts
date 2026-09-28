@@ -35,7 +35,7 @@ import { WorkspaceSearch } from './workspace-search';
   providers: [WorkspacePreview],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './chat-layout.html',
-  styleUrl: './chat-layout.scss',
+  styleUrls: ['./chat-layout.scss', './guest-banner.scss'],
 })
 export class ChatLayout {
   protected readonly session = inject(AuthSession);

@@ -250,20 +250,20 @@
     background: var(--accent-hover);
   }
   .preview-banner {
-    min-height: 36px;
-    padding: 0 16px;
-    gap: 8px;
-    font-size: 11px;
-    background: var(--page);
+    position: absolute;
+    top: 56px;
+    left: 98px;
+    right: 76px;
+    min-height: 0;
+    padding: 0;
+    font-size: 10px;
+    pointer-events: none;
   }
   .preview-banner p {
     display: none;
   }
   .preview-banner a {
-    margin-left: auto;
-    min-height: 44px;
-    display: flex;
-    align-items: center;
+    display: none;
   }
   .mobile-notice {
     display: inline;

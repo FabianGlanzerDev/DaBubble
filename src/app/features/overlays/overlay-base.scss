@@ -1,0 +1,47 @@
+dialog {
+  width: 500px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 30px;
+  background: white;
+  color: var(--text);
+  box-shadow: 0 6px 10px #0003;
+  overflow-y: auto;
+}
+.overlay-body {
+  padding: 40px;
+}
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+h2 {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  margin: 0;
+  font-size: 24px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+header .icon-button {
+  color: var(--text);
+}
+[data-type='channel'] h2 {
+  gap: 10px;
+}
+[data-type='channel'] h2 app-icon {
+  width: 32px;
+  height: 32px;
+}
+@media (max-width: 767px) {
+  [data-type='channel'] h2 app-icon {
+    width: 24px;
+    height: 24px;
+  }
+}

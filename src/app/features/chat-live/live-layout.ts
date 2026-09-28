@@ -8,6 +8,7 @@ import { LiveHeader } from './live-header';
 import { LiveSidebar } from './live-sidebar';
 import { LiveSearch } from './live-search';
 import { LiveConversation } from './live-conversation';
+import { MobileNavigation } from '../../core/ui/mobile-navigation';
 
 @Component({
   selector: 'app-live-layout',
@@ -28,5 +29,6 @@ import { LiveConversation } from './live-conversation';
 export class LiveLayout {
   protected readonly store = inject(ChatStore);
   protected readonly nav = inject(ChatNavigation);
+  protected readonly mobile = inject(MobileNavigation);
   protected readonly menuOpen = signal(true);
 }

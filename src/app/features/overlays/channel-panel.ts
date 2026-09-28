@@ -3,6 +3,7 @@ import { OverlayState } from '../../core/ui/overlay-state';
 import { channels } from '../chat/workspace-items';
 import { Icon } from '../../shared/ui/icon';
 import { MembersPanel } from './members-panel';
+import { AuthSession } from '../../core/auth/auth-session';
 
 @Component({
   selector: 'app-channel-panel',
@@ -12,6 +13,7 @@ import { MembersPanel } from './members-panel';
   styleUrl: './channel-panel.scss',
 })
 export class ChannelPanel {
+  protected readonly session = inject(AuthSession);
   protected readonly overlay = inject(OverlayState);
   protected readonly creating = computed(() => this.overlay.current()?.type === 'channel-create');
   protected readonly label = computed(

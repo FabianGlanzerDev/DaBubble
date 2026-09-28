@@ -1,0 +1,17 @@
+.guest-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0 24px;
+  flex-shrink: 0;
+  padding: 4px 16px;
+  background: var(--page);
+  font-size: 14px;
+  text-align: center;
+}
+.guest-banner a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}

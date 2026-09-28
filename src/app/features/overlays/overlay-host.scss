@@ -1,16 +1,3 @@
-dialog {
-  width: 500px;
-  max-width: calc(100vw - 32px);
-  max-height: calc(100dvh - 32px);
-  margin: auto;
-  padding: 0;
-  border: 0;
-  border-radius: 30px;
-  background: white;
-  color: var(--text);
-  box-shadow: 0 6px 10px #0003;
-  overflow-y: auto;
-}
 dialog[open] {
   animation: dialog-in 200ms ease-out both;
 }
@@ -23,25 +10,6 @@ dialog::backdrop {
 }
 dialog.closing::backdrop {
   animation: backdrop-out 200ms forwards;
-}
-.overlay-body {
-  padding: 40px;
-}
-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
-h2 {
-  display: flex;
-  gap: 15px;
-  align-items: center;
-  margin: 0;
-  font-size: 24px;
-}
-header .icon-button {
-  color: var(--text);
 }
 [data-type='channel'],
 [data-type='channel-create'] {
@@ -67,9 +35,9 @@ header .icon-button {
 [data-type='settings'] .overlay-body {
   padding: 20px 30px 12px;
 }
-[data-type='members'],
-[data-type='add-members'] {
-  margin: 210px 40px auto auto;
+[data-type$='members'] {
+  margin: min(210px, 25dvh) 40px auto auto;
+  max-height: calc(100dvh - min(210px, 25dvh) - 32px);
   border-top-right-radius: 0;
 }
 [data-type='emoji'] {
@@ -123,10 +91,6 @@ header .icon-button {
     opacity: 0;
     transform: translateY(12px) scale(0.98);
   }
-  to {
-    opacity: 1;
-    transform: none;
-  }
 }
 @keyframes dialog-out {
   to {
@@ -150,16 +114,16 @@ header .icon-button {
 @media (max-width: 767px) {
   dialog,
   [data-type='settings'],
-  [data-type='members'],
-  [data-type='add-members'] {
+  [data-type$='members'] {
     margin: auto;
+    max-height: calc(100dvh - 32px);
     border-radius: 30px;
   }
   .overlay-body {
     padding: 32px 20px;
   }
   h2 {
-    font-size: clamp(18px, 5vw, 22px);
+    font-size: clamp(18px, 5.7vw, 24px);
     gap: 8px;
   }
   header {
@@ -185,11 +149,17 @@ header .icon-button {
   }
   [data-type='channel'] header {
     margin-inline: -16px;
-    padding: 30px 16px 12px;
+    padding: 38px 16px 8px;
     box-shadow: 0 3px 5px #0000000d;
   }
   [data-type='channel'] h2 {
     font-size: 20px;
+  }
+  [data-type='members'] .overlay-body {
+    padding: 16px 16px 24px;
+  }
+  [data-type='add-members'] .overlay-body {
+    padding-bottom: 100px;
   }
   [data-type='profile'] .overlay-body,
   [data-type='profile-edit'] .overlay-body {
@@ -263,10 +233,6 @@ header .icon-button {
   from {
     transform: translateY(100%);
     opacity: 0;
-  }
-  to {
-    transform: none;
-    opacity: 1;
   }
 }
 @keyframes sheet-out {

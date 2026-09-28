@@ -23,6 +23,7 @@ export interface OverlayContext {
   readonly personId?: string;
   readonly channelId?: string;
   readonly draftChannelName?: string;
+  readonly title?: () => string;
   readonly onEmoji?: (emoji: string) => void;
   readonly kind?: 'account' | 'email' | 'signin';
   readonly anchor?: { readonly x: number; readonly y: number };

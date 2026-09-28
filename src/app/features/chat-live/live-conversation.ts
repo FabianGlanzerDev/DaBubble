@@ -34,6 +34,14 @@ export class LiveConversation {
     this.store.rooms().find((room) => room.id === this.nav.roomId()),
   );
   protected readonly roots = computed(() => (this.room() ? [this.room()!] : []));
+  protected readonly partner = computed(() => {
+    const room = this.room();
+    const uid = room?.memberIds.find((id) => id !== this.store.session.user()?.uid);
+    return this.store.person(uid ?? room?.memberIds[0] ?? '');
+  });
+  protected readonly selfConversation = computed(
+    () => this.room()?.kind === 'direct' && this.room()?.memberIds.length === 1,
+  );
   protected readonly root = computed(() => (this.compact() ? this.nav.threadId() : ''));
   private readonly all = computed(() => this.store.messages()[this.nav.roomId()] ?? []);
   protected readonly parent = computed(() =>
@@ -53,12 +61,11 @@ export class LiveConversation {
   protected details(): void {
     const room = this.room();
     if (!room) return;
-    const uid =
-      room.memberIds.find((id) => id !== this.store.session.user()?.uid) ?? room.memberIds[0];
     this.overlay.open(room.kind === 'channel' ? 'channel' : 'profile', {
       live: true,
       channelId: room.id,
-      personId: uid,
+      title: () => this.room()?.name ?? 'Channel',
+      personId: this.partner().uid,
     });
   }
 

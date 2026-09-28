@@ -1,0 +1,19 @@
+.channel-section p,
+.creator {
+  overflow-wrap: anywhere;
+}
+.channel-label app-icon {
+  flex-shrink: 0;
+}
+.description {
+  white-space: pre-wrap;
+}
+.actions.end {
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+@media (max-width: 374px) {
+  .channel-section {
+    padding: 16px;
+  }
+}

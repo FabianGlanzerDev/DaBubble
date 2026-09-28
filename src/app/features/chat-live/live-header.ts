@@ -29,12 +29,18 @@ import { LiveSearch } from './live-search';
       type="button"
       (click)="overlay.open('settings', { account: true })"
       [attr.aria-label]="'Profilmenü für ' + (session.profile()?.name ?? 'Mein Konto') + ' öffnen'"
+      [attr.aria-description]="session.presence.label(session.user()?.uid ?? '')"
       aria-haspopup="dialog"
     >
       <span>{{ session.profile()?.name ?? 'Mein Konto' }}</span>
-      <app-avatar-image [index]="session.profile()?.avatarId ?? null" [size]="70" /><app-icon
-        name="chevron"
-      />
+      @if (session.isGuest()) {
+        <small class="guest-label" aria-label="Gastkonto">Gast</small>
+      }
+      <app-avatar-image
+        [index]="session.profile()?.avatarId ?? null"
+        [size]="70"
+        [uid]="session.user()?.uid ?? null"
+      /><app-icon name="chevron" />
     </button>
   </header>`,
   styleUrls: ['../chat/workspace-header.scss', './live-header.scss'],

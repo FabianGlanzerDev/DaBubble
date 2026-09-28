@@ -6,6 +6,7 @@
     #field
     [id]="fieldId()"
     rows="2"
+    [disabled]="session.isGuest()"
     [value]="draft()"
     (input)="updateDraft(field.value)"
     (keydown.escape)="mentionsOpen.set(false)"
@@ -13,11 +14,17 @@
     [attr.aria-describedby]="fieldId() + '-note'"
   ></textarea>
   <div class="tools">
-    <button class="icon-button" (click)="openEmoji()" aria-label="Emoji in Entwurf einfügen">
+    <button
+      class="icon-button"
+      [disabled]="session.isGuest()"
+      (click)="openEmoji()"
+      aria-label="Emoji in Entwurf einfügen"
+    >
       <app-icon name="smile" />
     </button>
     <button
       class="icon-button"
+      [disabled]="session.isGuest()"
       (click)="mentionsOpen.set(!mentionsOpen())"
       [attr.aria-expanded]="mentionsOpen()"
       [attr.aria-controls]="fieldId() + '-mentions'"
@@ -25,7 +32,9 @@
     >
       <app-icon name="at" />
     </button>
-    <span class="draft-note" [id]="fieldId() + '-note'">Lokaler Entwurf · Versand ausstehend</span>
+    <span class="draft-note" [id]="fieldId() + '-note'">{{
+      session.isGuest() ? 'Designvorschau · Kein Versand' : 'Lokaler Entwurf · Versand ausstehend'
+    }}</span>
     <button
       class="icon-button send"
       disabled

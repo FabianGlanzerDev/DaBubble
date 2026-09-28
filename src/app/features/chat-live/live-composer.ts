@@ -31,7 +31,7 @@ import { Icon } from '../../shared/ui/icon';
       [id]="fieldId()"
       rows="2"
       maxlength="4000"
-      [placeholder]="rootId() ? 'Antworten…' : 'Nachricht schreiben…'"
+      [placeholder]="placeholder()"
       [value]="draft()"
       (input)="update($event)"
       (keydown)="key($event)"
@@ -85,6 +85,7 @@ export class LiveComposer {
   readonly roomId = input.required<string>();
   readonly rootId = input('');
   readonly fieldId = input('chat-message');
+  readonly placeholder = input('Nachricht schreiben…');
   private readonly store = inject(ChatStore);
   private readonly overlay = inject(OverlayState);
   private readonly field = viewChild.required<ElementRef<HTMLTextAreaElement>>('field');

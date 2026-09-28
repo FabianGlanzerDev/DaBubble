@@ -47,6 +47,7 @@
           type="button"
           (click)="startNameEdit()"
           aria-label="Bearbeiten: Channel-Name"
+          [disabled]="session.isGuest()"
         >
           <span class="edit-label">Bearbeiten</span
           ><app-icon class="mobile-edit" name="pencil" /><span class="sr-only">: Channel-Name</span>
@@ -82,6 +83,7 @@
           class="text-button"
           type="button"
           aria-label="Bearbeiten: Beschreibung"
+          [disabled]="session.isGuest()"
           (click)="description.set(descriptionExample); editDescription.set(true)"
         >
           <span class="edit-label">Bearbeiten</span
