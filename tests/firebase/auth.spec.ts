@@ -1,12 +1,13 @@
 import { test, expect } from '../browser-fixture';
 import type { Page } from '@playwright/test';
 import { randomUUID } from 'node:crypto';
+import { emulatorConfig } from './emulator-config';
 
 test.use({ emulatedFirebase: true });
 const password = randomUUID(); // Generated per local emulator run; never stored in the repository.
 
 async function register(page: Page, email: string, name: string, avatar = 3): Promise<void> {
-  await page.goto('/registrierung');
+  await page.goto('/#/registrierung');
   await page.getByLabel('Name', { exact: true }).fill(name);
   await page.getByLabel('E-Mail-Adresse', { exact: true }).fill(email);
   await page.getByLabel('Passwort', { exact: true }).fill(password);
@@ -26,7 +27,7 @@ async function logout(page: Page): Promise<void> {
 }
 
 async function login(page: Page, email: string, secret = password): Promise<void> {
-  await page.goto('/anmeldung');
+  await page.goto('/#/anmeldung');
   await page.getByLabel('E-Mail-Adresse', { exact: true }).fill(email);
   await page.getByLabel('Passwort', { exact: true }).fill(secret);
   await page.getByRole('button', { name: 'Anmelden', exact: true }).click();
@@ -68,7 +69,7 @@ for (const width of [1280, 375]) {
       /avatar-option-4.svg$/,
     );
     await logout(page);
-    await page.goto('/chat/channels/entwicklerteam');
+    await page.goto('/#/chat/channels/entwicklerteam');
     await expect(page).toHaveURL(/\/anmeldung\?/);
     await register(page, bob, 'Bob Test', 2);
     await logout(page);
@@ -98,7 +99,7 @@ test('duplicate email and invalid credentials produce field errors; repeated sub
     await new Promise((resolve) => setTimeout(resolve, 400));
     await route.fallback();
   });
-  await page.goto('/registrierung');
+  await page.goto('/#/registrierung');
   await page.getByLabel('Name', { exact: true }).fill('Duplicate Test');
   await page.getByLabel('E-Mail-Adresse', { exact: true }).fill(email);
   await page.getByLabel('Passwort', { exact: true }).fill(password);
@@ -112,7 +113,8 @@ test('duplicate email and invalid credentials produce field errors; repeated sub
   await expect(page).toHaveURL(/\/avatar-auswahl$/);
   expect(registrations).toBe(1);
   await page.reload();
-  await page.getByLabel('Name', { exact: true }).fill('Resumed Test');
+  await expect(page.getByRole('heading', { name: 'Duplicate Test', exact: true })).toBeVisible();
+  await expect(page.getByLabel('Name', { exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Avatar 1', exact: true }).click();
   await page.getByRole('button', { name: 'Weiter', exact: true }).click();
   await expect(page).toHaveURL(/\/chat$/);
@@ -129,7 +131,7 @@ test('duplicate email and invalid credentials produce field errors; repeated sub
 });
 
 async function registerUntilSubmit(page: Page, email: string): Promise<void> {
-  await page.goto('/registrierung');
+  await page.goto('/#/registrierung');
   await page.getByLabel('Name', { exact: true }).fill('Other Name');
   await page.getByLabel('E-Mail-Adresse', { exact: true }).fill(email);
   await page.getByLabel('Passwort', { exact: true }).fill(password);
@@ -145,7 +147,7 @@ for (const width of [1280, 430]) {
     const email = `reset-${Date.now()}@example.test`;
     await register(page, email, 'Reset Test');
     await logout(page);
-    await page.goto('/passwort-reset');
+    await page.goto('/#/passwort-reset');
     await page.getByLabel('E-Mail-Adresse', { exact: true }).fill(email);
     await page.getByRole('button', { name: 'E-Mail senden', exact: true }).click();
     await expect(page.getByRole('status')).toContainText('Wenn ein Konto');
@@ -159,11 +161,34 @@ for (const width of [1280, 430]) {
       (entry) => entry.email === email && entry.requestType === 'PASSWORD_RESET',
     )?.oobCode;
     expect(code).toBeTruthy();
-    const destination = `/passwort-reset/neues-passwort?mode=resetPassword&oobCode=${encodeURIComponent(code!)}`;
-    await page.goto(destination);
+    const parameters = new URLSearchParams({
+      mode: 'resetPassword',
+      oobCode: code!,
+      apiKey: emulatorConfig.firebase.apiKey,
+      lang: 'de',
+      continueUrl: new URL('/#/anmeldung', page.url()).href,
+    });
+    const destination = `/?${parameters}`;
+    // Both a direct email link and a browser reload must verify the same unused code.
+    for (const navigate of [() => page.goto(destination), () => page.reload()]) {
+      const verification = page.waitForResponse(
+        (result) =>
+          result.url().includes('/accounts:resetPassword') &&
+          result.request().method() === 'POST' &&
+          !result.request().postDataJSON()?.newPassword,
+      );
+      await navigate();
+      expect((await verification).status()).toBe(200);
+      await expect(page.locator('form')).toHaveAttribute('aria-busy', 'false');
+      expect(new URL(new URL(page.url()).hash.slice(1), page.url()).searchParams.toString()).toBe(
+        parameters.toString(),
+      );
+    }
     const changedPassword = randomUUID();
     await page.getByLabel('Neues Passwort', { exact: true }).fill(changedPassword);
     await page.getByLabel('Neues Kennwort bestätigen', { exact: true }).fill(changedPassword);
+    await expect(page.getByLabel('Neues Passwort', { exact: true })).toHaveValue(changedPassword);
+    await expect(page.getByRole('button', { name: 'Passwort ändern', exact: true })).toBeEnabled();
     await page.getByRole('button', { name: 'Passwort ändern', exact: true }).click();
     await expect(page.getByRole('status')).toContainText('Dein Passwort wurde geändert');
     await login(page, email, changedPassword);
@@ -177,12 +202,12 @@ for (const width of [1280, 430]) {
   });
 }
 
-test('protected avatar route rejects anonymous users and invalid reset feedback fits 320px', async ({
+test('protected avatar route rejects unauthenticated visitors and invalid reset feedback fits 320px', async ({
   page,
 }) => {
-  await page.goto('/avatar-auswahl');
+  await page.goto('/#/avatar-auswahl');
   await expect(page).toHaveURL(/\/anmeldung\?/);
-  await page.goto('/passwort-reset/neues-passwort?oobCode=invalid&mode=resetPassword');
+  await page.goto('/#/passwort-reset/neues-passwort?oobCode=invalid&mode=resetPassword');
   await expect(page.getByRole('alert')).toContainText('ungültig');
   await page.setViewportSize({ width: 320, height: 720 });
   const size = await page.evaluate(() => ({
@@ -200,13 +225,13 @@ test('logout revokes another open tab including a chat route with query paramete
   const second = await context.newPage();
   const errors: string[] = [];
   second.on('pageerror', (error) => errors.push(error.message));
-  await second.goto('/chat?pane=main');
+  await second.goto('/#/chat?pane=main');
   await expect(
     second.getByRole('button', { name: 'Profilmenü für Tab Test öffnen' }),
   ).toBeVisible();
   await logout(page);
   await expect(second).toHaveURL(/\/anmeldung$/);
-  await second.goto('/chat');
+  await second.goto('/#/chat');
   await expect(second).toHaveURL(/\/anmeldung\?/);
   expect(errors).toEqual([]);
   await second.close();
@@ -218,10 +243,10 @@ test('malformed Firebase configuration fails closed without contacting a cloud p
   await page.route('**/firebase-config.json', (route) =>
     route.fulfill({ json: { firebase: {}, emulators: false } }),
   );
-  await page.goto('/chat');
+  await page.goto('/#/chat');
   await expect(page).toHaveURL(/\/anmeldung\?/);
   await expect(page.getByRole('button', { name: 'Anmelden', exact: true })).toBeDisabled();
-  await expect(page.locator('#auth-note')).toContainText('Webkonfiguration');
+  await expect(page.locator('#auth-note')).toContainText('derzeit nicht verfügbar');
 });
 
 test('own profile dialogs and validation remain usable at 320px', async ({ page }, info) => {

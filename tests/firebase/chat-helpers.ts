@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { installAppRoutes } from '../browser-fixture';
 
 export async function registerChatUser(page: Page, name: string): Promise<void> {
-  await page.goto('/registrierung');
+  await page.goto('/#/registrierung');
   await page.getByLabel('Name', { exact: true }).fill(name);
   await page
     .getByLabel('E-Mail-Adresse', { exact: true })
@@ -49,12 +49,21 @@ export async function createChannel(page: Page, name: string): Promise<void> {
 }
 
 export async function send(page: Page, text: string, thread = false): Promise<void> {
+  await expect(page.getByRole('dialog')).toBeHidden();
   const field = page.getByLabel(thread ? 'Antwort schreiben' : 'Nachricht schreiben', {
     exact: true,
   });
   await field.fill(text);
   await field.press('Enter');
   await expect(field).toHaveValue('');
+}
+
+export async function selectInvitee(page: Page, name: string): Promise<void> {
+  await page.getByRole('textbox', { name: 'Leute hinzufügen', exact: true }).fill(name);
+  await page
+    .getByRole('list', { name: 'Passende Personen' })
+    .getByRole('button', { name, exact: true })
+    .click();
 }
 
 export async function noOverflow(page: Page, info: TestInfo, name: string): Promise<void> {
