@@ -1,6 +1,8 @@
 import { test, expect } from '../browser-fixture';
+import { startGuest, editGuestProfile } from './access-helpers';
 import {
   createChannel,
+  selectInvitee,
   noOverflow,
   registerChatUser,
   revealActions,
@@ -10,8 +12,13 @@ import {
 
 test.use({ emulatedFirebase: true, hasTouch: true });
 
-for (const width of [1440, 375]) {
-  test.describe(`${width}px client`, () => {
+for (const [width, guest] of [
+  [1440, false],
+  [375, false],
+  [1440, true],
+  [320, true],
+] as const) {
+  test.describe(`${width}px ${guest ? 'guest' : 'regular'} client`, () => {
     test.use({ hasTouch: width < 768 });
     test(`${width}px: two clients exchange channels, messages, threads, reactions and private messages`, async ({
       page,
@@ -27,7 +34,10 @@ for (const width of [1440, 375]) {
       const second = await secondUser(browser, baseURL!, width);
       try {
         await registerChatUser(second.page, bob);
-        await registerChatUser(page, alice);
+        if (guest) {
+          await startGuest(page);
+          await editGuestProfile(page, alice);
+        } else await registerChatUser(page, alice);
         await noOverflow(page, info, 'menu-' + width);
         await createChannel(page, team);
         await expect(page.getByLabel('Nachricht schreiben', { exact: true })).toBeFocused();
@@ -37,8 +47,8 @@ for (const width of [1440, 375]) {
           second.page.getByRole('heading', { name: 'Gespräch nicht verfügbar' }),
         ).toBeVisible();
         await page.getByRole('button', { name: /Mitglieder verwalten/ }).click();
-        await page.getByLabel('Leute hinzufügen', { exact: true }).fill(bob);
-        await page.getByRole('checkbox', { name: bob }).check();
+        await page.getByRole('button', { name: 'Mitglieder hinzufügen', exact: true }).click();
+        await selectInvitee(page, bob);
         await page.getByRole('button', { name: 'Hinzufügen', exact: true }).click();
         await expect(page.getByRole('status')).toContainText('Mitglieder hinzugefügt');
         await noOverflow(page, info, 'members-' + width);
@@ -90,8 +100,9 @@ for (const width of [1440, 375]) {
         await second.page.getByRole('button', { name: 'Thread schließen' }).click();
         await noOverflow(page, info, 'conversation-' + width);
         await page.getByRole('button', { name: 'Gesprächsdetails' }).click();
+        await page.getByRole('button', { name: 'Bearbeiten: Channel-Name', exact: true }).click();
         await page.getByLabel('Channel-Name', { exact: true }).fill(team + ' Neu');
-        await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+        await page.getByRole('button', { name: 'Speichern: Channel-Name', exact: true }).click();
         await expect(
           second.page.getByRole('heading', { name: team + ' Neu', exact: true }),
         ).toBeVisible();
@@ -104,7 +115,7 @@ for (const width of [1440, 375]) {
         await deletion.getByRole('button', { name: 'Nachricht löschen', exact: true }).click();
         await deletion.getByRole('button', { name: 'Löschen bestätigen' }).click();
         await expect(second.page.getByText('Nachricht gelöscht', { exact: true })).toBeVisible();
-        await page.goto('/chat/neue-nachricht');
+        await page.goto('/#/chat/neue-nachricht');
         await page.getByLabel('Empfänger', { exact: true }).fill('@' + bob);
         await page.locator('.results').getByRole('button', { name: bob, exact: true }).click();
         await expect(page).toHaveURL(/\/chat\/direkt\/dm_/);
@@ -116,7 +127,7 @@ for (const width of [1440, 375]) {
           .getByRole('button', { name: 'Nachricht', exact: true })
           .click();
         await expect(page.getByRole('dialog')).toBeHidden();
-        await second.page.goto('/chat');
+        await second.page.goto('/#/chat');
         await second.page
           .locator('app-live-sidebar')
           .getByRole('link', { name: alice, exact: true })
@@ -128,7 +139,7 @@ for (const width of [1440, 375]) {
         await expect(page.locator('.live-thread')).toContainText('Private Thread-Antwort');
         await page.getByRole('button', { name: 'Thread schließen' }).click();
         await noOverflow(page, info, 'direct-' + width);
-        await page.goto('/chat');
+        await page.goto('/#/chat');
         const search = page
           .getByLabel('Devspace durchsuchen', { exact: true })
           .filter({ visible: true });
