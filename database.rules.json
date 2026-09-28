@@ -1,0 +1,18 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "presence": {
+      "$uid": {
+        "connections": {
+          ".read": "auth != null && !root.child('presenceBlocks').child(auth.uid).exists()",
+          "$connection": {
+            ".write": "auth != null && auth.uid === $uid && (!newData.exists() || !root.child('presenceBlocks').child(auth.uid).exists())",
+            ".validate": "newData.isBoolean() && newData.val() === true && $connection.matches(/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/)"
+          }
+        },
+        "$other": { ".validate": false }
+      }
+    }
+  }
+}
