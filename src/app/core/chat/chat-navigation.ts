@@ -6,6 +6,7 @@ import { filter, map } from 'rxjs';
 import { ChatRoom } from './chat-models';
 import { ChatStore } from './chat-store';
 
+/** Builds real conversation links and manages thread history without mixing in preview routes. */
 @Injectable({ providedIn: 'root' })
 export class ChatNavigation {
   private readonly router = inject(Router);
@@ -23,15 +24,18 @@ export class ChatNavigation {
   readonly threadId = computed(() => String(this.tree().queryParams['thread'] ?? ''));
   readonly active = computed(() => this.url().split('?')[0] !== '/chat');
 
+  /** Selects the channel or direct-message route for a persisted conversation ID. */
   path(room: ChatRoom): string[] {
     return ['/chat', room.kind === 'channel' ? 'channels' : 'direkt', room.id];
   }
 
+  /** Waits for a direct conversation to exist before navigating to its protected route. */
   async direct(uid: string): Promise<void> {
     const id = await this.store.direct(uid);
     await this.router.navigate(['/chat/direkt', id]);
   }
 
+  /** Adds a thread history entry or replaces the current thread while preserving other query parameters. */
   thread(id: string): void {
     void this.router.navigate([], {
       queryParams: { thread: id },
@@ -41,6 +45,7 @@ export class ChatNavigation {
     });
   }
 
+  /** Uses browser back for an app-opened thread and removes the parameter for a direct thread link. */
   closeThread(): void {
     if ((this.location.getState() as { chatThread?: boolean }).chatThread) this.location.back();
     else
@@ -51,6 +56,7 @@ export class ChatNavigation {
       });
   }
 
+  /** Navigates a search result to its conversation, optional parent thread and highlighted message. */
   message(room: ChatRoom, id: string, root: string): void {
     void this.router.navigate(this.path(room), {
       queryParams: { thread: root || null, message: id },

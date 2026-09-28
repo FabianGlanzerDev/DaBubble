@@ -9,6 +9,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthPage } from '../auth/auth-page';
 
+/** Plays the branded entry sequence on each visit before forwarding preserved login parameters. */
 @Component({
   selector: 'app-intro',
   imports: [AuthPage],
@@ -34,6 +35,7 @@ export class Intro {
   private readonly destroy = inject(DestroyRef);
   protected readonly departing = signal(false);
 
+  /** Starts animation timing only after the introduction has been rendered. */
   constructor() {
     afterNextRender(() => this.startIntro());
   }
@@ -59,6 +61,7 @@ export class Intro {
     }
   }
 
+  /** Replaces the intro history entry with login while preserving return parameters and discarding the replay marker. */
   private finishIntro(): void {
     const queryParams = { ...this.route.snapshot.queryParams };
     delete queryParams['replay'];

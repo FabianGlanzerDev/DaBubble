@@ -7,6 +7,7 @@ import { WorkspaceSearch } from './workspace-search';
 import { AuthSession } from '../../core/auth/auth-session';
 import { RouterLink } from '@angular/router';
 
+/** Provides the preview workspace's branding, example identity and account-menu entry. */
 @Component({
   selector: 'app-workspace-header',
   imports: [Brand, AvatarImage, Icon, WorkspaceSearch, RouterLink],

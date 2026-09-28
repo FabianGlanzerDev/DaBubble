@@ -1,3 +1,9 @@
+/**
+ * Replays known provider failures locally to check actionable guest feedback, retry behavior and safe error-code display.
+ *
+ * @packageDocumentation
+ */
+
 import { test, expect } from '../browser-fixture';
 import { identity } from './access-helpers';
 

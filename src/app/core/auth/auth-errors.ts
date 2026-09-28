@@ -1,3 +1,4 @@
+/** Safe, field-specific feedback that can be rendered without exposing a raw service response. */
 export interface AuthIssue {
   field: 'email' | 'password' | 'name' | 'general';
   message: string;
@@ -155,11 +156,13 @@ const issues: Record<string, AuthIssue> = {
   },
 };
 
+/** Extracts an SDK error code or a local Error message for the controlled feedback lookup. */
 export function errorCode(error: unknown): string {
   if (typeof error === 'object' && error !== null && 'code' in error) return String(error.code);
   return error instanceof Error ? error.message : '';
 }
 
+/** Maps known failures to form fields and uses neutral feedback for unrecognized errors. */
 export function authIssue(error: unknown): AuthIssue {
   return (
     issues[errorCode(error)] ?? {
@@ -181,6 +184,7 @@ export function guestIssue(error: unknown): AuthIssue {
   return issues[code] ?? unknownGuestIssue(code);
 }
 
+/** Includes only a syntactically safe Auth error code in otherwise generic guest feedback. */
 function unknownGuestIssue(code: string): AuthIssue {
   const reference = /^auth\/[a-z][a-z0-9-]{1,80}$/.test(code) ? ` (Fehlercode: ${code})` : '';
   return {

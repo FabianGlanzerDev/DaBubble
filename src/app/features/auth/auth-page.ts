@@ -30,8 +30,10 @@ const pages = {
     description: 'Mit deinem Namen und deiner E-Mail-Adresse hast du dein neues DABubble-Konto.',
   },
 } as const;
+/** Selects the existing login or registration presentation and its corresponding submission behavior. */
 type Mode = keyof typeof pages;
 
+/** Validates login and signup forms while preserving persisted sessions and recoverable avatar setup. */
 @Component({
   selector: 'app-auth-page',
   imports: [PublicLayout, Icon, RouterLink, FormField, SessionNotice],
@@ -86,6 +88,7 @@ export class AuthPage {
     () => this.query().get('hinweis') === 'anmeldung-ausstehend',
   );
 
+  /** Restores unfinished signup details and clears login fields when authentication becomes signed out. */
   constructor() {
     effect(() => this.restoreRegistration());
     effect(() => {
@@ -94,6 +97,7 @@ export class AuthPage {
     });
   }
 
+  /** Restores name, email and prior consent for an account whose avatar setup is still incomplete. */
   private restoreRegistration(): void {
     const draft = this.progress();
     if (!this.resuming() || !draft) return;
@@ -102,6 +106,7 @@ export class AuthPage {
     this.consent.set(true);
   }
 
+  /** Removes prior form values and guest confirmation after logout while retaining designated sign-out errors. */
   private clearLogin(): void {
     this.email.set('');
     this.password.set('');
@@ -111,6 +116,7 @@ export class AuthPage {
     for (const field of this.fields()) field.reset();
   }
 
+  /** Dispatches validated form submission to login or registration without overlapping authentication actions. */
   protected async submit(event: Event): Promise<void> {
     event.preventDefault();
     if (this.session.busy()) return;
@@ -120,12 +126,14 @@ export class AuthPage {
     else if (this.loginValid() && this.session.configured()) await this.login();
   }
 
+  /** Starts guest access directly and opens the Google flow only when it is configured as available. */
   protected openAccess(kind: 'google' | 'gast'): void {
     if (this.session.busy()) return;
     if (kind === 'gast') void this.startGuest();
     else if (this.session.googleAvailable()) void this.router.navigateByUrl('/zugang/' + kind);
   }
 
+  /** Opens real chat after anonymous authentication and displays guest-specific errors without stale navigation. */
   private async startGuest(): Promise<void> {
     this.issue.set(null);
     try {
@@ -136,6 +144,7 @@ export class AuthPage {
     }
   }
 
+  /** Creates or resumes signup, clears the password and advances to avatar selection only after success. */
   private async register(): Promise<void> {
     if (!this.valid() || !this.session.configured()) return;
     try {
@@ -149,6 +158,7 @@ export class AuthPage {
     }
   }
 
+  /** Signs in with confirmed session-switch intent and restricts the return destination to internal chat routes. */
   private async login(): Promise<void> {
     try {
       await this.session.login(this.email(), this.password(), this.confirmedGuestUid());
@@ -162,6 +172,7 @@ export class AuthPage {
     }
   }
 
+  /** Returns server feedback only for the field assigned to that authentication failure. */
   protected fieldIssue(field: AuthIssue['field']): string {
     return this.issue()?.field === field ? this.issue()!.message : '';
   }

@@ -16,6 +16,7 @@ import { createChannel, send, secondUser } from './chat-helpers';
 
 test.use({ emulatedFirebase: true, hasTouch: true });
 
+/** Creates a unique emulator account through signup and avatar setup for logout and later login checks. */
 async function register(page: Page, name: string) {
   const email = `logout-${randomUUID()}@example.test`,
     password = randomUUID();
@@ -29,6 +30,7 @@ async function register(page: Page, name: string) {
   return { email, password };
 }
 
+/** Signs in through the displayed form and waits for the real chat route. */
 async function login(page: Page, email: string, password: string) {
   await page.getByLabel('E-Mail-Adresse', { exact: true }).fill(email);
   await page.getByLabel('Passwort', { exact: true }).fill(password);
@@ -36,6 +38,7 @@ async function login(page: Page, email: string, password: string) {
   await expect(page).toHaveURL(/\/chat$/);
 }
 
+/** Reads only the persisted UID, returning null when logout removed the browser's Firebase identity. */
 async function storedUid(page: Page): Promise<string | null> {
   return page.evaluate(async () => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
@@ -63,6 +66,7 @@ async function storedUid(page: Page): Promise<string | null> {
   });
 }
 
+/** Captures test-owned profile, directory and conversation documents from the local Firestore emulator. */
 async function dataSnapshot(request: APIRequestContext, uid: string, room: string) {
   const root =
     'http://127.0.0.1:8080/v1/projects/demo-dabubble-auth/databases/(default)/documents/';
@@ -80,6 +84,7 @@ async function dataSnapshot(request: APIRequestContext, uid: string, room: strin
   return result;
 }
 
+/** Asserts an empty, error-free login form with no session notice and no persisted Firebase UID. */
 async function normalLogin(page: Page) {
   await expect(page).toHaveURL(/\/anmeldung$/);
   await expect(page.getByRole('button', { name: 'Anmelden', exact: true })).toBeEnabled();
@@ -99,6 +104,7 @@ async function normalLogin(page: Page) {
   await expect.poll(() => storedUid(page)).toBeNull();
 }
 
+/** Excludes expected directory republishing timestamps while retaining all account and chat content for comparison. */
 function withoutDirectorySyncTime(snapshot: Record<string, unknown>, uid: string) {
   const result = structuredClone(snapshot);
   const directory = result[`directory/${uid}`] as {

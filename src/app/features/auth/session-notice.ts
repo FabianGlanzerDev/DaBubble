@@ -12,6 +12,7 @@ import { RouterLink } from '@angular/router';
 import { AuthSession } from '../../core/auth/auth-session';
 import { authIssue } from '../../core/auth/auth-errors';
 
+/** Presents account-switch controls without treating the displayed identity as proof of guest status. */
 @Component({
   selector: 'app-session-notice',
   imports: [RouterLink],
@@ -25,6 +26,7 @@ export class SessionNotice {
   protected readonly error = signal('');
   readonly confirmedGuestUid = model('');
 
+  /** Invalidates an earlier guest-switch confirmation whenever the observed account changes. */
   constructor() {
     effect(() => {
       this.session.user();
@@ -33,10 +35,12 @@ export class SessionNotice {
     });
   }
 
+  /** Binds acknowledgement to the current UID so it cannot authorize replacing a different guest. */
   protected confirmGuest(checked: boolean): void {
     this.confirmedGuestUid.set(checked ? (this.session.user()?.uid ?? '') : '');
   }
 
+  /** Signs out a regular session and focuses email entry; guest access needs its separate confirmation. */
   protected async switchAccount(): Promise<void> {
     if (this.session.busy() || this.session.isGuest()) return;
     this.error.set('');

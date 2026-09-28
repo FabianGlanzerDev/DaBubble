@@ -2,7 +2,9 @@ import type { DocumentReference, Firestore, WriteBatch } from 'firebase-admin/fi
 import { membersOf, readRoom, remainingMessages } from './inventory.mts';
 import type { RoomInventory } from './inventory.mts';
 
+/** Deferred Firestore batch mutation applied only inside the operator's reviewed cleanup workflow. */
 type Write = (batch: WriteBatch) => void;
+/** Renews the deletion lease before committing at most 350 queued writes per batch. */
 export async function commitChunks(
   db: Firestore,
   changes: Write[],
@@ -16,6 +18,7 @@ export async function commitChunks(
   }
 }
 
+/** Locks one affected conversation, preserves foreign content and resumes or completes its targeted UID cleanup. */
 export async function cleanRoom(
   db: Firestore,
   reference: DocumentReference,
@@ -79,6 +82,7 @@ export async function cleanRoom(
   await lock.delete();
 }
 
+/** Copies retained direct-chat content to a UID-neutral archive before exposing it to remaining members. */
 async function archiveDirect(
   db: Firestore,
   room: RoomInventory,
@@ -112,6 +116,7 @@ async function archiveDirect(
   await finishArchive(db, room, archiveId, heartbeat);
 }
 
+/** Requires the prepared archive before removing source messages, reactions, room metadata and the archive lock. */
 async function finishArchive(
   db: Firestore,
   room: RoomInventory,
@@ -130,6 +135,7 @@ async function finishArchive(
   await finish.commit();
 }
 
+/** Deletes empty conversation metadata and only the channel-name reservation that still points to it. */
 async function removeEmptyRoom(db: Firestore, room: RoomInventory): Promise<void> {
   await db.runTransaction(async (tx) => {
     const name = room.room.data['nameKey'];
@@ -143,6 +149,7 @@ async function removeEmptyRoom(db: Firestore, room: RoomInventory): Promise<void
   });
 }
 
+/** Recursively removes the target's profile and directory trees, including administrative child collections. */
 export async function finishProfile(db: Firestore, uid: string): Promise<void> {
   // recursiveDelete also handles any administrative subcollections below profile documents.
   await db.recursiveDelete(db.doc('users/' + uid));

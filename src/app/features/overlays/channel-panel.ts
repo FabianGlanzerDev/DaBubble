@@ -5,6 +5,7 @@ import { Icon } from '../../shared/ui/icon';
 import { MembersPanel } from './members-panel';
 import { AuthSession } from '../../core/auth/auth-session';
 
+/** Demonstrates channel editing and member selection using local example state rather than Firestore. */
 @Component({
   selector: 'app-channel-panel',
   imports: [Icon, MembersPanel],
@@ -41,20 +42,24 @@ export class ChannelPanel {
         : '',
   );
 
+  /** Updates the preview name draft and enables interaction-based validation feedback. */
   protected changeName(event: Event): void {
     this.name.set((event.target as HTMLInputElement).value);
     this.touched.set(true);
   }
 
+  /** Copies text input into the local description draft without a persistence operation. */
   protected changeDescription(event: Event): void {
     this.description.set((event.target as HTMLInputElement).value);
   }
 
+  /** Seeds the local editor from the displayed channel label before switching to edit mode. */
   protected startNameEdit(): void {
     this.name.set(this.label());
     this.editName.set(true);
   }
 
+  /** Advances a valid preview channel name to example member selection without creating a real room. */
   protected showPeople(): void {
     if (this.nameError()) return;
     this.overlay.open('channel-people', { draftChannelName: this.name().trim() });

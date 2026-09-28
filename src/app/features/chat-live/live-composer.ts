@@ -14,6 +14,7 @@ import { ChatAction } from '../../core/chat/chat-action';
 import { OverlayState } from '../../core/ui/overlay-state';
 import { Icon } from '../../shared/ui/icon';
 
+/** Sends real messages or thread replies and inserts emoji or accessible-directory mentions at the caret. */
 @Component({
   selector: 'app-live-composer',
   imports: [Icon],
@@ -106,10 +107,12 @@ export class LiveComposer {
       : [],
   );
 
+  /** Focuses the newly rendered editor without shifting the conversation's scroll position. */
   constructor() {
     afterNextRender(() => this.field().nativeElement.focus({ preventScroll: true }));
   }
 
+  /** Builds mention suggestions from directory people and channels already available to this account. */
   private entries(): string[] {
     return [
       ...this.store.people().map((person) => '@' + person.name),
@@ -117,12 +120,14 @@ export class LiveComposer {
     ];
   }
 
+  /** Keeps the draft and caret position synchronized for contextual mention suggestions. */
   protected update(event: Event): void {
     const field = event.target as HTMLTextAreaElement;
     this.draft.set(field.value);
     this.cursor.set(field.selectionStart);
   }
 
+  /** Sends on unmodified Enter while preserving Shift+Enter and IME composition; Escape dismisses suggestions. */
   protected key(event: KeyboardEvent): void {
     if (event.key === 'Escape') this.cursor.set(0);
     if (event.key !== 'Enter' || event.shiftKey || event.isComposing) return;
@@ -130,6 +135,7 @@ export class LiveComposer {
     this.send();
   }
 
+  /** Clears the draft only after a successful write and returns focus to the message editor. */
   protected send(): void {
     if (!this.draft().trim()) return;
     void this.action.run(async () => {
@@ -140,6 +146,7 @@ export class LiveComposer {
     });
   }
 
+  /** Replaces the current text selection and restores the caret immediately after the inserted content. */
   protected insert(text: string): void {
     const field = this.field().nativeElement;
     const start = field.selectionStart;
@@ -151,12 +158,14 @@ export class LiveComposer {
     });
   }
 
+  /** Replaces the current mention token with the selected name and a trailing space. */
   protected mention(text: string): void {
     const field = this.field().nativeElement;
     field.setSelectionRange(this.cursor() - this.token().length, this.cursor());
     this.insert(text + ' ');
   }
 
+  /** Opens the shared picker with a callback that inserts the chosen emoji into this draft. */
   protected emoji(): void {
     this.overlay.open('emoji', { live: true, onEmoji: (emoji) => this.insert(emoji) });
   }

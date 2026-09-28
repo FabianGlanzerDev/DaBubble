@@ -4,6 +4,7 @@ import { OverlayState } from '../../core/ui/overlay-state';
 import { LiveMemberList } from './live-member-list';
 import { LiveMemberPicker } from './live-member-picker';
 
+/** Hosts the real member list and invitation controls for the selected conversation. */
 @Component({
   selector: 'app-live-members-dialog',
   imports: [LiveMemberList, LiveMemberPicker],

@@ -1,3 +1,9 @@
+/**
+ * Exercises guest and simulated Google access, session persistence, provider errors and data-preserving logout in emulators.
+ *
+ * @packageDocumentation
+ */
+
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '../browser-fixture';
 import { createChannel, send } from './chat-helpers';

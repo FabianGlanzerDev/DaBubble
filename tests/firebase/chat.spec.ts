@@ -1,3 +1,9 @@
+/**
+ * Exercises protected multi-user conversations, editing, threads, reactions and mobile recovery using local test accounts.
+ *
+ * @packageDocumentation
+ */
+
 import { test, expect } from '../browser-fixture';
 import { startGuest, editGuestProfile } from './access-helpers';
 import {

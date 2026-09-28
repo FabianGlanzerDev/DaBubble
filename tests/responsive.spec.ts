@@ -1,6 +1,7 @@
 import { test, expect } from './browser-fixture';
 import type { Page } from '@playwright/test';
 
+/** Checks visible element bounds and document width, excluding intentional clipped and intro-animation content. */
 async function expectNoOverflow(page: Page) {
   const overflowing = await page.evaluate(() => {
     const viewport = document.documentElement.clientWidth;

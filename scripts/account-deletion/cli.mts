@@ -6,6 +6,7 @@ import { reviewRoom } from './review.mts';
 import { deleteAccount, purgeCompleted } from './worker.mts';
 import { presenceInventory } from './presence.mts';
 
+/** Validates an explicit target and command before planning, confirmed deletion or global completed-guard maintenance. */
 async function main(): Promise<void> {
   const { values, positionals } = parseArgs({
     allowPositionals: true,

@@ -11,6 +11,7 @@ import type { Page, TestInfo } from '@playwright/test';
 
 test.use({ emulatedFirebase: true, staticHosting: true, hasTouch: true });
 
+/** Checks that an authenticated dynamic hash link survives a fresh document load and reload on a static host. */
 async function directAndReload(page: Page, url: string, text: string) {
   await page.goto('about:blank');
   expect((await page.goto(url))?.status()).toBe(200);
@@ -22,6 +23,7 @@ async function directAndReload(page: Page, url: string, text: string) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 }
 
+/** Writes a full-page rendering into the current test's isolated evidence directory. */
 async function screenshot(page: Page, info: TestInfo, name: string) {
   await page.screenshot({ path: info.outputPath(name + '.png'), fullPage: true });
 }

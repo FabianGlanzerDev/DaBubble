@@ -16,6 +16,7 @@ import { AvatarImage } from '../../shared/ui/avatar-image';
 import { channels, directMessages } from './workspace-items';
 import { findPerson } from './workspace-people';
 
+/** Filters local example recipients with keyboard results and a history-backed mobile search view. */
 @Component({
   selector: 'app-workspace-search',
   imports: [RouterLink, Icon, AvatarImage],
@@ -54,23 +55,27 @@ export class WorkspaceSearch {
   );
   private readonly results = viewChild<ElementRef<HTMLElement>>('results');
 
+  /** Expands filtered examples and enters the separate mobile search view when necessary. */
   protected changeQuery(event: Event): void {
     this.query.set((event.target as HTMLInputElement).value);
     this.expanded.set(true);
     if (this.mobileMenu() && this.mobile.isMobile()) this.mobile.open('search');
   }
 
+  /** Moves keyboard focus to the first preview result without following its link. */
   protected focusResults(event: Event): void {
     event.preventDefault();
     this.results()?.nativeElement.querySelector('a')?.focus();
   }
 
+  /** Closes desktop results on focus exit while keeping the dedicated mobile search view open. */
   protected closeResults(event: FocusEvent): void {
     if (this.mobileMenu() && this.mobile.view() === 'search') return;
     if (!(event.currentTarget as HTMLElement).contains(event.relatedTarget as Node | null))
       this.expanded.set(false);
   }
 
+  /** Clears the preview query and exits mobile search through the shared navigation history. */
   protected dismiss(): void {
     this.expanded.set(false);
     this.query.set('');

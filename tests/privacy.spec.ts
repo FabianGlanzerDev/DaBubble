@@ -1,3 +1,9 @@
+/**
+ * Checks that the public privacy and deletion-request text remains readable without claiming unsupported automatic deletion.
+ *
+ * @packageDocumentation
+ */
+
 import { test, expect } from './browser-fixture';
 
 for (const width of [1440, 375, 320]) {

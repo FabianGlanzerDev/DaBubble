@@ -1,3 +1,9 @@
+/**
+ * Normalizes email-action and legacy entry URLs before bootstrapping Angular with the shared application configuration.
+ *
+ * @packageDocumentation
+ */
+
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
 import { App } from './app/app';

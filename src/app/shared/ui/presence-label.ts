@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { PresenceState } from '../../core/presence/presence-state';
 
+/** Displays the server-observed presence state, including an explicit unavailable state instead of a guessed status. */
 @Component({
   selector: 'app-presence-label',
   changeDetection: ChangeDetectionStrategy.OnPush,

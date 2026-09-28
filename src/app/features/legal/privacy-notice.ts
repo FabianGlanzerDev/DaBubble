@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
+/** Renders the maintained privacy text separately from the surrounding legal-page layout. */
 @Component({
   selector: 'app-privacy-notice',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -10,6 +10,7 @@ import { LiveSearch } from './live-search';
 import { LiveConversation } from './live-conversation';
 import { MobileNavigation } from '../../core/ui/mobile-navigation';
 
+/** Arranges real sidebar, conversation and thread views with responsive account and loading states. */
 @Component({
   selector: 'app-live-layout',
   imports: [

@@ -14,6 +14,7 @@ import { authIssue } from '../../core/auth/auth-errors';
 import { PublicLayout } from '../../shared/layout/public-layout';
 import { Icon } from '../../shared/ui/icon';
 
+/** Handles explicit Google linking and guest account decisions before invoking authentication changes. */
 @Component({
   selector: 'app-access-page',
   imports: [PublicLayout, Icon, RouterLink],
@@ -37,6 +38,7 @@ export class AccessPage {
   protected readonly error = signal('');
   protected readonly linked = signal(false);
 
+  /** Rejects stale guest-management routes and resets confirmations when access parameters change. */
   constructor() {
     effect(() => {
       if (this.guest() && !this.session.initializing() && !this.session.isGuest())
@@ -51,6 +53,7 @@ export class AccessPage {
     });
   }
 
+  /** Requires the relevant confirmation and prevents duplicate access actions while Firebase is busy. */
   protected async proceed(): Promise<void> {
     if (this.session.busy() || (!this.guest() && !this.confirmed())) return;
     this.error.set('');
@@ -64,6 +67,7 @@ export class AccessPage {
     }
   }
 
+  /** Routes linked users to confirmation and new or upgraded identities to their required profile step. */
   private async useGoogle(): Promise<void> {
     const wasGuest = this.session.isGuest();
     await this.session.google(this.linking());
@@ -77,6 +81,7 @@ export class AccessPage {
       );
   }
 
+  /** Signs out only after explicit acknowledgement, preserving the guest account and its chat data. */
   protected async endGuest(): Promise<void> {
     if (!this.session.isGuest() || !this.logoutConfirmed() || this.session.busy()) return;
     this.error.set('');

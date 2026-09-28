@@ -11,6 +11,7 @@ export class WorkspacePreview {
   readonly threadOpen = signal(true);
   readonly mobileThreadOpen = signal(false);
 
+  /** Opens the appropriate responsive preview thread and focuses its heading after layout completes. */
   openThread(): void {
     if (this.mobile.isMobile()) this.mobile.open('thread');
     this.threadOpen.set(true);
@@ -21,6 +22,7 @@ export class WorkspacePreview {
     );
   }
 
+  /** Focuses only a visible thread heading so hidden desktop or mobile duplicates are skipped. */
   private focusHeading(): void {
     const headings = this.document.querySelectorAll<HTMLElement>('[data-thread-heading]');
     [...headings].find((heading) => heading.checkVisibility({ checkVisibilityCSS: true }))?.focus();

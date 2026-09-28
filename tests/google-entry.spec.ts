@@ -1,3 +1,9 @@
+/**
+ * Checks Google entry and explicit linking consent in the public UI without opening a real provider session.
+ *
+ * @packageDocumentation
+ */
+
 import { readFile } from 'node:fs/promises';
 import { test, expect } from './browser-fixture';
 

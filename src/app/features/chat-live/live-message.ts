@@ -10,6 +10,7 @@ import { Icon } from '../../shared/ui/icon';
 import { LiveReactions } from './live-reactions';
 import { LiveMessageText } from './live-message-text';
 
+/** Displays persisted message content with author actions, thread entry and real emoji reactions. */
 @Component({
   selector: 'app-live-message',
   imports: [DatePipe, AvatarImage, Icon, LiveReactions, LiveMessageText],
@@ -45,16 +46,19 @@ export class LiveMessage {
     () => 'edit-' + (this.compact() ? 'thread-' : 'main-') + this.message().id,
   );
 
+  /** Opens the message author's real directory profile without requesting private profile fields. */
   protected profile(): void {
     this.overlay.open('profile', { live: true, personId: this.message().authorId });
   }
 
+  /** Starts editing from the latest displayed text and dismisses pending deletion confirmation. */
   protected beginEdit(): void {
     this.text.set(this.message().text);
     this.editing.set(true);
     this.removing.set(false);
   }
 
+  /** Leaves edit mode only after the server accepts the message update. */
   protected save(): void {
     void this.action.run(async () => {
       await this.store.edit(this.message(), this.text());
@@ -62,6 +66,7 @@ export class LiveMessage {
     });
   }
 
+  /** Applies the message tombstone and clears deletion confirmation only after the write succeeds. */
   protected remove(): void {
     void this.action.run(async () => {
       await this.store.remove(this.message());
@@ -69,10 +74,12 @@ export class LiveMessage {
     });
   }
 
+  /** Toggles a reaction through the shared pending/error wrapper to prevent duplicate action submissions. */
   protected react(emoji: string): void {
     void this.action.run(() => this.store.react(this.message(), emoji));
   }
 
+  /** Connects the emoji picker to this message's persisted reaction action. */
   protected emojis(): void {
     this.overlay.open('emoji', { live: true, onEmoji: (emoji) => this.react(emoji) });
   }

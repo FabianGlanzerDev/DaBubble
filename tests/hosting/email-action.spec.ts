@@ -1,3 +1,9 @@
+/**
+ * Uses synthetic action parameters to verify root-to-hash normalization, reloads and rejection of unsupported mail actions.
+ *
+ * @packageDocumentation
+ */
+
 import { test, expect } from '../browser-fixture';
 
 test.use({ emulatedFirebase: true, staticHosting: true, trace: 'off' });

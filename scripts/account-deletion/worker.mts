@@ -8,9 +8,13 @@ import { blockPresence } from './presence.mts';
 
 const leaseDuration = 5 * 60 * 1000;
 const tokenWindow = 65 * 60 * 1000;
+/** Operator acknowledgement tied to one UID and the fingerprint of its reviewed data inventory. */
 export type Confirmation = { uid: string; fingerprint: string };
 
-/** Privileged operator tool, never imported into the browser or exposed as a public endpoint. */
+/**
+ * Executes a fingerprint-confirmed account cleanup while preserving foreign content and guarding stale tokens.
+ * Privileged operator tool; never imported into the browser or exposed as a public endpoint.
+ */
 export async function deleteAccount(
   context: DeletionContext,
   uid: string,
@@ -50,6 +54,7 @@ export async function deleteAccount(
     return false;
   });
   if (alreadyDone) return { state: 'complete', remaining: plan.summary };
+  /** Renews the five-minute worker lease only while this process still owns the deletion job. */
   const heartbeat = async () => {
     await context.db.runTransaction(async (tx) => {
       const snapshot = await tx.get(job);
@@ -116,7 +121,10 @@ export async function deleteAccount(
   }
 }
 
-/** Explicit maintenance: no automatic TTL or unverified backup expiry is claimed. */
+/**
+ * Removes every expired completed deletion guard only after confirming that its Auth account remains absent.
+ * Explicit global maintenance, not a UID-filtered action, automatic TTL or backup-expiry mechanism.
+ */
 export async function purgeCompleted(context: DeletionContext): Promise<number> {
   await requireDeletionRules(context);
   let removed = 0;

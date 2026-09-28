@@ -6,6 +6,7 @@ import { startGuest, endGuest, identity, leaveAccount } from './access-helpers';
 
 test.use({ emulatedFirebase: true });
 
+/** Waits for server-observed status text and its matching visual state, including disconnect timeout allowance. */
 async function presence(page: Page, value: string): Promise<void> {
   const header = page.locator('app-live-conversation .title-button');
   await expect(header).toHaveAttribute('aria-description', value, { timeout: 90000 });
@@ -13,6 +14,7 @@ async function presence(page: Page, value: string): Promise<void> {
   await expect(header.locator('.presence')).toHaveAttribute('data-presence', state);
 }
 
+/** Opens the selected test participant's direct conversation through the real recipient picker. */
 async function direct(page: Page, name: string): Promise<void> {
   await page.goto('/#/chat/neue-nachricht');
   await page.getByLabel('Empfänger', { exact: true }).fill('@' + name);

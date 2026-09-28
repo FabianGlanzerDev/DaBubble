@@ -1,3 +1,4 @@
+/** Figma-provided display identity used only in local examples, including optional illustrated availability. */
 export interface ExamplePerson {
   readonly id: string;
   readonly name: string;
@@ -16,6 +17,7 @@ export const examplePeople: readonly ExamplePerson[] = [
   { id: 'steffen-hoffmann', name: 'Steffen Hoffmann', avatar: 3, email: 'thehoffman@beispiel.com' },
 ];
 
+/** Resolves a preview identity and falls back to the first supplied example for unknown IDs. */
 export function findPerson(id: string | undefined): ExamplePerson {
   return examplePeople.find((person) => person.id === id) ?? examplePeople[0]!;
 }

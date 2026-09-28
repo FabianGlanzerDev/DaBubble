@@ -111,6 +111,7 @@ export const test = base.extend<{
 
 export { expect };
 
+/** Serves the tested build and explicit local configuration while blocking unexpected external requests. */
 export async function installAppRoutes(
   context: BrowserContext,
   emulatedFirebase: boolean,

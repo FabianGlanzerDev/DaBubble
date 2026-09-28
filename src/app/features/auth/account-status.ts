@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthSession } from '../../core/auth/auth-session';
 
+/** Renders profile loading, read failures and incomplete-setup guidance for authenticated page shells. */
 @Component({
   selector: 'app-account-status',
   imports: [RouterLink],

@@ -5,6 +5,7 @@ import { ChatRoom } from '../../core/chat/chat-models';
 import { AvatarImage } from '../../shared/ui/avatar-image';
 import { Icon } from '../../shared/ui/icon';
 
+/** Collects directory members for a real invitation while retaining pending and failed action feedback. */
 @Component({
   selector: 'app-live-member-picker',
   imports: [AvatarImage, Icon],
@@ -30,6 +31,7 @@ export class LiveMemberPicker {
       ),
   );
 
+  /** Adds a candidate to the pending selection and returns focus to the cleared search field. */
   protected select(uid: string, field: HTMLInputElement): void {
     this.selected.update((ids) => [...ids, uid]);
     this.query.set('');
@@ -37,11 +39,13 @@ export class LiveMemberPicker {
     field.focus();
   }
 
+  /** Removes a pending candidate without changing persisted membership and restores search focus. */
   protected remove(uid: string, field: HTMLInputElement): void {
     this.selected.update((ids) => ids.filter((id) => id !== uid));
     field.focus();
   }
 
+  /** Clears the pending selection only after all requested membership additions succeed. */
   protected add(): void {
     void this.action.run(async () => {
       await this.store.invite(this.room().id, this.selected());

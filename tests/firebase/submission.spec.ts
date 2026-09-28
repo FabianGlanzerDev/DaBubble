@@ -5,6 +5,7 @@ import { noOverflow } from './chat-helpers';
 
 test.use({ emulatedFirebase: true });
 
+/** Checks real authentication routes for visible headings, no preview notices and no horizontal overflow. */
 async function authScreens(page: Page, info: TestInfo): Promise<void> {
   for (const route of [
     'registrierung',

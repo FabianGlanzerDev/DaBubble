@@ -5,6 +5,7 @@ import { AvatarImage } from '../../shared/ui/avatar-image';
 import { OverlayState } from '../../core/ui/overlay-state';
 import { channels, directMessages } from './workspace-items';
 
+/** Lists supplied channel and direct-message examples with expandable sections and preview navigation. */
 @Component({
   selector: 'app-workspace-sidebar',
   imports: [Icon, AvatarImage, RouterLink, RouterLinkActive],

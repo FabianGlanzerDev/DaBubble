@@ -4,6 +4,7 @@ import { PublicLayout } from '../../shared/layout/public-layout';
 import { ConfirmationMessage } from '../../shared/ui/confirmation-message';
 import { OverlayState } from '../../core/ui/overlay-state';
 
+/** Demonstrates Figma confirmation variants without requesting email or changing authentication data. */
 @Component({
   selector: 'app-confirmation-preview',
   imports: [PublicLayout, RouterLink, ConfirmationMessage],

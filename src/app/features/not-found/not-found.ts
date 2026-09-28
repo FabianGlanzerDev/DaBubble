@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PublicLayout } from '../../shared/layout/public-layout';
 
+/** Provides a navigable fallback for unknown client routes instead of presenting a blank application. */
 @Component({
   selector: 'app-not-found',
   imports: [PublicLayout, RouterLink],

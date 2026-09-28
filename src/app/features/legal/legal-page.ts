@@ -4,6 +4,7 @@ import { Brand } from '../../shared/ui/brand';
 import { Icon } from '../../shared/ui/icon';
 import { PrivacyNotice } from './privacy-notice';
 
+/** Selects the maintained imprint or privacy content within the shared responsive legal layout. */
 @Component({
   selector: 'app-legal-page',
   imports: [Brand, Icon, RouterLink, PrivacyNotice],

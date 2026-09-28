@@ -6,6 +6,7 @@ import { createChannel, registerChatUser, secondUser, selectInvitee } from './ch
 test.use({ emulatedFirebase: true, hasTouch: true });
 const output = 'tmp/figma-finish/screenshots';
 
+/** Waits for fonts, checks page and dialog overflow, and records stable rendered Figma-comparison screenshots. */
 async function capture(page: Page, name: string): Promise<void> {
   await page.mouse.move(0, 0);
   await page.evaluate(() => document.fonts.ready);

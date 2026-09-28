@@ -1,3 +1,9 @@
+/**
+ * Runs authentication and chat scenarios serially with explicit local emulator routing and isolated browser contexts.
+ *
+ * @packageDocumentation
+ */
+
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({

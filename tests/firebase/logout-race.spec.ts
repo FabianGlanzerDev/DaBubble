@@ -1,3 +1,9 @@
+/**
+ * Ensures a delayed sign-in response cannot resurrect a session after logout in another tab.
+ *
+ * @packageDocumentation
+ */
+
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '../browser-fixture';
 import { identity, leaveAccount } from './access-helpers';

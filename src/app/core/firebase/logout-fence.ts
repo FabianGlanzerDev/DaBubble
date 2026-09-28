@@ -4,6 +4,7 @@ export class LogoutFence {
   private readonly channel: BroadcastChannel | null;
   private readonly key: string;
 
+  /** Scopes cross-tab logout notifications to the configured Firebase project. */
   constructor(projectId: string) {
     this.key = `dabubble.logout.${projectId}`;
     this.channel = typeof BroadcastChannel === 'undefined' ? null : new BroadcastChannel(this.key);
@@ -13,6 +14,7 @@ export class LogoutFence {
       };
   }
 
+  /** Combines persisted and live logout markers, tolerating blocked browser storage. */
   version(): string {
     try {
       return `${localStorage.getItem(this.key) ?? ''}:${this.current}`;
@@ -21,6 +23,7 @@ export class LogoutFence {
     }
   }
 
+  /** Invalidates pending sign-ins in other tabs using storage and a live broadcast. */
   publish(): void {
     this.current = crypto.randomUUID();
     try {
@@ -31,6 +34,7 @@ export class LogoutFence {
     this.channel?.postMessage(this.current);
   }
 
+  /** Closes the cross-tab channel when the Firebase runtime is disposed. */
   destroy(): void {
     this.channel?.close();
   }

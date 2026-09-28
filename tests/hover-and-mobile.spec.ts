@@ -1,3 +1,9 @@
+/**
+ * Checks visible hover and focus feedback plus small-screen dialog bounds in the local design preview.
+ *
+ * @packageDocumentation
+ */
+
 import { test, expect } from './browser-fixture';
 
 test('buttons, icons, links and fields expose reference hover and focus states', async ({

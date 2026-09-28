@@ -5,6 +5,7 @@ import { OverlayState } from '../../core/ui/overlay-state';
 import { AvatarImage } from '../../shared/ui/avatar-image';
 import { Icon } from '../../shared/ui/icon';
 
+/** Displays real conversation members with profile navigation and server-observed presence. */
 @Component({
   selector: 'app-live-member-list',
   imports: [AvatarImage, Icon],
@@ -36,11 +37,13 @@ export class LiveMemberList {
   protected readonly store = inject(ChatStore);
   private readonly overlay = inject(OverlayState);
 
+  /** Opens the editable own-profile view or a read-only view for another listed member. */
   protected profile(uid: string): void {
     const own = uid === this.store.session.user()?.uid;
     this.overlay.open('profile', { live: !own, account: own, personId: uid });
   }
 
+  /** Opens member selection for this conversation using its persisted room ID. */
   protected add(): void {
     this.overlay.open('add-members', { live: true, channelId: this.room().id });
   }

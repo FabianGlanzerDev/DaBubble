@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+/** Renders the shared DaBubble logo with a route back through the intro animation. */
 @Component({
   selector: 'app-brand',
   imports: [RouterLink],

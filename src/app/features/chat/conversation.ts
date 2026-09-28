@@ -10,6 +10,7 @@ import { channelMessages } from './preview-messages';
 import { WorkspacePreview } from './workspace-preview';
 import { OverlayState } from '../../core/ui/overlay-state';
 
+/** Displays the selected channel or direct-message example without reading or writing real chat data. */
 @Component({
   selector: 'app-conversation',
   imports: [Icon, RouterLink, AvatarImage, MessagePreview, MessageComposer],
@@ -33,6 +34,7 @@ export class Conversation {
   );
   protected readonly basePath = this.route.parent?.snapshot.data['preview'] ? '/vorschau' : '/chat';
 
+  /** Opens the appropriate example channel or profile dialog for the current preview item. */
   protected openDetails(): void {
     this.overlay.open(this.isChannel ? 'channel' : 'profile', {
       channelId: this.item()?.id,

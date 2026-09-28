@@ -1,11 +1,13 @@
 import { expect, type APIRequestContext, type BrowserContext, type Page } from '@playwright/test';
 
+/** Local Auth emulator account fields used to distinguish anonymous and linked identities during assertions. */
 interface EmulatorAccount {
   localId: string;
   providerUserInfo?: { providerId: string }[];
   passwordHash?: string;
 }
 
+/** Reads all local demo accounts with emulator-only owner access, following every result page. */
 export async function emulatorAccounts(request: APIRequestContext): Promise<EmulatorAccount[]> {
   const accounts: EmulatorAccount[] = [];
   let nextPageToken = '';
@@ -37,6 +39,7 @@ export async function enableEmulatorPopup(context: BrowserContext): Promise<void
   );
 }
 
+/** Accepts the app's linking explanation and asserts that its popup belongs to the local Auth emulator. */
 export async function openGoogle(page: Page): Promise<Page> {
   await page.getByRole('checkbox').check();
   const popup = page.waitForEvent('popup');
@@ -46,6 +49,7 @@ export async function openGoogle(page: Page): Promise<Page> {
   return window;
 }
 
+/** Selects or creates a simulated Google identity inside the emulator popup, never a real Google account. */
 export async function chooseGoogle(
   popup: Page,
   email: string,
@@ -61,6 +65,7 @@ export async function chooseGoogle(
   }
 }
 
+/** Reads only UID and anonymous status from this isolated browser's Firebase persistence, excluding tokens. */
 export async function identity(page: Page): Promise<{ uid: string; isAnonymous: boolean }> {
   return page.evaluate(async () => {
     const database = await new Promise<IDBDatabase>((resolve, reject) => {
@@ -89,6 +94,7 @@ export async function identity(page: Page): Promise<{ uid: string; isAnonymous: 
   });
 }
 
+/** Completes the profile step and waits until the tested account reaches real chat. */
 export async function finishAvatar(page: Page, name = 'Google Test'): Promise<void> {
   await expect(page).toHaveURL(/\/avatar-auswahl$/);
   const field = page.getByLabel('Name', { exact: true });
@@ -98,12 +104,14 @@ export async function finishAvatar(page: Page, name = 'Google Test'): Promise<vo
   await expect(page).toHaveURL(/\/chat$/);
 }
 
+/** Signs out through the real account menu and checks that the login route is reached. */
 export async function leaveAccount(page: Page): Promise<void> {
   await page.getByRole('button', { name: /^Profilmenü für/ }).click();
   await page.getByRole('button', { name: 'Log out', exact: true }).click();
   await expect(page).toHaveURL(/\/anmeldung$/);
 }
 
+/** Opens anonymous chat and verifies guest labeling and completed data loading in the local test app. */
 export async function startGuest(page: Page): Promise<void> {
   await page.goto('/#/anmeldung');
   await page.getByRole('button', { name: 'Gäste-Login' }).click();
@@ -113,6 +121,7 @@ export async function startGuest(page: Page): Promise<void> {
   await expect(page.getByText('Gespräche werden geladen…', { exact: true })).toBeHidden();
 }
 
+/** Checks the guest-loss acknowledgement gate before signing the emulator session out. */
 export async function endGuest(page: Page): Promise<void> {
   await page.goto('/#/zugang/gast');
   await expect(page.getByRole('button', { name: 'Als Gast abmelden' })).toBeDisabled();
@@ -121,6 +130,7 @@ export async function endGuest(page: Page): Promise<void> {
   await expect(page).toHaveURL(/\/anmeldung$/);
 }
 
+/** Exercises guest name and avatar editing and verifies the saved values in the real profile dialog. */
 export async function editGuestProfile(page: Page, name: string): Promise<void> {
   await page.getByRole('button', { name: /^Profilmenü für/ }).click();
   await page.getByRole('button', { name: 'Profil', exact: true }).click();

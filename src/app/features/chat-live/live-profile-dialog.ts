@@ -8,6 +8,7 @@ import { Icon } from '../../shared/ui/icon';
 import { ProfileDraftState } from '../../core/auth/profile-draft';
 import { PresenceLabel } from '../../shared/ui/presence-label';
 
+/** Presents real directory identity with own-profile editing and protected direct-chat navigation. */
 @Component({
   selector: 'app-live-profile-dialog',
   imports: [AvatarImage, Icon, PresenceLabel],
@@ -53,11 +54,13 @@ export class LiveProfileDialog {
   );
   protected readonly own = computed(() => this.person().uid === this.store.session.user()?.uid);
 
+  /** Seeds the shared edit draft from the displayed profile before opening the own-account editor. */
   protected edit(): void {
     this.draft.begin(this.person().name, this.person().avatarId);
     this.overlay.open('profile-edit', { account: true });
   }
 
+  /** Opens the participant's persisted direct conversation before dismissing the profile dialog. */
   protected direct(): void {
     void this.action.run(async () => {
       await this.nav.direct(this.person().uid);

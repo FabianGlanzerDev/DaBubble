@@ -3,6 +3,7 @@ import { AuthSession } from '../auth/auth-session';
 import { ChatMessage, ChatPerson, ChatReaction, ChatRoom, chatError } from './chat-models';
 import type { ChatApi } from './chat-api';
 
+/** Maintains account-scoped live chat subscriptions, cached messages and recent reaction choices. */
 @Injectable({ providedIn: 'root' })
 export class ChatStore {
   readonly session = inject(AuthSession);
@@ -25,6 +26,7 @@ export class ChatStore {
   );
   readonly recent = signal<string[]>(['✅', '🙌']);
 
+  /** Rebinds chat listeners on account changes and republishes profile edits to the directory. */
   constructor() {
     effect(() => {
       const uid = this.accountUid();
@@ -34,12 +36,14 @@ export class ChatStore {
     this.destroy.onDestroy(() => this.disconnect());
   }
 
+  /** Clears the previous account's cached data before starting a new authenticated subscription set. */
   private connect(uid?: string): void {
     this.disconnect();
     if (uid) void this.initialize(uid, this.revision);
     else this.loading.set(false);
   }
 
+  /** Creates the chat client and directory entry only while the initiating account revision is current. */
   private async initialize(uid: string, revision: number): Promise<void> {
     try {
       const { ChatApi } = await import('./chat-api');
@@ -54,7 +58,9 @@ export class ChatStore {
     }
   }
 
+  /** Starts directory and membership listeners whose errors are scoped to this connection revision. */
   private subscribe(revision: number): void {
+    /** Ignores delayed subscription errors from an account connection that has already been replaced. */
     const fail = (error: unknown) => {
       if (revision === this.revision) this.fail(error);
     };
@@ -62,11 +68,13 @@ export class ChatStore {
     this.stops.push(this.api().rooms((rooms) => this.acceptRooms(rooms), fail));
   }
 
+  /** Sorts directory entries and synchronizes the UIDs observed by the presence service. */
   private acceptPeople(people: ChatPerson[]): void {
     this.people.set(people.sort((a, b) => a.name.localeCompare(b.name)));
     this.session.watchPresence(people.map((person) => person.uid));
   }
 
+  /** Drops revoked conversations and attaches listeners to newly permitted rooms before ending loading. */
   private acceptRooms(rooms: ChatRoom[]): void {
     for (const [id, stops] of this.roomStops) {
       if (!rooms.some((room) => room.id === id)) this.dropRoom(id, stops);
@@ -76,12 +84,16 @@ export class ChatStore {
     this.loading.set(false);
   }
 
+  /** Maintains separate message and reaction streams for an accessible conversation. */
   private watchRoom(id: string): void {
+    /** Reports room listener errors only while the room remains in the current membership list. */
     const fail = (error: unknown) => {
       if (this.rooms().some((room) => room.id === id)) this.fail(error);
     };
+    /** Replaces this conversation's message cache without disturbing other subscribed rooms. */
     const messages = (items: ChatMessage[]) =>
       this.messages.update((all) => ({ ...all, [id]: items }));
+    /** Replaces this conversation's reaction cache without disturbing other subscribed rooms. */
     const reactions = (items: ChatReaction[]) =>
       this.reactions.update((all) => ({ ...all, [id]: items }));
     this.roomStops.set(id, [
@@ -90,6 +102,7 @@ export class ChatStore {
     ]);
   }
 
+  /** Unsubscribes a revoked room and removes its messages and reactions from local state. */
   private dropRoom(id: string, stops: (() => void)[]): void {
     stops.forEach((stop) => stop());
     this.roomStops.delete(id);
@@ -101,6 +114,7 @@ export class ChatStore {
     );
   }
 
+  /** Propagates profile changes to the directory and ignores errors from superseded account connections. */
   private publish(profile: ChatPerson | null): void {
     if (!profile || !this.client) return;
     const revision = this.revision;
@@ -109,6 +123,7 @@ export class ChatStore {
     });
   }
 
+  /** Disposes all listeners and account-specific caches before another user can access the workspace. */
   private disconnect(): void {
     this.revision++;
     this.stops.splice(0).forEach((stop) => stop());
@@ -124,21 +139,25 @@ export class ChatStore {
     this.recent.set(['✅', '🙌']);
   }
 
+  /** Stops loading and exposes safe feedback for a failed chat connection. */
   private fail(error: unknown): void {
     this.error.set(chatError(error));
     this.loading.set(false);
   }
 
+  /** Rebuilds subscriptions for the current session after a recoverable loading failure. */
   retry(): void {
     this.connect(this.session.user()?.uid);
   }
 
+  /** Rejects writes before client initialization or when the browser reports an offline connection. */
   private api(): ChatApi {
     if (!this.client) throw new Error('chat-not-ready');
     if (!navigator.onLine) throw new Error('offline');
     return this.client;
   }
 
+  /** Resolves directory identity with distinct fallbacks for deleted accounts and unavailable members. */
   person(uid: string): ChatPerson {
     if (!uid) return { uid: '', name: 'Gelöschtes Konto', avatarId: 0 };
     return (
@@ -146,6 +165,7 @@ export class ChatStore {
     );
   }
 
+  /** Derives a room title from channel metadata, direct-chat participants or its archive state. */
   label(room: ChatRoom): string {
     if (room.archived) return 'Direktgespräch · Konto gelöscht';
     const uid =
@@ -153,19 +173,23 @@ export class ChatStore {
     return room.kind === 'channel' ? room.name : this.person(uid).name;
   }
 
+  /** Creates a validated channel through the ready, connectivity-checked chat client. */
   create(name: string, description: string): Promise<string> {
     return this.api().createChannel(name, description);
   }
 
+  /** Adds selected members sequentially; already completed additions remain if a later addition fails. */
   async invite(id: string, members: string[]): Promise<void> {
     const client = this.api();
     for (const member of members) await client.addMember(id, member);
   }
 
+  /** Delegates validated channel metadata changes to the authenticated transactional API. */
   editRoom(room: ChatRoom, name: string, description: string): Promise<void> {
     return this.api().editChannel(room, name, description);
   }
 
+  /** Stops room listeners before leaving and reinstates them if the membership update fails. */
   async leave(id: string): Promise<void> {
     const stops = this.roomStops.get(id);
     if (stops) this.dropRoom(id, stops);
@@ -177,22 +201,27 @@ export class ChatStore {
     }
   }
 
+  /** Returns the existing or newly created deterministic conversation for the selected UID. */
   direct(uid: string): Promise<string> {
     return this.api().openDirect(uid);
   }
 
+  /** Sends a root message or reply through the currently authenticated chat client. */
   send(id: string, text: string, root = ''): Promise<void> {
     return this.api().send(id, text, root);
   }
 
+  /** Updates message content through the server's author-ownership checks. */
   edit(message: ChatMessage, text: string): Promise<void> {
     return this.api().edit(message, text);
   }
 
+  /** Requests message tombstoning rather than deleting shared thread structure. */
   remove(message: ChatMessage): Promise<void> {
     return this.api().remove(message);
   }
 
+  /** Persists an emoji toggle before updating the two most recent reaction shortcuts. */
   async react(message: ChatMessage, emoji: string): Promise<void> {
     await this.api().react(message, emoji);
     this.recent.update((recent) => [emoji, ...recent.filter((item) => item !== emoji)].slice(0, 2));

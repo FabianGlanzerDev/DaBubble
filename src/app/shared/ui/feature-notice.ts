@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
+/** Labels design-only interactions so users are not led to expect persisted chat behavior. */
 @Component({
   selector: 'app-feature-notice',
   changeDetection: ChangeDetectionStrategy.OnPush,

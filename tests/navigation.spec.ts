@@ -1,3 +1,9 @@
+/**
+ * Checks public and preview navigation, protected-route rejection, keyboard controls and accessible fallback pages.
+ *
+ * @packageDocumentation
+ */
+
 import { test, expect } from './browser-fixture';
 
 test('intro, account navigation and unavailable forms', async ({ page }) => {

@@ -7,6 +7,7 @@ import { captureOverlay } from './overlay-evidence';
 test.use({ emulatedFirebase: true });
 const draftKey = 'dabubble.registration.v1';
 
+/** Prepares unique emulator signup data and consent without submitting the form. */
 async function fillRegistration(page: Page): Promise<void> {
   await page.goto('/#/registrierung');
   await page.getByLabel('Name', { exact: true }).fill('Frederik Beck');
@@ -17,12 +18,14 @@ async function fillRegistration(page: Page): Promise<void> {
   await page.getByRole('checkbox').check();
 }
 
+/** Submits a prepared signup and verifies the immediate transition to avatar selection. */
 async function startRegistration(page: Page): Promise<void> {
   await fillRegistration(page);
   await page.getByRole('button', { name: 'Weiter zur Avatar-Auswahl' }).click();
   await expect(page).toHaveURL(/\/avatar-auswahl$/);
 }
 
+/** Checks restored setup identity without an extra name field or development-preview notice. */
 async function expectRestored(page: Page, name = 'Frederik Beck'): Promise<void> {
   await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
   await expect(page.getByLabel('Name', { exact: true })).toHaveCount(0);

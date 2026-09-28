@@ -1,3 +1,9 @@
+/**
+ * Exercises emulator-generated reset links on static hosting through password change, subsequent login and used-code rejection.
+ *
+ * @packageDocumentation
+ */
+
 import { test, expect } from '../browser-fixture';
 import { randomUUID } from 'node:crypto';
 import { writeFile } from 'node:fs/promises';

@@ -1,3 +1,9 @@
+/**
+ * Checks real reaction grouping, recent emoji choices, mentions and responsive chat presentation using emulator data.
+ *
+ * @packageDocumentation
+ */
+
 import { test, expect } from '../browser-fixture';
 import { createChannel, noOverflow, registerChatUser, revealActions, send } from './chat-helpers';
 

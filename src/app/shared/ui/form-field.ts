@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, input, model, signal } from '@angular/core';
 import { Icon } from './icon';
 
+/** Identifies the supported name, email and password validation variants. */
 export type FieldKind = 'name' | 'email' | 'password' | 'confirmation';
 
+/** Returns localized required-field, identity, minimum-password or confirmation feedback without HTML alerts. */
 export function fieldError(kind: FieldKind, value: string, match = ''): string {
   if (!value.trim())
     return kind === 'name'
@@ -17,6 +19,7 @@ export function fieldError(kind: FieldKind, value: string, match = ''): string {
   return '';
 }
 
+/** Checks the display-name length limit and the application's email format requirement. */
 function identityFieldError(kind: 'name' | 'email', value: string): string {
   if (kind === 'name' && value.trim().length > 80)
     return 'Der Name darf höchstens 80 Zeichen lang sein.';
@@ -25,6 +28,7 @@ function identityFieldError(kind: 'name' | 'email', value: string): string {
   return '';
 }
 
+/** Combines accessible labels, input state and local or backend validation feedback for authentication forms. */
 @Component({
   selector: 'app-form-field',
   imports: [Icon],
@@ -143,6 +147,7 @@ function identityFieldError(kind: 'name' | 'email', value: string): string {
   `,
 })
 export class FormField {
+  /** Clears interaction-driven validation visibility without changing the parent-owned input value. */
   reset(): void {
     this.touched.set(false);
   }

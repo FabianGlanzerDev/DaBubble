@@ -133,6 +133,7 @@ for (const width of [1440, 320]) {
   }
 }
 
+/** Verifies guest ownership by a profile challenge, confirms logout preserves data and checks a new guest cannot reopen it. */
 async function reviewGuest(
   page: Page,
   admin: DeletionContext,

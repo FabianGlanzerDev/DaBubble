@@ -1,3 +1,9 @@
+/**
+ * Checks that newly created channels retain their intended list position after renaming and reloading.
+ *
+ * @packageDocumentation
+ */
+
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '../browser-fixture';
 import { createChannel, registerChatUser, noOverflow } from './chat-helpers';

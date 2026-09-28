@@ -1,3 +1,9 @@
+/**
+ * Checks intro timing, repeated entry, logo replay and reduced motion alongside explicitly labeled confirmation previews.
+ *
+ * @packageDocumentation
+ */
+
 import { test, expect } from './browser-fixture';
 
 for (const width of [1920, 430, 375, 320]) {

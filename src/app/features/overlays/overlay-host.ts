@@ -36,6 +36,7 @@ const titles: Record<OverlayType, string> = {
   reactions: 'Beispielreaktionen',
 };
 
+/** Hosts native modal dialogs for real and preview flows, including focus restoration and logout feedback. */
 @Component({
   selector: 'app-overlay-host',
   imports: [
@@ -68,10 +69,12 @@ export class OverlayHost {
       : titles[current?.type ?? 'settings'];
   });
 
+  /** Synchronizes the native dialog lifecycle after reactive overlay state has rendered. */
   constructor() {
     afterRenderEffect(() => this.syncDialog());
   }
 
+  /** Closes account controls only after Firebase logout succeeds; failures remain visible in the dialog. */
   protected async logout(): Promise<void> {
     if (this.session.busy()) return;
     this.logoutError.set('');
@@ -83,6 +86,7 @@ export class OverlayHost {
     }
   }
 
+  /** Mirrors shared overlay state into native modal state and restores focus after dismissal. */
   private syncDialog(): void {
     const dialog = this.dialog().nativeElement;
     if (this.overlay.current() && !dialog.open) dialog.showModal();
@@ -92,11 +96,13 @@ export class OverlayHost {
     }
   }
 
+  /** Keeps Escape dismissal under the shared closing animation instead of the browser's immediate close. */
   protected cancel(event: Event): void {
     event.preventDefault();
     this.overlay.close();
   }
 
+  /** Dismisses only pointer events outside the dialog bounds, preserving clicks within its content. */
   protected backdrop(event: PointerEvent): void {
     const dialog = this.dialog().nativeElement;
     const rect = dialog.getBoundingClientRect();

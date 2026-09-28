@@ -4,6 +4,7 @@ import { ChatStore } from '../../core/chat/chat-store';
 import { ChatNavigation } from '../../core/chat/chat-navigation';
 import { OverlayState } from '../../core/ui/overlay-state';
 
+/** Turns recognized directory and channel mentions into navigation controls without interpreting arbitrary HTML. */
 @Component({
   selector: 'app-live-message-text',
   imports: [RouterLink],
@@ -43,6 +44,7 @@ export class LiveMessageText {
   protected readonly overlay = inject(OverlayState);
   protected readonly parts = computed(() => this.split());
 
+  /** Separates recognized mention tokens from plain message text while discarding empty fragments. */
   private split(): string[] {
     const pattern = this.pattern();
     return pattern
@@ -52,6 +54,7 @@ export class LiveMessageText {
       : [this.text()];
   }
 
+  /** Escapes known names for literal matching and prioritizes longer names to avoid partial mention matches. */
   private pattern(): string {
     const names = [
       ...this.store.people().map((p) => '@' + p.name),
@@ -63,10 +66,12 @@ export class LiveMessageText {
       .join('|');
   }
 
+  /** Resolves an exact rendered person mention against the available directory. */
   protected person(text: string) {
     return this.store.people().find((person) => '@' + person.name === text);
   }
 
+  /** Resolves an exact channel mention only among conversations available to the current account. */
   protected channel(text: string) {
     return this.store.channels().find((room) => '#' + room.name === text);
   }

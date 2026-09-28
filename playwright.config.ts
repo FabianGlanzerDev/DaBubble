@@ -1,3 +1,9 @@
+/**
+ * Runs public UI tests against the built app through isolated fixtures rather than a development server.
+ *
+ * @packageDocumentation
+ */
+
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({

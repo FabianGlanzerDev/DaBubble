@@ -18,6 +18,7 @@ import { OverlayState } from '../../core/ui/overlay-state';
 import { Icon } from '../../shared/ui/icon';
 import { LiveMemberList } from './live-member-list';
 
+/** Edits real channel metadata and membership with inline validation and per-action error state. */
 @Component({
   selector: 'app-live-channel-dialog',
   imports: [NgTemplateOutlet, Icon, LiveMemberList],
@@ -50,6 +51,7 @@ export class LiveChannelDialog {
   private readonly descriptionInput =
     viewChild<ElementRef<HTMLTextAreaElement>>('descriptionInput');
 
+  /** Synchronizes untouched fields with live room updates and restores focus after edit transitions. */
   constructor() {
     effect(() => {
       const room = this.room();
@@ -59,6 +61,7 @@ export class LiveChannelDialog {
     afterRenderEffect(() => this.focusField());
   }
 
+  /** Focuses the active editor or its edit button after saving, without disturbing an in-flight action. */
   private focusField(): void {
     if (this.action.busy()) return;
     if (this.editing() === 'name') this.nameInput()?.nativeElement.focus();
@@ -69,6 +72,7 @@ export class LiveChannelDialog {
         ?.focus();
   }
 
+  /** Resets field-edit tracking and records the control that should regain focus after saving. */
   protected startEdit(field: 'name' | 'description'): void {
     this.action.error.set('');
     this.nameEdited.set(false);
@@ -77,6 +81,7 @@ export class LiveChannelDialog {
     this.editing.set(field);
   }
 
+  /** Validates channel naming before updating an existing room or creating and opening a new one. */
   protected save(): void {
     this.nameTouched.set(true);
     if (this.validation()) return;
@@ -88,6 +93,7 @@ export class LiveChannelDialog {
       });
   }
 
+  /** Persists only the selected editable field while retaining the other field's live value. */
   protected saveField(field: 'name' | 'description'): void {
     if (field === 'name' && this.validation()) return;
     void this.action.run(async () => {
@@ -103,10 +109,12 @@ export class LiveChannelDialog {
     });
   }
 
+  /** Opens the profile associated with the room's recorded creator UID. */
   protected creator(): void {
     this.overlay.open('profile', { live: true, personId: this.room()?.createdBy });
   }
 
+  /** Navigates to the workspace overview only after the current user's membership has been removed. */
   protected leave(): void {
     void this.action.run(async () => {
       await this.store.leave(this.room()!.id);

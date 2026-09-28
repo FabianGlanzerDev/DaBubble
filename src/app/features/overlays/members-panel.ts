@@ -4,6 +4,7 @@ import { AvatarImage } from '../../shared/ui/avatar-image';
 import { Icon } from '../../shared/ui/icon';
 import { examplePeople } from '../chat/workspace-people';
 
+/** Demonstrates member search and selection using example people without changing real membership. */
 @Component({
   selector: 'app-members-panel',
   imports: [AvatarImage, Icon],
@@ -31,15 +32,18 @@ export class MembersPanel {
     ),
   );
 
+  /** Updates local filtering from the example member-search field. */
   protected search(event: Event): void {
     this.query.set((event.target as HTMLInputElement).value);
   }
 
+  /** Adds an example person to the pending selection and clears the search query. */
   protected select(id: string): void {
     this.selected.update((ids) => [...ids, id]);
     this.query.set('');
   }
 
+  /** Removes a pending example selection without touching any stored conversation. */
   protected remove(id: string): void {
     this.selected.update((ids) => ids.filter((selected) => selected !== id));
   }

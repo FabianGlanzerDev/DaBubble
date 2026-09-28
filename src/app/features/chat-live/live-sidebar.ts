@@ -6,6 +6,7 @@ import { OverlayState } from '../../core/ui/overlay-state';
 import { Icon } from '../../shared/ui/icon';
 import { AvatarImage } from '../../shared/ui/avatar-image';
 
+/** Lists only available real conversations and directory identities with active-route and presence feedback. */
 @Component({
   selector: 'app-live-sidebar',
   imports: [RouterLink, RouterLinkActive, Icon, AvatarImage],
@@ -97,10 +98,12 @@ export class LiveSidebar {
     this.store.rooms().filter((room) => room.kind === 'direct'),
   );
 
+  /** Selects the other direct-chat participant, falling back to the sole member for self conversations. */
   protected partner(members: string[]): string {
     return members.find((id) => id !== this.store.session.user()?.uid) ?? members[0] ?? '';
   }
 
+  /** Opens channel creation in real persistence mode rather than the design preview. */
   protected create(): void {
     this.overlay.open('channel-create', { live: true });
   }

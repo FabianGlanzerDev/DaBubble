@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MessageComposer } from './message-composer';
 import { WorkspaceSearch } from './workspace-search';
 
+/** Shows the preview's initial conversation-selection state and example recipient search. */
 @Component({
   selector: 'app-workspace-overview',
   imports: [MessageComposer, WorkspaceSearch],

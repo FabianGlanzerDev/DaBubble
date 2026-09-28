@@ -16,6 +16,7 @@ import type { Page } from '@playwright/test';
 
 test.use({ emulatedFirebase: true });
 
+/** Creates an email/password emulator identity through the form for subsequent provider-linking tests. */
 async function passwordAccount(page: Page, email: string, password: string): Promise<void> {
   await page.goto('/#/registrierung');
   await page.getByLabel('Name', { exact: true }).fill('Bestehendes Konto');

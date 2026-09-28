@@ -1,3 +1,9 @@
+/**
+ * Runs hash-route and reset-link checks against a real local static server without SPA fallback.
+ *
+ * @packageDocumentation
+ */
+
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({

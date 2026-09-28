@@ -6,6 +6,7 @@ import { LiveProfileDialog } from './live-profile-dialog';
 import { LiveChannelDialog } from './live-channel-dialog';
 import { LiveMembersDialog } from './live-members-dialog';
 
+/** Dispatches real-chat overlay content and connects shared pickers to the initiating chat action. */
 @Component({
   selector: 'app-live-dialog',
   imports: [LiveProfileDialog, LiveChannelDialog, LiveMembersDialog],
@@ -69,6 +70,7 @@ export class LiveDialog {
     ),
   );
 
+  /** Delivers the selected emoji to the opening action before dismissing the picker. */
   protected choose(emoji: string): void {
     this.overlay.current()?.onEmoji?.(emoji);
     this.overlay.close();

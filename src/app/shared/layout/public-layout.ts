@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Brand } from '../ui/brand';
 
+/** Provides the common brand, main-content landmark and legal navigation around public page content. */
 @Component({
   selector: 'app-public-layout',
   imports: [Brand, RouterLink],

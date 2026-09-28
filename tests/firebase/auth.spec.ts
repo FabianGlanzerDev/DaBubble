@@ -6,6 +6,7 @@ import { emulatorConfig } from './emulator-config';
 test.use({ emulatedFirebase: true });
 const password = randomUUID(); // Generated per local emulator run; never stored in the repository.
 
+/** Registers a local account, selects its avatar and verifies the resulting named profile menu in chat. */
 async function register(page: Page, email: string, name: string, avatar = 3): Promise<void> {
   await page.goto('/#/registrierung');
   await page.getByLabel('Name', { exact: true }).fill(name);
@@ -20,12 +21,14 @@ async function register(page: Page, email: string, name: string, avatar = 3): Pr
   await expect(page.getByRole('button', { name: `Profilmenü für ${name} öffnen` })).toBeVisible();
 }
 
+/** Ends the emulator session through the account menu and verifies navigation back to login. */
 async function logout(page: Page): Promise<void> {
   await page.getByRole('button', { name: /^Profilmenü für/ }).click();
   await page.getByRole('button', { name: 'Log out', exact: true }).click();
   await expect(page).toHaveURL(/\/anmeldung$/);
 }
 
+/** Submits emulator email credentials through a freshly opened login route for success or failure assertions. */
 async function login(page: Page, email: string, secret = password): Promise<void> {
   await page.goto('/#/anmeldung');
   await page.getByLabel('E-Mail-Adresse', { exact: true }).fill(email);
@@ -130,6 +133,7 @@ test('duplicate email and invalid credentials produce field errors; repeated sub
   await expect(page.getByRole('button', { name: 'Anmelden', exact: true })).toBeEnabled();
 });
 
+/** Submits signup details without completing avatar setup so tests can inspect registration validation. */
 async function registerUntilSubmit(page: Page, email: string): Promise<void> {
   await page.goto('/#/registrierung');
   await page.getByLabel('Name', { exact: true }).fill('Other Name');

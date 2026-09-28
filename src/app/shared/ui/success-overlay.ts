@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { ConfirmationKind, ConfirmationMessage } from './confirmation-message';
 
+/** Shows an accessible timed confirmation after its caller has established that the operation succeeded. */
 @Component({
   selector: 'app-success-overlay',
   imports: [ConfirmationMessage],
@@ -68,12 +69,14 @@ export class SuccessOverlay {
   private readonly status = viewChild.required<ElementRef<HTMLElement>>('status');
   private done = false;
 
+  /** Focuses the confirmation after rendering and disposes the automatic completion timer on destruction. */
   constructor() {
     afterNextRender(() => this.status().nativeElement.focus());
     const timer = setTimeout(() => this.finish(), 1800);
     this.destroy.onDestroy(() => clearTimeout(timer));
   }
 
+  /** Emits completion at most once, whether triggered by the timer, Enter or Escape. */
   protected finish(): void {
     if (this.done) return;
     this.done = true;

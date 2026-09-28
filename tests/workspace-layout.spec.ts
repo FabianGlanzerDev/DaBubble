@@ -9,6 +9,7 @@ test('four desktop layouts reclaim space and keep thread controls keyboard acces
   const main = page.getByRole('region', { name: 'Chat-Ansicht', exact: true });
   const menu = page.getByRole('navigation', { name: 'Arbeitsbereich', exact: true });
   const thread = page.getByRole('complementary', { name: 'Vorgesehener Thread-Bereich' });
+  /** Measures the currently rendered main panel to compare available space before and after layout toggles. */
   const width = async () => (await main.boundingBox())!.width;
   const fullWidth = await width();
   await page.screenshot({ path: testInfo.outputPath('06-menu-and-thread.png') });

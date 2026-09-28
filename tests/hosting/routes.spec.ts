@@ -1,3 +1,9 @@
+/**
+ * Checks direct entry, reload and safe parameter handling for public and protected hash routes without server rewrites.
+ *
+ * @packageDocumentation
+ */
+
 import { test, expect } from '../browser-fixture';
 import { writeFile } from 'node:fs/promises';
 

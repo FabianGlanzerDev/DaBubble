@@ -2,6 +2,7 @@ import { expect, type Browser, type Page, type TestInfo } from '@playwright/test
 import { randomUUID } from 'node:crypto';
 import { installAppRoutes } from '../browser-fixture';
 
+/** Creates an isolated emulator chat participant and waits for profile and conversation loading to finish. */
 export async function registerChatUser(page: Page, name: string): Promise<void> {
   await page.goto('/#/registrierung');
   await page.getByLabel('Name', { exact: true }).fill(name);
@@ -18,6 +19,7 @@ export async function registerChatUser(page: Page, name: string): Promise<void> 
   await expect(page.locator('.chat-error')).toBeHidden();
 }
 
+/** Creates a separate desktop or touch browser context with emulator routing and browser-error collection. */
 export async function secondUser(browser: Browser, baseURL: string, width: number) {
   const context = await browser.newContext({
     baseURL,
@@ -36,6 +38,7 @@ export async function secondUser(browser: Browser, baseURL: string, width: numbe
   return { page, context, errors };
 }
 
+/** Creates a test-owned channel through the real dialog and verifies its heading and dialog dismissal. */
 export async function createChannel(page: Page, name: string): Promise<void> {
   await page
     .locator('app-live-sidebar')
@@ -48,6 +51,7 @@ export async function createChannel(page: Page, name: string): Promise<void> {
   await expect(page.getByRole('dialog')).toBeHidden();
 }
 
+/** Submits root or thread text with Enter and verifies that successful persistence clears the editor. */
 export async function send(page: Page, text: string, thread = false): Promise<void> {
   await expect(page.getByRole('dialog')).toBeHidden();
   const field = page.getByLabel(thread ? 'Antwort schreiben' : 'Nachricht schreiben', {
@@ -58,6 +62,7 @@ export async function send(page: Page, text: string, thread = false): Promise<vo
   await expect(field).toHaveValue('');
 }
 
+/** Finds and selects a named test participant in the real channel invitation picker. */
 export async function selectInvitee(page: Page, name: string): Promise<void> {
   await page.getByRole('textbox', { name: 'Leute hinzufügen', exact: true }).fill(name);
   await page
@@ -66,6 +71,7 @@ export async function selectInvitee(page: Page, name: string): Promise<void> {
     .click();
 }
 
+/** Asserts viewport and open-dialog bounds before saving an animation-free screenshot. */
 export async function noOverflow(page: Page, info: TestInfo, name: string): Promise<void> {
   const size = await page.evaluate(() => {
     const dialog = document.querySelector<HTMLDialogElement>('dialog[open]');
@@ -80,6 +86,7 @@ export async function noOverflow(page: Page, info: TestInfo, name: string): Prom
   await page.screenshot({ path: info.outputPath(name + '.png'), animations: 'disabled' });
 }
 
+/** Exposes message actions through touch or hover and returns a locator stable across content edits. */
 export async function revealActions(page: Page, text: string) {
   const article = page
     .locator('.main-panel article')

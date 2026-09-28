@@ -11,6 +11,7 @@ export const emojiOptions = [
   { text: '🤔', label: 'Nachdenken', asset: 'thinking-face' },
 ] as const;
 
+/** Displays the shared emoji palette and delegates effects to the caller-provided callback. */
 @Component({
   selector: 'app-emoji-panel',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -69,6 +70,7 @@ export class EmojiPanel {
   protected readonly overlay = inject(OverlayState);
   protected readonly emojis = emojiOptions;
 
+  /** Delivers an emoji to the initiating preview action and closes the picker. */
   protected choose(emoji: string): void {
     this.overlay.current()?.onEmoji?.(emoji);
     this.overlay.close();

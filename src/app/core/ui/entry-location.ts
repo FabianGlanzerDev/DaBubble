@@ -9,6 +9,7 @@ export function entryLocation(url: URL): string | null {
   return '/#' + path + url.search + url.hash;
 }
 
+/** Normalizes Firebase action queries and legacy entry paths before Angular reads the browser location. */
 export function prepareEntryLocation(browser: Window): void {
   const destination = entryLocation(new URL(browser.location.href));
   if (destination) browser.history.replaceState(browser.history.state, '', destination);

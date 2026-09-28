@@ -1,3 +1,9 @@
+/**
+ * Exercises responsive preview dialogs, touch actions, history and intro presentation at mobile widths.
+ *
+ * @packageDocumentation
+ */
+
 import { test, expect } from './browser-fixture';
 
 test.use({ hasTouch: true });

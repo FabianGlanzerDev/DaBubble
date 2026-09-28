@@ -4,6 +4,7 @@ import { ChatAction } from '../../core/chat/chat-action';
 import { ChatMessage } from '../../core/chat/chat-models';
 import { OverlayState } from '../../core/ui/overlay-state';
 
+/** Groups real per-user emoji selections into accessible reaction counts and participant details. */
 @Component({
   selector: 'app-live-reactions',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -114,6 +115,7 @@ export class LiveReactions {
     ),
   );
 
+  /** Collects participant names and the current user's selection for one displayed emoji. */
   private summary(emoji: string) {
     const reactions = this.reactions().filter((item) => item.emojis.includes(emoji));
     return {
@@ -123,10 +125,12 @@ export class LiveReactions {
     };
   }
 
+  /** Submits a per-user emoji toggle while exposing failures without modifying another user's reactions. */
   protected toggle(emoji: string): void {
     void this.action.run(() => this.store.react(this.message(), emoji));
   }
 
+  /** Opens reaction details scoped to this message and conversation. */
   protected people(): void {
     this.overlay.open('reactions', {
       live: true,

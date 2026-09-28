@@ -17,6 +17,7 @@ import { RouterLink } from '@angular/router';
 import { Icon } from '../../shared/ui/icon';
 import { MobileNavigation } from '../../core/ui/mobile-navigation';
 
+/** Searches subscribed conversation data and directory entries with desktop and history-backed mobile presentation. */
 @Component({
   selector: 'app-live-search',
   imports: [AvatarImage, RouterLink, Icon],
@@ -69,10 +70,12 @@ export class LiveSearch {
           ),
   );
 
+  /** Restores focus when the expanded mobile search view is dismissed after rendering. */
   constructor() {
     afterRenderEffect(() => this.restoreSearchFocus());
   }
 
+  /** Clears a closing mobile search and returns focus only when its compact field remains visible. */
   private restoreSearchFocus(): void {
     const expanded = this.mobileExpanded();
     if (!expanded && this.wasMobileExpanded) {
@@ -83,22 +86,26 @@ export class LiveSearch {
     this.wasMobileExpanded = expanded;
   }
 
+  /** Updates live filtering and opens the dedicated mobile search view when typing from the menu. */
   protected changeQuery(event: Event): void {
     this.query.set((event.target as HTMLInputElement).value);
     if (this.mobileMenu() && this.mobile.isMobile()) this.mobile.open('search');
   }
 
+  /** Moves keyboard focus into the first enabled result without performing a selection. */
   protected focusResult(event: Event): void {
     event.preventDefault();
     this.results()?.nativeElement.querySelector<HTMLElement>('a, button:not(:disabled)')?.focus();
   }
 
+  /** Clears filtering and closes mobile search through history or returns focus to the desktop field. */
   protected dismiss(): void {
     this.query.set('');
     if (this.mobileExpanded()) this.mobile.close();
     else this.field().nativeElement.focus({ preventScroll: true });
   }
 
+  /** Clears the query only after opening a real direct conversation with the selected member. */
   protected direct(uid: string): void {
     void this.action.run(async () => {
       await this.nav.direct(uid);
@@ -106,6 +113,7 @@ export class LiveSearch {
     });
   }
 
+  /** Opens the result's conversation and thread context before clearing the search query. */
   protected openMessage(result: ReturnType<typeof this.messages>[number]): void {
     this.nav.message(result.room, result.message.id, result.message.rootId);
     this.query.set('');

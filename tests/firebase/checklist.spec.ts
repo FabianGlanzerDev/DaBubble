@@ -1,3 +1,9 @@
+/**
+ * Exercises channel validation, membership invitations, live filtering and accessible message editing with isolated test accounts.
+ *
+ * @packageDocumentation
+ */
+
 import { test, expect } from '../browser-fixture';
 import {
   createChannel,

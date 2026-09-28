@@ -18,6 +18,7 @@ import { FormField } from '../../shared/ui/form-field';
 import { SuccessOverlay } from '../../shared/ui/success-overlay';
 import { validProfileDraft } from '../../core/auth/user-profile';
 
+/** Restores account-bound avatar setup and separates real profile persistence from the design preview. */
 @Component({
   selector: 'app-avatar-page',
   imports: [AuthNote, PublicLayout, RouterLink, AvatarImage, Icon, FormField, SuccessOverlay],
@@ -58,6 +59,7 @@ export class AvatarPage {
       validProfileDraft({ name: this.name(), avatarId: this.selection()! }),
   );
 
+  /** Persists real-account avatar progress before reflecting the choice so reloads do not lose setup state. */
   protected select(avatarId: number): void {
     this.error.set('');
     try {
@@ -69,6 +71,7 @@ export class AvatarPage {
     }
   }
 
+  /** Saves a valid profile before completing registration or navigating an existing account to chat. */
   protected async save(): Promise<void> {
     if (!this.realAccount || !this.valid() || this.session.busy() || this.completed()) return;
     this.error.set('');
@@ -83,6 +86,7 @@ export class AvatarPage {
     }
   }
 
+  /** Clears completed signup progress only after successful navigation from the confirmation to chat. */
   protected async finish(): Promise<void> {
     if (this.destroy.destroyed) return;
     if (await this.router.navigateByUrl('/chat', { replaceUrl: true }))

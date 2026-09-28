@@ -1,8 +1,10 @@
+/** Directory identity used to display participants without exposing private profile fields. */
 export interface ChatPerson {
   uid: string;
   name: string;
   avatarId: number;
 }
+/** Conversation metadata, membership and optional archive state shared by channels and direct chats. */
 export interface ChatRoom {
   id: string;
   kind: 'channel' | 'direct';
@@ -14,6 +16,7 @@ export interface ChatRoom {
   createdAt?: number;
   archived?: boolean;
 }
+/** Conversation message with an optional root reference; deleted messages retain metadata as tombstones. */
 export interface ChatMessage {
   id: string;
   roomId: string;
@@ -24,6 +27,7 @@ export interface ChatMessage {
   updatedAt: number;
   deleted: boolean;
 }
+/** One user's emoji selections for a message, represented by a deterministic Firestore document. */
 export interface ChatReaction {
   id: string;
   messageId: string;
@@ -53,6 +57,7 @@ export const chatEmojis = [
   '🎯',
 ];
 
+/** Returns localized validation feedback for the allowed 1-80 character channel naming format. */
 export function channelNameError(name: string): string {
   if (!name.trim()) return 'Bitte gib einen Channel-Namen ein.';
   return /^[a-zäöüß0-9][a-zäöüß0-9 _-]{0,79}$/i.test(name.trim())
@@ -60,10 +65,12 @@ export function channelNameError(name: string): string {
     : 'Bitte verwende 1–80 Buchstaben, Zahlen, Leerzeichen, - oder _. Beginne mit einem Buchstaben oder einer Zahl.';
 }
 
+/** Produces the same room ID for either participant order and supports a one-member self conversation. */
 export function directRoomId(first: string, second: string): string {
   return 'dm_' + [...new Set([first, second])].sort().join('~');
 }
 
+/** Maps domain validation and connectivity failures to safe feedback without exposing raw service errors. */
 export function chatError(error: unknown): string {
   const code = error instanceof Error ? error.message : '';
   if (code === 'duplicate-channel') return 'Dieser Channel-Name ist bereits vergeben.';

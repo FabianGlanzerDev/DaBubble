@@ -1,3 +1,9 @@
+/**
+ * Verifies reset-page presentation and explicitly labeled confirmation examples without issuing real account actions.
+ *
+ * @packageDocumentation
+ */
+
 import { test, expect } from './browser-fixture';
 
 test('password layouts have separate routes without sending or changing anything', async ({

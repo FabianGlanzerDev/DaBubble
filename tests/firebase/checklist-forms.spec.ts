@@ -1,3 +1,9 @@
+/**
+ * Verifies field-specific validation and disabled states in real emulator-backed authentication forms.
+ *
+ * @packageDocumentation
+ */
+
 import { test, expect } from '../browser-fixture';
 
 test.use({ emulatedFirebase: true });

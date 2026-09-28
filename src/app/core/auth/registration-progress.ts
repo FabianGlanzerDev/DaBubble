@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { AccountIdentity } from './user-profile';
 
+/** Serializable setup progress bound to one UID after registration; excludes credentials. */
 interface RegistrationDraft {
   uid: string | null;
   email: string;
@@ -16,11 +17,13 @@ const storageKey = 'dabubble.registration.v1';
 export class RegistrationProgress {
   private readonly draft = signal<RegistrationDraft | null>(this.restore());
 
+  /** Returns setup progress only for its owning, non-anonymous account. */
   forUser(user: AccountIdentity | null): RegistrationDraft | null {
     const draft = this.draft();
     return user && !user.isAnonymous && draft?.uid === user.uid ? draft : null;
   }
 
+  /** Persists the entered identity before creating an account so setup can survive reloads. */
   prepare(email: string, name: string): void {
     this.persist({
       uid: null,
@@ -31,6 +34,7 @@ export class RegistrationProgress {
     });
   }
 
+  /** Binds an unclaimed draft only to the matching email/password identity. */
   attach(user: AccountIdentity | null): void {
     const draft = this.draft();
     if (!draft || draft.uid || !user || user.isAnonymous) return;
@@ -39,21 +43,25 @@ export class RegistrationProgress {
     this.persist({ ...draft, uid: user.uid });
   }
 
+  /** Retains the prior avatar when updating the owning account's unfinished setup. */
   update(user: AccountIdentity | null, name: string, avatarId?: number | null): void {
     const draft = this.forUser(user);
     if (draft)
       this.persist({ ...draft, name, avatarId: avatarId ?? draft.avatarId, completed: false });
   }
 
+  /** Marks persisted setup as complete so reloads can replay the success step. */
   complete(user: AccountIdentity | null): void {
     const draft = this.forUser(user);
     if (draft) this.persist({ ...draft, completed: true });
   }
 
+  /** Discards an unbound draft after failed signup without removing an existing account's progress. */
   cancelPreparation(): void {
     if (!this.draft()?.uid) this.clear();
   }
 
+  /** Removes this tab's setup draft without allowing unavailable storage to prevent logout. */
   clear(): void {
     this.draft.set(null);
     try {
@@ -63,6 +71,7 @@ export class RegistrationProgress {
     }
   }
 
+  /** Updates the in-memory draft only after session storage succeeds; rejects unavailable storage. */
   private persist(draft: RegistrationDraft): void {
     try {
       sessionStorage.setItem(storageKey, JSON.stringify(draft));
@@ -72,6 +81,7 @@ export class RegistrationProgress {
     }
   }
 
+  /** Treats missing, malformed or inaccessible session storage as absent setup progress. */
   private restore(): RegistrationDraft | null {
     try {
       const data: unknown = JSON.parse(sessionStorage.getItem(storageKey) ?? 'null');
@@ -82,6 +92,7 @@ export class RegistrationProgress {
   }
 }
 
+/** Validates restored draft fields and name limits before trusting browser storage. */
 function validDraft(value: unknown): value is RegistrationDraft {
   if (!value || typeof value !== 'object') return false;
   const draft = value as Partial<RegistrationDraft>;
@@ -96,6 +107,7 @@ function validDraft(value: unknown): value is RegistrationDraft {
   );
 }
 
+/** Accepts an unselected avatar or an integer index into the six supplied illustrations. */
 function validAvatar(value: unknown): boolean {
   return (
     value === null ||

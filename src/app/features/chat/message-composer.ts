@@ -14,6 +14,7 @@ import { channels, directMessages } from './workspace-items';
 import { AvatarImage } from '../../shared/ui/avatar-image';
 import { AuthSession } from '../../core/auth/auth-session';
 
+/** Demonstrates draft entry, mentions and emoji insertion locally without sending messages. */
 @Component({
   selector: 'app-message-composer',
   imports: [Icon, AvatarImage],
@@ -41,20 +42,24 @@ export class MessageComposer {
     ),
   );
 
+  /** Detects a trailing mention token and opens matching example suggestions. */
   protected updateDraft(value: string): void {
     this.draft.set(value);
     this.mentionQuery.set(value.match(/(?:^|\s)([@#][\p{L}\p{N}-]*)$/u)?.[1] ?? '');
     this.mentionsOpen.set(!!this.mentionQuery());
   }
 
+  /** Routes a preview emoji selection back into the current local draft. */
   protected openEmoji(): void {
     this.overlay.open('emoji', { onEmoji: (emoji) => this.insert(emoji) });
   }
 
+  /** Finds the supplied example avatar for an exact direct-message mention. */
   protected mentionAvatar(mention: string): number | null {
     return directMessages.find((person) => '@' + person.label === mention)?.avatar ?? null;
   }
 
+  /** Replaces the trailing mention query, normalizes surrounding spacing and refocuses the preview editor. */
   protected insert(text: string): void {
     const value = this.mentionQuery()
       ? this.draft().slice(0, -this.mentionQuery().length)

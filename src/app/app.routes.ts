@@ -1,3 +1,9 @@
+/**
+ * Defines public, preview and protected live routes with lazy views and explicit authentication and intro guards.
+ *
+ * @packageDocumentation
+ */
+
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/auth.guard';
 import { loginEntryGuard } from './core/ui/login-entry.guard';

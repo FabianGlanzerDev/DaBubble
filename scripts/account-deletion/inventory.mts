@@ -7,17 +7,21 @@ import type {
 import type { DeletionContext } from './environment.mts';
 import { isMissingAuth, validateUid } from './environment.mts';
 
+/** Document reference and data together with its existence and update version for deletion-plan review. */
 export type Row = {
   ref: DocumentReference;
   data: Record<string, unknown>;
   version: string;
   exists: boolean;
 };
+/** Conversation metadata and known child documents, including children whose parent document is missing. */
 export type RoomInventory = { room: Row; exists: boolean; messages: Row[]; reactions: Row[] };
+/** Extracts only string participant identifiers from untrusted conversation metadata. */
 export const membersOf = (data: Record<string, unknown>): string[] =>
   Array.isArray(data['memberIds'])
     ? data['memberIds'].filter((v): v is string => typeof v === 'string')
     : [];
+/** Preserves document location, data and update version even for a missing parent document. */
 const row = (snapshot: DocumentSnapshot): Row => ({
   ref: snapshot.ref,
   data: snapshot.data() ?? {},
@@ -25,6 +29,7 @@ const row = (snapshot: DocumentSnapshot): Row => ({
   exists: snapshot.exists,
 });
 
+/** Stops deletion planning when message or reaction references contain unrecognized nested collections. */
 async function assertNoNestedData(collection: CollectionReference): Promise<void> {
   // Query snapshots omit missing parent documents. Inspect those references as well.
   const references = await collection.listDocuments();
@@ -40,6 +45,7 @@ async function assertNoNestedData(collection: CollectionReference): Promise<void
   }
 }
 
+/** Reads the known conversation schema and refuses unknown collections that would escape targeted cleanup. */
 export async function readRoom(reference: DocumentReference): Promise<RoomInventory> {
   const [snapshot, messages, reactions, collections] = await Promise.all([
     reference.get(),
@@ -61,6 +67,7 @@ export async function readRoom(reference: DocumentReference): Promise<RoomInvent
   };
 }
 
+/** Detects UID references in membership, creation, direct-room IDs, message authorship or reaction ownership. */
 export function affected(room: RoomInventory, uid: string): boolean {
   return (
     membersOf(room.room.data).includes(uid) ||
@@ -71,6 +78,7 @@ export function affected(room: RoomInventory, uid: string): boolean {
   );
 }
 
+/** Preserves other authors' messages and replaces removed roots only when their replies still require structure. */
 export function remainingMessages(
   room: RoomInventory,
   uid: string,
@@ -102,6 +110,7 @@ export function remainingMessages(
   return result;
 }
 
+/** Builds a read-only account impact plan and fingerprint from affected document versions, without printing chat content. */
 export async function inventory(context: DeletionContext, uid: string) {
   validateUid(uid);
   let accountExists = true;

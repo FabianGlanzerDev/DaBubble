@@ -23,6 +23,7 @@ import { AuthIssue, authIssue, errorCode } from '../../core/auth/auth-errors';
 import { ConfirmationKind } from '../../shared/ui/confirmation-message';
 import { SuccessOverlay } from '../../shared/ui/success-overlay';
 
+/** Handles real reset requests and email action codes with validation and persistence-backed success feedback. */
 @Component({
   selector: 'app-password-page',
   imports: [PublicLayout, RouterLink, Icon, FormField, SuccessOverlay],
@@ -59,6 +60,7 @@ export class PasswordPage {
       : !fieldError('email', this.email()),
   );
 
+  /** Rechecks changed action parameters and invalidates pending verification results when the page is destroyed. */
   constructor() {
     inject(DestroyRef).onDestroy(() => this.verification++);
     effect(() => {
@@ -69,6 +71,7 @@ export class PasswordPage {
     });
   }
 
+  /** Clears previous reset state and queues verification so obsolete links cannot enable the current form. */
   private prepareVerification(parameters: ParamMap, reset: boolean, revision: number): void {
     this.verified.set(false);
     this.issue.set(null);
@@ -81,6 +84,7 @@ export class PasswordPage {
       );
   }
 
+  /** Removes password values and validation-touch state after link changes or a completed password update. */
   private clearResetFields(): void {
     this.password.set('');
     this.confirmation.set('');
@@ -88,6 +92,7 @@ export class PasswordPage {
     for (const field of this.fields()) field.reset();
   }
 
+  /** Enables reset submission only after Firebase validates the current, still-active action code. */
   private async verifyLink(parameters: ParamMap, revision: number): Promise<void> {
     await this.session.ready;
     if (revision !== this.verification || !this.session.configured()) return;
@@ -100,6 +105,7 @@ export class PasswordPage {
     }
   }
 
+  /** Rejects unsupported email actions and missing reset codes before contacting Firebase. */
   private validateResetLink(parameters: ParamMap): string {
     const mode = parameters.get('mode') ?? 'resetPassword';
     const code = parameters.get('oobCode') ?? '';
@@ -108,6 +114,7 @@ export class PasswordPage {
     return code;
   }
 
+  /** Prevents duplicate or invalid reset actions and maps failures to the corresponding form feedback. */
   protected async submit(event: Event): Promise<void> {
     event.preventDefault();
     this.submitted.set(true);
@@ -122,6 +129,7 @@ export class PasswordPage {
     }
   }
 
+  /** Uses the same neutral confirmation for existing and unknown addresses to avoid disclosing account existence. */
   private async requestReset(): Promise<void> {
     try {
       await this.session.sendReset(this.email());
@@ -134,6 +142,7 @@ export class PasswordPage {
     this.completion.set('email');
   }
 
+  /** Shows the sign-in confirmation only after Firebase accepts the verified password change. */
   private async changePassword(): Promise<void> {
     if (!this.verified()) return;
     await this.session.confirmReset(this.code(), this.password());
@@ -145,11 +154,13 @@ export class PasswordPage {
     this.completion.set('signin');
   }
 
+  /** Restores focus to the rendered login link after the success overlay is dismissed. */
   protected finishConfirmation(): void {
     this.completion.set(null);
     afterNextRender(() => this.continueLink()?.nativeElement.focus(), { injector: this.injector });
   }
 
+  /** Selects backend validation feedback for the requested password or identity field. */
   protected fieldIssue(field: AuthIssue['field']): string {
     return this.issue()?.field === field ? this.issue()!.message : '';
   }

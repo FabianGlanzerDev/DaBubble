@@ -1,3 +1,9 @@
+/**
+ * Compares real-data workspace states and mobile search navigation with supplied visual references.
+ *
+ * @packageDocumentation
+ */
+
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '../browser-fixture';
 import { createChannel, noOverflow, registerChatUser, secondUser, send } from './chat-helpers';

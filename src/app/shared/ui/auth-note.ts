@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
+/** Groups explanatory content for explicitly marked preview pages rather than real authentication forms. */
 @Component({
   selector: 'app-auth-note',
   changeDetection: ChangeDetectionStrategy.OnPush,

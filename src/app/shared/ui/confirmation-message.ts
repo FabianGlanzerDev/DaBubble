@@ -5,6 +5,7 @@ const messages = {
   email: 'E-Mail gesendet',
   signin: 'Anmelden',
 } as const;
+/** Selects one of the three supplied Figma success messages without implying that an operation was performed. */
 export type ConfirmationKind = keyof typeof messages;
 
 /** Shared presentation; callers are responsible for confirming successful persistence. */

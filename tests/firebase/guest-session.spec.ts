@@ -7,12 +7,14 @@ import { emulatorAccounts, finishAvatar, identity, startGuest } from './access-h
 
 test.use({ emulatedFirebase: true });
 
+/** Checks that restored anonymous access reaches real chat with guest labeling and no alerts. */
 async function expectGuest(page: Page): Promise<void> {
   await expect(page).toHaveURL(/\/chat$/);
   await expect(page.locator('app-live-header .guest-label')).toHaveText('Gast');
   await expect(page.getByRole('alert')).toHaveCount(0);
 }
 
+/** Converts the current test guest through email registration and finishes avatar setup without clearing storage. */
 async function upgrade(page: Page): Promise<void> {
   await page.goto('/#/registrierung');
   await page.getByLabel('Name', { exact: true }).fill('Gast bleibt erhalten');
@@ -25,6 +27,7 @@ async function upgrade(page: Page): Promise<void> {
   await finishAvatar(page);
 }
 
+/** Checks that guest entry cannot silently replace the supplied regular account and its existing chat access. */
 async function expectRegularProtected(page: Page, uid: string): Promise<void> {
   await expect(page.getByRole('button', { name: 'Gäste-Login' })).toBeEnabled();
   await page.getByRole('button', { name: 'Gäste-Login' }).click();
@@ -131,6 +134,7 @@ async function launchStoredBrowser(directory: string, errors: string[]): Promise
     viewport: { width: 1440, height: 932 },
   });
   await installAppRoutes(context, true, 'http://127.0.0.1:4301', errors);
+  /** Collects browser errors for each page of the isolated persistent-profile restart test. */
   const watch = (page: Page) => {
     page.on('pageerror', (error) => errors.push(error.message));
     page.on('console', (message) => {

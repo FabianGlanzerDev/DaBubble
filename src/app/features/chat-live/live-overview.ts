@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { OverlayState } from '../../core/ui/overlay-state';
 import { LiveSearch } from './live-search';
 
+/** Provides the real workspace's conversation selection and new-message entry state. */
 @Component({
   selector: 'app-live-overview',
   imports: [LiveSearch],

@@ -46,6 +46,7 @@ const assets: Partial<Record<keyof typeof paths, string>> = {
   at: 'alternate-email-gray',
 };
 
+/** Renders the shared inline SVG symbol selected by the caller, keeping decorative icons out of the accessibility tree. */
 @Component({
   selector: 'app-icon',
   changeDetection: ChangeDetectionStrategy.OnPush,

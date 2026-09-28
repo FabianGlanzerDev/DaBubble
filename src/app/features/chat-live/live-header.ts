@@ -7,6 +7,7 @@ import { OverlayState } from '../../core/ui/overlay-state';
 import { AuthSession } from '../../core/auth/auth-session';
 import { LiveSearch } from './live-search';
 
+/** Displays the authenticated workspace identity and exposes navigation and account actions. */
 @Component({
   selector: 'app-live-header',
   imports: [Brand, AvatarImage, Icon, RouterLink, LiveSearch],

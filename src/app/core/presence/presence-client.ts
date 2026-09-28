@@ -15,6 +15,7 @@ import type { Database, DatabaseReference, Unsubscribe } from 'firebase/database
 import type { FirebaseSettings } from '../firebase/firebase-settings';
 import { PresenceState } from './presence-state';
 
+/** Creates a random per-tab connection key without embedding a user identifier. */
 function connectionKey(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(16));
   const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
@@ -38,9 +39,12 @@ export class PresenceClient {
   private stopConnection: Unsubscribe | null = null;
   private readonly readers = new Map<string, Unsubscribe>();
   private wanted: string[] = [];
+  /** Suspends this tab's presence when the page leaves the active document lifecycle. */
   private readonly hide = () => this.suspend();
+  /** Reconnects this tab's presence when the browser restores the page. */
   private readonly show = () => this.resume();
 
+  /** Registers identity handling before RTDB token handling so logout can remove the authenticated connection. */
   constructor(
     app: FirebaseApp,
     settings: FirebaseSettings,
@@ -55,6 +59,7 @@ export class PresenceClient {
     this.configureConnection(settings.emulators);
   }
 
+  /** Selects the emulator when requested and defers the socket until an identity is available. */
   private configureConnection(emulated: boolean): void {
     if (!this.db) return;
     if (emulated) connectDatabaseEmulator(this.db, '127.0.0.1', 9000);
@@ -63,6 +68,7 @@ export class PresenceClient {
     window.addEventListener('pageshow', this.show);
   }
 
+  /** Closes the prior identity's socket before subscribing and publishing for the replacement UID. */
   identify(uid: string): void {
     if (uid === this.uid) return;
     this.suspend();
@@ -70,6 +76,7 @@ export class PresenceClient {
     this.resume();
   }
 
+  /** Reconciles presence subscriptions with visible users and the current account, removing obsolete listeners. */
   watch(uids: string[]): void {
     this.wanted = [...new Set([...uids, this.uid].filter(Boolean))];
     if (!this.db || !this.uid) return;
@@ -82,6 +89,7 @@ export class PresenceClient {
     for (const uid of this.wanted) if (!this.readers.has(uid)) this.read(uid);
   }
 
+  /** Maps server connection entries to online/offline and permission failures to an unknown status. */
   private read(uid: string): void {
     const stop = onValue(
       ref(this.db!, 'presence/' + uid + '/connections'),
@@ -94,6 +102,7 @@ export class PresenceClient {
     this.readers.set(uid, stop);
   }
 
+  /** Opens an authenticated socket and publishes presence only after RTDB confirms its connection. */
   private resume(): void {
     if (!this.db || !this.uid || this.stopConnection) return;
     this.connection = ref(this.db, `presence/${this.uid}/connections/${this.connectionId}`);
@@ -107,6 +116,7 @@ export class PresenceClient {
     goOnline(this.db);
   }
 
+  /** Arms server-side removal before writing this connection and ignores obsolete reconnect attempts. */
   private async publish(revision: number, connection: DatabaseReference): Promise<void> {
     try {
       await onDisconnect(connection).remove();
@@ -131,6 +141,7 @@ export class PresenceClient {
     this.connection = null;
   }
 
+  /** Disposes identity and page lifecycle listeners and closes only this client's presence connection. */
   destroy(): void {
     this.stopIdentity();
     this.suspend();

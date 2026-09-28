@@ -13,6 +13,7 @@ import {
 
 test.use({ emulatedFirebase: true });
 
+/** Reveals message controls by touch or hover in the requested root or thread transcript. */
 async function actions(page: Page, text: string, thread = false): Promise<Locator> {
   const container = thread ? '.live-thread' : '.main-panel';
   const article = page.locator(`${container} article`).filter({
@@ -25,6 +26,7 @@ async function actions(page: Page, text: string, thread = false): Promise<Locato
   return article;
 }
 
+/** Keeps a stable message-ID locator while editing and asserts that the server-backed bubble updates. */
 async function edit(page: Page, text: string, updated: string, thread = false): Promise<void> {
   const article = await actions(page, text, thread);
   const id = await article.getAttribute('data-message-id');
@@ -37,6 +39,7 @@ async function edit(page: Page, text: string, updated: string, thread = false): 
   await expect(stable.locator('.bubble')).toHaveText(updated);
 }
 
+/** Exercises both the message deletion action and its explicit confirmation in the emulator UI. */
 async function remove(page: Page, text: string, thread = false): Promise<void> {
   const article = await actions(page, text, thread);
   await article.getByRole('button', { name: 'Nachricht löschen', exact: true }).click();

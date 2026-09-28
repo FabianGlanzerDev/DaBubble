@@ -20,6 +20,7 @@ import { AuthSession } from '../../core/auth/auth-session';
 import { AccountStatus } from '../auth/account-status';
 import { WorkspaceSearch } from './workspace-search';
 
+/** Arranges the explicitly local design preview, with separate responsive menu and thread views. */
 @Component({
   selector: 'app-chat-layout',
   imports: [
@@ -61,6 +62,7 @@ export class ChatLayout {
     this.currentUrl().split(/[?#]/)[0]?.endsWith('/channels/entwicklerteam'),
   );
 
+  /** Resets preview thread visibility from route state without modifying any persisted conversation. */
   constructor() {
     effect(() => {
       this.preview.threadOpen.set(!!this.hasThread());
@@ -68,15 +70,18 @@ export class ChatLayout {
     });
   }
 
+  /** Mirrors the native details element's open state into the mobile preview layout. */
   protected syncMobileThread(event: Event): void {
     this.preview.mobileThreadOpen.set((event.target as HTMLDetailsElement).open);
   }
 
+  /** Hides the desktop preview thread and returns keyboard focus to its toggle. */
   protected closeThread(): void {
     this.preview.threadOpen.set(false);
     this.threadSwitch()?.nativeElement.focus();
   }
 
+  /** Hides the mobile preview thread and restores the prior history-backed view. */
   protected closeMobileThread(): void {
     this.preview.mobileThreadOpen.set(false);
     this.mobile.close();

@@ -4,6 +4,7 @@ import { MessagePreview } from './message-preview';
 import { MessageComposer } from './message-composer';
 import { question, threadReplies } from './preview-messages';
 
+/** Renders the static thread example and local composer used by the design preview. */
 @Component({
   selector: 'app-thread-panel',
   imports: [Icon, MessagePreview, MessageComposer],

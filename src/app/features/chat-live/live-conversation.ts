@@ -17,6 +17,7 @@ import { AvatarImage } from '../../shared/ui/avatar-image';
 import { LiveComposer } from './live-composer';
 import { LiveMessage } from './live-message';
 
+/** Renders live root or thread messages and coordinates room details, day separators and scroll position. */
 @Component({
   selector: 'app-live-conversation',
   imports: [DatePipe, Icon, AvatarImage, LiveComposer, LiveMessage],
@@ -54,10 +55,12 @@ export class LiveConversation {
   private lastMessage = '';
   private lastSearch = '';
 
+  /** Adjusts transcript scrolling after reactive message and route changes have rendered. */
   constructor() {
     afterRenderEffect(() => this.scroll());
   }
 
+  /** Opens channel metadata or the direct-chat partner's profile using the current real conversation. */
   protected details(): void {
     const room = this.room();
     if (!room) return;
@@ -69,10 +72,12 @@ export class LiveConversation {
     });
   }
 
+  /** Opens the member list scoped to the current persisted conversation. */
   protected members(): void {
     this.overlay.open('members', { live: true, channelId: this.room()?.id });
   }
 
+  /** Adds a day separator when adjacent messages fall on different local calendar dates. */
   protected newDay(index: number): boolean {
     const current = this.messages()[index],
       previous = this.messages()[index - 1];
@@ -83,6 +88,7 @@ export class LiveConversation {
     );
   }
 
+  /** Follows initial or nearby conversation updates while allowing search links to locate a specific message. */
   private scroll(): void {
     const element = this.transcript()?.nativeElement;
     if (!element) return;
@@ -95,6 +101,7 @@ export class LiveConversation {
     this.scrollSearch(element);
   }
 
+  /** Follows newly appended messages only when sent by this user or the reader is near the bottom. */
   private shouldFollow(element: HTMLElement): boolean {
     const last = this.messages().at(-1);
     const nearby = element.scrollHeight - element.scrollTop - element.clientHeight < 180;
@@ -103,6 +110,7 @@ export class LiveConversation {
     );
   }
 
+  /** Centers and focuses a linked search result once its message has rendered. */
   private scrollSearch(element: HTMLElement): void {
     const id = String(this.nav.tree().queryParams['message'] ?? '');
     if (!id || id === this.lastSearch) return;

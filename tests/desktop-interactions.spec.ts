@@ -1,12 +1,14 @@
 import { test, expect } from './browser-fixture';
 import type { Page, TestInfo } from '@playwright/test';
 
+/** Waits for local fonts and short UI transitions before recording the complete desktop view. */
 async function capture(page: Page, info: TestInfo, name: string) {
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(300);
   await page.screenshot({ path: info.outputPath(`${name}.png`), fullPage: true });
 }
 
+/** Exercises keyboard dismissal and verifies that the native modal is no longer visible. */
 async function dismiss(page: Page) {
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toBeHidden();

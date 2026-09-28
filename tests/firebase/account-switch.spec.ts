@@ -7,6 +7,7 @@ import { emulatorConfig } from './emulator-config';
 
 test.use({ emulatedFirebase: true, hasTouch: true });
 
+/** Registers an isolated emulator account and returns its test-only identity for account-switch assertions. */
 async function account(page: Page, name: string) {
   const email = `switch-${randomUUID()}@example.test`,
     password = randomUUID();
@@ -20,12 +21,14 @@ async function account(page: Page, name: string) {
   return { ...(await identity(page)), email, password, name };
 }
 
+/** Submits supplied emulator credentials through the existing login form without clearing browser persistence. */
 async function submit(page: Page, email: string, password: string) {
   await page.getByLabel('E-Mail-Adresse', { exact: true }).fill(email);
   await page.getByLabel('Passwort', { exact: true }).fill(password);
   await page.getByRole('button', { name: 'Anmelden', exact: true }).click();
 }
 
+/** Reads only the test-owned profile and conversation from the local emulator for before/after preservation checks. */
 async function retainedData(request: APIRequestContext, uid: string, conversation: string) {
   const root =
     'http://127.0.0.1:8080/v1/projects/demo-dabubble-auth/databases/(default)/documents/';

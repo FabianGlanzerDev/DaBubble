@@ -4,6 +4,7 @@ import { fromEvent, map, startWith } from 'rxjs';
 import { OverlayState } from '../../core/ui/overlay-state';
 import { Icon } from '../../shared/ui/icon';
 
+/** Presents example reaction counts and participant details without persisting user selections. */
 @Component({
   selector: 'app-reaction-list',
   imports: [Icon],

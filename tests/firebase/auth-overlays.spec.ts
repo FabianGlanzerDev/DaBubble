@@ -7,6 +7,7 @@ import { captureOverlay } from './overlay-evidence';
 test.use({ emulatedFirebase: true, trace: 'off' });
 const authEndpoint = 'http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1';
 
+/** Creates a unique local demo account for reset tests without requesting mail from the cloud project. */
 async function createAccount(request: APIRequestContext): Promise<string> {
   const email = `overlay-${randomUUID()}@example.test`;
   const response = await request.post(`${authEndpoint}/accounts:signUp?key=demo-emulator-key`, {
@@ -16,12 +17,14 @@ async function createAccount(request: APIRequestContext): Promise<string> {
   return email;
 }
 
+/** Requests a reset through the app so the test can observe real SDK completion and overlay behavior. */
 async function requestReset(page: Page, email: string): Promise<void> {
   await page.goto('/#/passwort-reset');
   await page.locator('#reset-email').fill(email);
   await page.getByRole('button', { name: 'E-Mail senden', exact: true }).click();
 }
 
+/** Converts the local emulator's reset action into the app's root-query entry without logging its action code. */
 async function resetLink(request: APIRequestContext, email: string): Promise<string> {
   const response = await request.get(
     'http://127.0.0.1:9099/emulator/v1/projects/demo-dabubble-auth/oobCodes',
@@ -36,6 +39,7 @@ async function resetLink(request: APIRequestContext, email: string): Promise<str
   return '/?' + new URL(record!.oobLink).searchParams;
 }
 
+/** Fills both reset fields with the same fresh test password without recording it in test evidence. */
 async function fillNewPassword(page: Page): Promise<void> {
   const password = randomUUID();
   await page.getByLabel('Neues Passwort', { exact: true }).fill(password);
