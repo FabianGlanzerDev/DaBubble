@@ -31,7 +31,29 @@ function validateSettings(value: Record<string, unknown>): FirebaseSettings {
   ) as FirebaseOptions;
   const emulators = value['emulators'] === true;
   validateEmulatorMode(firebase.projectId!, emulators);
+  firebase.databaseURL = presenceUrl(options['databaseURL'], emulators);
   return { firebase, emulators };
+}
+
+function presenceUrl(value: unknown, emulators: boolean): string | undefined {
+  if (emulators) return 'https://demo-dabubble-auth-default-rtdb.firebaseio.com';
+  if (value === undefined || value === null || value === '') return undefined;
+  if (typeof value !== 'string') throw new Error('firebase/configuration');
+  const url = new URL(value);
+  if (!validPresenceUrl(url)) throw new Error('firebase/configuration');
+  return url.origin;
+}
+
+function validPresenceUrl(url: URL): boolean {
+  return (
+    url.protocol === 'https:' &&
+    !url.username &&
+    !url.password &&
+    !url.search &&
+    !url.hash &&
+    /\.(firebaseio\.com|firebasedatabase\.app)$/.test(url.hostname) &&
+    url.pathname === '/'
+  );
 }
 
 function hasRequiredStrings(value: Record<string, unknown>, keys: readonly string[]): boolean {
