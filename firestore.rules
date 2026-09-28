@@ -2,7 +2,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function owns(uid) {
-      return request.auth != null && request.auth.uid == uid;
+      return signedIn() && request.auth.uid == uid;
     }
 
     function validProfile(uid) {
@@ -26,11 +26,23 @@ service cloud.firestore {
     }
 
     function signedIn() {
-      return request.auth != null;
+      return request.auth != null
+        && !exists(/databases/$(database)/documents/accountDeletions/$(request.auth.uid));
+    }
+
+    function availableAccount(uid) {
+      return exists(/databases/$(database)/documents/directory/$(uid))
+        && !exists(/databases/$(database)/documents/accountDeletions/$(uid));
     }
 
     function member(roomId) {
       return signedIn() && request.auth.uid in get(/databases/$(database)/documents/conversations/$(roomId)).data.memberIds;
+    }
+
+    function writableRoom(roomId) {
+      return member(roomId)
+        && !exists(/databases/$(database)/documents/deletionLocks/$(roomId))
+        && !get(/databases/$(database)/documents/conversations/$(roomId)).data.get('archived', false);
     }
 
     match /directory/{uid} {
@@ -67,9 +79,9 @@ service cloud.firestore {
       return data.kind == 'direct' && data.name == '' && data.nameKey == '' && data.description == ''
         && data.memberIds.size() >= 1 && data.memberIds.size() <= 2
         && roomId == 'dm_' + data.memberIds.join('~')
-        && exists(/databases/$(database)/documents/directory/$(data.memberIds[0]))
+        && availableAccount(data.memberIds[0])
         && (data.memberIds.size() == 1 || (data.memberIds[0] < data.memberIds[1]
-          && exists(/databases/$(database)/documents/directory/$(data.memberIds[1]))));
+          && availableAccount(data.memberIds[1])));
     }
 
     function membershipChange() {
@@ -78,7 +90,7 @@ service cloud.firestore {
       let added = next.removeAll(old);
       return (next == old.removeAll([request.auth.uid]))
         || (added.size() == 1 && next.toSet().hasAll(old) && next.size() == old.size() + 1
-          && exists(/databases/$(database)/documents/directory/$(added[0])));
+          && availableAccount(added[0]));
     }
 
     function channelUpdate(roomId) {
@@ -98,7 +110,7 @@ service cloud.firestore {
         && getAfter(/databases/$(database)/documents/conversations/$(request.resource.data.roomId)).data.nameKey == key
         && request.auth.uid in getAfter(/databases/$(database)/documents/conversations/$(request.resource.data.roomId)).data.memberIds;
       allow update: if false;
-      allow delete: if member(resource.data.roomId)
+      allow delete: if writableRoom(resource.data.roomId)
         && getAfter(/databases/$(database)/documents/conversations/$(resource.data.roomId)).data.nameKey != key;
     }
 
@@ -113,7 +125,7 @@ service cloud.firestore {
         && request.auth.uid in request.resource.data.memberIds
         && ((channelFields(request.resource.data) && request.resource.data.memberIds == [request.auth.uid]
           && reservedName(roomId, request.resource.data)) || directFields(roomId, request.resource.data));
-      allow update: if member(roomId) && resource.data.kind == 'channel'
+      allow update: if writableRoom(roomId) && resource.data.kind == 'channel'
         && validRoom(request.resource.data) && channelUpdate(roomId);
       allow delete: if false;
 
@@ -127,11 +139,11 @@ service cloud.firestore {
 
       match /messages/{messageId} {
         allow read: if member(roomId);
-        allow create: if member(roomId) && validMessage(request.resource.data)
+        allow create: if writableRoom(roomId) && validMessage(request.resource.data)
           && request.resource.data.authorId == request.auth.uid && !request.resource.data.deleted
           && request.resource.data.createdAt == request.time
           && (request.resource.data.rootId == '' || get(/databases/$(database)/documents/conversations/$(roomId)/messages/$(request.resource.data.rootId)).data.rootId == '');
-        allow update: if member(roomId) && resource.data.authorId == request.auth.uid && !resource.data.deleted
+        allow update: if writableRoom(roomId) && resource.data.authorId == request.auth.uid && !resource.data.deleted
           && validMessage(request.resource.data)
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text', 'deleted', 'updatedAt']);
         allow delete: if false;
@@ -139,7 +151,7 @@ service cloud.firestore {
 
       match /reactions/{reactionId} {
         allow read: if member(roomId);
-        allow create, update: if member(roomId) && request.resource.data.userId == request.auth.uid
+        allow create, update: if writableRoom(roomId) && request.resource.data.userId == request.auth.uid
           && request.resource.data.keys().hasOnly(['messageId', 'userId', 'emojis', 'updatedAt'])
           && reactionId == request.resource.data.messageId + '_' + request.auth.uid
           && !get(/databases/$(database)/documents/conversations/$(roomId)/messages/$(request.resource.data.messageId)).data.deleted
@@ -147,7 +159,7 @@ service cloud.firestore {
           && request.resource.data.emojis is list && request.resource.data.emojis.size() > 0
           && request.resource.data.emojis.size() == request.resource.data.emojis.toSet().size()
           && request.resource.data.emojis.hasOnly(['✅', '🙌', '😀', '👍', '👏', '❤️', '😎', '🤔', '🚀', '🤓', '🎉', '😂', '😊', '🔥', '💡', '👀', '💪', '🙏', '😢', '🎯']);
-        allow delete: if member(roomId) && resource.data.userId == request.auth.uid;
+        allow delete: if writableRoom(roomId) && resource.data.userId == request.auth.uid;
       }
     }
 

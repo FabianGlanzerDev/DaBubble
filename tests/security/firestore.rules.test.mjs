@@ -56,7 +56,7 @@ test('owner can create, read and update their name and every allowed avatar', as
     );
 });
 
-test('anonymous visitors cannot read, list, create, update or delete profiles', async () => {
+test('unauthenticated visitors cannot read, list, create, update or delete profiles', async () => {
   await setDoc(doc(database('alice'), 'users/alice'), profile('alice'));
   const guest = database(null),
     reference = doc(guest, 'users/alice');

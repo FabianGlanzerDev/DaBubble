@@ -1,4 +1,5 @@
-import { before, after, beforeEach, test } from 'node:test';
+import { before, after, beforeEach, test as nodeTest } from 'node:test';
+import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import {
   initializeTestEnvironment,
@@ -21,9 +22,24 @@ import {
 } from 'firebase/firestore';
 
 let environment;
+let actorProvider = 'password';
+function test(name, operation) {
+  for (const provider of ['password', 'anonymous'])
+    nodeTest(`${provider} author / regular member / guest outsider: ${name}`, async () => {
+      actorProvider = provider;
+      await operation();
+    });
+}
 const db = (uid = 'alice') =>
   uid
-    ? environment.authenticatedContext(uid).firestore()
+    ? environment
+        .authenticatedContext(uid, {
+          firebase: {
+            sign_in_provider:
+              uid === 'alice' ? actorProvider : uid === 'eve' ? 'anonymous' : 'password',
+          },
+        })
+        .firestore()
     : environment.unauthenticatedContext().firestore();
 const stamp = () => ({ updatedAt: serverTimestamp() });
 const message = (authorId = 'alice', changes = {}) => ({
@@ -190,6 +206,8 @@ test('leaving revokes all room reads and writes, including reactions and threads
 test('members can send and edit their messages, but never impersonate or alter other messages', async () => {
   await shared();
   await assertSucceeds(setDoc(ref(db('bob'), 'messages/bob'), message('bob')));
+  await assertFails(updateDoc(ref(db(), 'messages/bob'), { text: 'Stolen', ...stamp() }));
+  await assertFails(updateDoc(ref(db(), 'messages/bob'), { text: '', deleted: true, ...stamp() }));
   await assertSucceeds(updateDoc(ref(db()), { text: 'Edited', ...stamp() }));
   await assertFails(updateDoc(ref(db('bob')), { text: 'Hijacked', ...stamp() }));
   await assertFails(setDoc(ref(db('bob'), 'messages/forged'), message('alice')));
@@ -215,14 +233,57 @@ test('message schema rejects whitespace, excessive length, unexpected properties
 
 test('soft deletion clears text irreversibly while keeping replies; hard deletion denied', async () => {
   await shared();
+  await setDoc(ref(db('bob'), 'messages/reply'), message('bob', { rootId: 'first' }));
+  await setDoc(ref(db('bob'), 'reactions/first_bob'), reaction('bob'));
+  const before = (await getDoc(ref(db('bob')))).data();
   await assertFails(updateDoc(ref(db('bob')), { text: '', deleted: true, ...stamp() }));
   await assertFails(updateDoc(ref(db()), { deleted: true, ...stamp() }));
   await assertSucceeds(updateDoc(ref(db()), { deleted: true, text: '', ...stamp() }));
   await assertFails(updateDoc(ref(db()), { deleted: false, text: 'Restored', ...stamp() }));
   await assertFails(deleteDoc(ref(db())));
+  const retained = (await getDoc(ref(db('bob')))).data();
+  assert.equal(retained.text, '');
+  assert.equal(retained.deleted, true);
+  assert.equal(retained.authorId, before.authorId);
+  assert.deepEqual(retained.createdAt, before.createdAt);
+  assert.equal(retained.rootId, before.rootId);
+  assert.equal((await getDoc(ref(db('bob'), 'messages/reply'))).data().text, 'Hallo');
+  assert.equal((await getDoc(ref(db('bob'), 'reactions/first_bob'))).data().userId, 'bob');
   await assertSucceeds(
-    setDoc(ref(db('bob'), 'messages/reply'), message('bob', { rootId: 'first' })),
+    setDoc(ref(db('bob'), 'messages/reply-after-delete'), message('bob', { rootId: 'first' })),
   );
+});
+
+test('deleting only a direct room as administrator leaves both participants messages and reactions behind', async () => {
+  const id = 'dm_alice~bob';
+  await setDoc(
+    doc(db(), 'conversations', id),
+    room({ kind: 'direct', name: '', nameKey: '', memberIds: ['alice', 'bob'] }),
+  );
+  await setDoc(ref(db(), 'messages/first', id), message());
+  await setDoc(ref(db('bob'), 'messages/reply', id), message('bob', { rootId: 'first' }));
+  await setDoc(ref(db('bob'), 'reactions/first_bob', id), reaction('bob'));
+  await assertFails(deleteDoc(doc(db(), 'conversations', id)));
+  await assertFails(deleteDoc(doc(db(), 'users/alice')));
+  await assertFails(deleteDoc(doc(db(), 'directory/alice')));
+
+  // Emulator only: demonstrate why a parent-only administrative deletion is incomplete.
+  await environment.withSecurityRulesDisabled(async (context) => {
+    const admin = context.firestore();
+    await deleteDoc(doc(admin, 'conversations', id));
+    const messages = await getDocs(collection(admin, 'conversations', id, 'messages'));
+    const reactions = await getDocs(collection(admin, 'conversations', id, 'reactions'));
+    assert.equal(messages.size, 2);
+    assert.deepEqual(messages.docs.map((item) => item.data().authorId).sort(), ['alice', 'bob']);
+    assert.equal(reactions.size, 1);
+    // Removing the remaining documents also removes Bob's own reply and reaction.
+    const batch = writeBatch(admin);
+    for (const item of [...messages.docs, ...reactions.docs]) batch.delete(item.ref);
+    await batch.commit();
+    assert.equal((await getDocs(collection(admin, 'conversations', id, 'messages'))).size, 0);
+    assert.equal((await getDocs(collection(admin, 'conversations', id, 'reactions'))).size, 0);
+  });
+  await assertFails(getDoc(ref(db('bob'), 'messages/reply', id)));
 });
 
 test('thread roots must exist in the same room and must be top-level messages', async () => {
@@ -267,6 +328,11 @@ test('direct conversations are canonical and readable only by participants', asy
     setDoc(ref(db('bob'), 'messages/reply', 'dm_alice~bob'), message('bob', { rootId: 'first' })),
   );
   await assertFails(getDoc(ref(db('eve'), 'messages/first', 'dm_alice~bob')));
+  await assertFails(getDoc(ref(db('eve'), 'messages/reply', 'dm_alice~bob')));
+  await assertFails(setDoc(ref(db('eve'), 'messages/forged', 'dm_alice~bob'), message('eve')));
+  await assertFails(
+    updateDoc(ref(db(), 'messages/reply', 'dm_alice~bob'), { text: 'Stolen', ...stamp() }),
+  );
 });
 
 test('reactions are per member, toggleable, validated and cannot manipulate someone else', async () => {
@@ -277,6 +343,8 @@ test('reactions are per member, toggleable, validated and cannot manipulate some
   );
   await assertFails(updateDoc(ref(db('bob'), 'reactions/first_alice'), reaction('bob')));
   await assertFails(deleteDoc(ref(db('bob'), 'reactions/first_alice')));
+  await assertFails(updateDoc(ref(db(), 'reactions/first_bob'), reaction('bob')));
+  await assertFails(deleteDoc(ref(db(), 'reactions/first_bob')));
   await assertFails(setDoc(ref(db('eve'), 'reactions/first_eve'), reaction('eve')));
   await assertFails(
     setDoc(ref(db(), 'reactions/first_alice'), reaction('alice', { emojis: ['not-an-emoji'] })),
