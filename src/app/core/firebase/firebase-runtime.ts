@@ -33,6 +33,7 @@ import {
 } from 'firebase/firestore';
 import { FirebaseSettings } from './firebase-settings';
 import { loadGuestProfile } from './guest-profile';
+import { observeProfile } from './profile-listener';
 import { LogoutFence } from './logout-fence';
 import { PresenceClient } from '../presence/presence-client';
 import { PresenceState } from '../presence/presence-state';
@@ -214,6 +215,15 @@ export class FirebaseRuntime {
     if (guest) return loadGuestProfile(this.database, uid);
     const snapshot = await getDocFromServer(doc(this.database, 'users', uid));
     return snapshot.exists() ? readUserProfile(snapshot.data(), uid) : null;
+  }
+
+  /** Keeps the current account's private profile synchronized across tabs without exposing other profiles. */
+  watchProfile(
+    uid: string,
+    next: (profile: UserProfile | null) => void,
+    failed: (error: unknown) => void,
+  ): () => void {
+    return observeProfile(this.database, uid, { next, error: failed });
   }
 
   /** Validates editable fields and atomically writes the current account's profile before returning it. */

@@ -21,6 +21,7 @@ export class AuthSession {
   private client: FirebaseRuntime | null = null;
   private revision = 0;
   private profileLoad: Promise<void> = Promise.resolve();
+  private stopProfileWatch: (() => void) | null = null;
   readonly user = signal<AccountIdentity | null>(null);
   readonly isGuest = computed(() => this.user()?.isAnonymous === true);
   readonly profile = signal<UserProfile | null>(null);
@@ -35,6 +36,11 @@ export class AuthSession {
   readonly busy = computed(() => this.initializing() || this.pending() !== null);
   readonly pendingName = signal('');
   readonly ready = this.initialize();
+
+  /** Releases the private-profile subscription together with the application session. */
+  constructor() {
+    this.destroy.onDestroy(() => this.stopProfileWatch?.());
+  }
 
   /** Waits for initialization before exposing the configured Firestore client to chat services. */
   async chatDatabase() {
@@ -86,13 +92,20 @@ export class AuthSession {
     if (this.refreshIdentity(user)) return this.profileLoad;
     const wasSignedIn = !!this.user();
     this.user.set(user);
-    this.profile.set(null);
-    this.profileError.set('');
+    this.resetProfile();
     this.profileLoading.set(!!user);
     const revision = ++this.revision;
     this.profileLoad = user ? this.fetchProfile(user.uid, revision) : Promise.resolve();
     if (!user && wasSignedIn) this.returnToLogin();
     return this.profileLoad;
+  }
+
+  /** Detaches the previous account's listener before clearing its displayed profile. */
+  private resetProfile(): void {
+    this.stopProfileWatch?.();
+    this.stopProfileWatch = null;
+    this.profile.set(null);
+    this.profileError.set('');
   }
 
   /** Refreshes provider details without refetching the profile when UID and guest state match. */
@@ -115,12 +128,32 @@ export class AuthSession {
       const profile = await this.limitProfileRead(
         this.requireClient().loadProfile(uid, this.isGuest()),
       );
-      if (revision === this.revision) this.profile.set(profile);
+      if (revision === this.revision) this.observeProfile(uid, revision, profile);
     } catch (error) {
       if (revision === this.revision) this.profileError.set(authIssue(error).message);
     } finally {
       if (revision === this.revision) this.profileLoading.set(false);
     }
+  }
+
+  /** Replaces one-shot profile state with live updates after the initial authenticated read succeeds. */
+  private observeProfile(uid: string, revision: number, profile: UserProfile | null): void {
+    this.profile.set(profile);
+    this.stopProfileWatch?.();
+    this.stopProfileWatch = this.requireClient().watchProfile(
+      uid,
+      (updated) => this.updateProfile(updated, revision),
+      (error) => {
+        if (revision === this.revision) this.profileError.set(authIssue(error).message);
+      },
+    );
+  }
+
+  /** Ignores queued changes from a previous account and clears recovered listener errors. */
+  private updateProfile(profile: UserProfile | null, revision: number): void {
+    if (revision !== this.revision) return;
+    this.profile.set(profile);
+    this.profileError.set('');
   }
 
   /** Bounds UI waiting to ten seconds without claiming to cancel the underlying Firestore request. */
