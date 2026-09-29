@@ -13,11 +13,21 @@ import { ChatStore } from '../../core/chat/chat-store';
 import { ChatAction } from '../../core/chat/chat-action';
 import { OverlayState } from '../../core/ui/overlay-state';
 import { Icon } from '../../shared/ui/icon';
+import { AvatarImage } from '../../shared/ui/avatar-image';
+import type { ChatPerson } from '../../core/chat/chat-models';
+
+/** A selectable mention with a stable identity separate from its visible name and inserted text. */
+interface MentionOption {
+  key: string;
+  value: string;
+  label: string;
+  person?: ChatPerson;
+}
 
 /** Sends real messages or thread replies and inserts emoji or accessible-directory mentions at the caret. */
 @Component({
   selector: 'app-live-composer',
-  imports: [Icon],
+  imports: [Icon, AvatarImage],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<form
     class="composer"
@@ -39,9 +49,19 @@ import { Icon } from '../../shared/ui/icon';
       [disabled]="action.busy()"
     ></textarea>
     @if (suggestions().length) {
-      <div class="mentions" aria-label="Erwähnungen">
-        @for (entry of suggestions(); track entry) {
-          <button type="button" (click)="mention(entry)">{{ entry }}</button>
+      <div
+        class="mentions"
+        role="group"
+        aria-label="Erwähnungen"
+        (keydown.escape)="dismissMentions($event)"
+      >
+        @for (entry of suggestions(); track entry.key) {
+          <button type="button" [attr.aria-label]="entry.value" (click)="mention(entry.value)">
+            @if (entry.person; as person) {
+              <app-avatar-image [index]="person.avatarId" [uid]="person.uid" [size]="50" />
+            }
+            <span>{{ entry.label }}</span>
+          </button>
         }
       </div>
     }
@@ -102,7 +122,7 @@ export class LiveComposer {
   protected readonly suggestions = computed(() =>
     this.token()
       ? this.entries().filter((entry) =>
-          entry.toLocaleLowerCase().startsWith(this.token().toLocaleLowerCase()),
+          entry.value.toLocaleLowerCase().startsWith(this.token().toLocaleLowerCase()),
         )
       : [],
   );
@@ -113,11 +133,33 @@ export class LiveComposer {
   }
 
   /** Builds mention suggestions from directory people and channels already available to this account. */
-  private entries(): string[] {
+  private entries(): MentionOption[] {
     return [
-      ...this.store.people().map((person) => '@' + person.name),
-      ...this.store.channels().map((room) => '#' + room.name),
+      ...this.store.people().map((person) => this.personMention(person)),
+      ...this.store.channels().map((room) => ({
+        key: 'channel/' + room.id,
+        value: '#' + room.name,
+        label: '#' + room.name,
+      })),
     ];
+  }
+
+  /** Marks the current account while keeping equal display names distinct during list updates. */
+  private personMention(person: ChatPerson): MentionOption {
+    return {
+      key: 'person/' + person.uid,
+      value: '@' + person.name,
+      label: person.name + (person.uid === this.store.session.user()?.uid ? ' (Du)' : ''),
+      person,
+    };
+  }
+
+  /** Dismisses this nonmodal suggestion list and returns keyboard users to their unchanged draft. */
+  protected dismissMentions(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.cursor.set(0);
+    this.field().nativeElement.focus();
   }
 
   /** Keeps the draft and caret position synchronized for contextual mention suggestions. */
