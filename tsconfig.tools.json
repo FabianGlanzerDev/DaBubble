@@ -7,5 +7,5 @@
     "allowImportingTsExtensions": true,
     "noEmit": true
   },
-  "include": ["playwright*.config.ts", "tests/**/*.ts", "scripts/account-deletion/**/*.mts"]
+  "include": ["scripts/account-deletion/**/*.mts"]
 }
