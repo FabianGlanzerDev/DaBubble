@@ -57,7 +57,7 @@ Die Anwendung benötigt folgende Einstellungen im eigenen Firebase-Projekt:
 
 Die aktuelle Realtime-URL lautet `YOUR_FIREBASE_DATABASE_URL`. Die Webkonfiguration wird an den Browser ausgeliefert und ist kein privater Serverschlüssel. Zugriffsschutz entsteht durch Authentication und die Datenbankregeln. Service-Account-Dateien, private Schlüssel, Passwörter und Sitzungstokens gehören weder ins Repository noch in den FTP-Build.
 
-Die vorhandene [firebase.json](firebase.json) erhält die lokale Emulator-Konfiguration für administrative Übungen: Auth auf `127.0.0.1:9099`, Firestore auf `127.0.0.1:8080`, Realtime Database auf `127.0.0.1:9000`, reserviertes Projekt `demo-dabubble-auth`. Diese Umgebung benötigt zusätzlich Java 21 oder neuer. Sie ist keine weiterhin enthaltene automatisierte Testsuite.
+Die vorhandene [firebase.json](firebase.json) enthält die lokale Emulator-Konfiguration für administrative Übungen: Auth auf `127.0.0.1:9099`, Firestore auf `127.0.0.1:8080`, Realtime Database auf `127.0.0.1:9000`, reserviertes Projekt `demo-dabubble-auth`. Diese Umgebung benötigt zusätzlich Java 21 oder neuer.
 
 ### Passwort-Reset
 
@@ -78,7 +78,7 @@ npm run build
 
 `npm run check` führt Typecheck, Lint, Format-, Dateilängenprüfung und Produktionsbuild gemeinsam aus. `npm run check:secrets` prüft separat Arbeitsdateien und erreichbare Git-Historie auf bekannte Schlüssel-/Tokenmuster; es ersetzt keine inhaltliche Prüfung vor der Veröffentlichung.
 
-Die automatisierten Browser-, Regel- und Löschtests sowie ihre Hilfen und Playwright-Konfigurationen wurden aus dem aktuellen Abgabestand entfernt. Es gibt keine ausführbaren `npm test`- oder `test:*`-Befehle mehr. Build und statische Prüfungen sind kein Ersatz für einen Funktionstest der veröffentlichten Anwendung. Frühere Testdateien bleiben in der unveränderten Git-Historie.
+Build und statische Prüfungen ersetzen nicht die manuelle Funktionsprüfung der veröffentlichten Anwendung. Der Ablauf für die Live-Abnahme steht im Abschnitt „Veröffentlichung per FTP“.
 
 Der Produktionsbuild liegt in `dist/da-bubble/browser/`. Lokale Vorschau des gebauten Stands:
 
