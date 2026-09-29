@@ -86,6 +86,11 @@ dialog.closing::backdrop {
 .settings-option:disabled {
   background: transparent;
 }
+.settings-option.google-link {
+  width: 100%;
+  justify-content: center;
+  text-align: center;
+}
 @keyframes dialog-in {
   from {
     opacity: 0;
