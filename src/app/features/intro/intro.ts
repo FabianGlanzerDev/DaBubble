@@ -22,7 +22,7 @@ import { AuthPage } from '../auth/auth-page';
       <div class="intro-background"></div>
       <div class="animated-brand" aria-hidden="true">
         <div class="brand-line">
-          <img src="assets/images/original/logo-solo.png" width="80" height="70" alt="" />
+          <img src="assets/images/original/logo-solo.webp" width="80" height="70" alt="" />
           <div class="word-clip"><span>DABubble</span></div>
         </div>
       </div>

@@ -13,6 +13,7 @@ const types = {
   '.json': 'application/json',
   '.svg': 'image/svg+xml',
   '.png': 'image/png',
+  '.webp': 'image/webp',
   '.woff2': 'font/woff2',
 };
 /** Resolves existing assets without interpreting Angular routes or hidden server files. */
@@ -26,6 +27,7 @@ async function assetPath(url) {
   return file;
 }
 
+/** Returns explicit content types without caching outdated local build assets. */
 function respond(response, status, type, body) {
   response.writeHead(status, { 'Content-Type': type, 'Cache-Control': 'no-store' });
   response.end(body);

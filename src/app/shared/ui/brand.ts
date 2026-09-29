@@ -12,7 +12,7 @@ import { RouterLink } from '@angular/router';
     [queryParams]="{ replay: true }"
     aria-label="DaBubble – Intro erneut abspielen"
   >
-    <img src="assets/images/original/logo-solo.png" width="70" height="70" alt="" />
+    <img src="assets/images/original/logo-solo.webp" width="70" height="70" alt="" />
     <span>DABubble</span>
   </a>`,
   styles: `
