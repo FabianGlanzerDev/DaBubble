@@ -5,13 +5,19 @@ import angular from 'angular-eslint';
 export default tseslint.config(
   { ignores: ['dist/**', 'node_modules/**', '.angular/**', 'test-results/**'] },
   {
-    files: ['scripts/serve-static.mjs'],
+    files: ['scripts/*.mjs'],
     extends: [js.configs.recommended],
     languageOptions: { globals: { console: 'readonly', process: 'readonly' } },
+    rules: {
+      'max-lines-per-function': ['error', { max: 14, skipBlankLines: true, skipComments: true }],
+    },
   },
   {
     files: ['scripts/account-deletion/**/*.mts'],
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
+    rules: {
+      'max-lines-per-function': ['error', { max: 14, skipBlankLines: true, skipComments: true }],
+    },
   },
   {
     files: ['src/**/*.ts'],

@@ -86,20 +86,22 @@ export class ChatStore {
 
   /** Maintains separate message and reaction streams for an accessible conversation. */
   private watchRoom(id: string): void {
-    /** Reports room listener errors only while the room remains in the current membership list. */
-    const fail = (error: unknown) => {
-      if (this.rooms().some((room) => room.id === id)) this.fail(error);
-    };
     /** Replaces this conversation's message cache without disturbing other subscribed rooms. */
     const messages = (items: ChatMessage[]) =>
       this.messages.update((all) => ({ ...all, [id]: items }));
+
     /** Replaces this conversation's reaction cache without disturbing other subscribed rooms. */
     const reactions = (items: ChatReaction[]) =>
       this.reactions.update((all) => ({ ...all, [id]: items }));
     this.roomStops.set(id, [
-      this.api().messages(id, messages, fail),
-      this.api().reactions(id, reactions, fail),
+      this.api().messages(id, messages, (error) => this.failRoom(id, error)),
+      this.api().reactions(id, reactions, (error) => this.failRoom(id, error)),
     ]);
+  }
+
+  /** Ignores late listener failures from conversations whose membership has already been revoked. */
+  private failRoom(id: string, error: unknown): void {
+    if (this.rooms().some((room) => room.id === id)) this.fail(error);
   }
 
   /** Unsubscribes a revoked room and removes its messages and reactions from local state. */

@@ -10,12 +10,15 @@ const patterns = [
   ['Google OAuth client secret', /GOCSPX-[A-Za-z0-9_-]{20,}/],
 ];
 const findings = [];
+/** Records pattern categories and file identities without logging matched secret values. */
 function inspect(label, content) {
   if (content.includes(0)) return;
   const text = content.toString('utf8');
   for (const [kind, pattern] of patterns)
     if (pattern.test(text)) findings.push(`${label}: ${kind}`);
 }
+
+/** Reads Git objects directly without shell expansion or changing the repository. */
 function git(args) {
   return execFileSync('git', args, { maxBuffer: 100 * 1024 * 1024 });
 }

@@ -10,6 +10,11 @@ export function connectPresence(app: App, emulator: boolean): Database | null {
       throw new Error('Der lokale Realtime-Database-Emulator ist ebenfalls erforderlich.');
     return getDatabaseWithUrl('https://demo-dabubble-auth-default-rtdb.firebaseio.com', app);
   }
+  return cloudPresence(app);
+}
+
+/** Validates the configured cloud URL without inventing a database or silently targeting an emulator. */
+function cloudPresence(app: App): Database | null {
   const config = JSON.parse(readFileSync('public/firebase-config.json', 'utf8'));
   const url: unknown = config.firebase?.databaseURL;
   if (url === undefined || url === null || url === '') return null;

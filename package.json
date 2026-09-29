@@ -8,7 +8,7 @@
     "preview": "node scripts/serve-static.mjs",
     "watch": "ng build --watch --configuration development",
     "typecheck": "ngc -p tsconfig.app.json --noEmit && tsc -p tsconfig.tools.json",
-    "lint": "eslint src scripts/account-deletion scripts/serve-static.mjs --max-warnings=0",
+    "lint": "eslint src scripts --max-warnings=0",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "account:delete": "node scripts/account-deletion/cli.mts",

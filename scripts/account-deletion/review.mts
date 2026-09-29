@@ -1,29 +1,23 @@
-import { membersOf, remainingMessages } from './inventory.mts';
-import type { RoomInventory } from './inventory.mts';
+import type { RoomInventory } from './room-content.mts';
+import { roomImpact, placeholderPaths, remainingMembers } from './room-impact.mts';
 
-/** Operator-only paths/counts: never export message text, password hashes or session tokens. */
+/** Reports operator-only paths and impacts without exposing message text, passwords or session tokens. */
 export function reviewRoom(room: RoomInventory, uid: string) {
-  const own = room.messages.filter((message) => message.data['authorId'] === uid);
-  const ownIds = new Set(own.map((message) => message.ref.id));
-  const remaining = remainingMessages(room, uid);
+  return reviewImpact(room, uid, roomImpact(room, uid));
+}
+
+/** Formats independently calculated effects for the operator's per-conversation review. */
+function reviewImpact(room: RoomInventory, uid: string, impact: ReturnType<typeof roomImpact>) {
   return {
     path: room.room.ref.path,
     kind: room.room.data['kind'] ?? 'missing-parent',
-    remainingMembers: membersOf(room.room.data).filter((member) => member !== uid).length,
-    ownMessages: own.length,
-    ownReactions: room.reactions.filter((reaction) => reaction.data['userId'] === uid).length,
-    foreignReactionsRemoved: room.reactions.filter(
-      (reaction) =>
-        reaction.data['userId'] !== uid && ownIds.has(String(reaction.data['messageId'])),
-    ).length,
-    foreignMessagesPreserved: room.messages.filter(
-      (message) => message.data['authorId'] !== uid && remaining.has(message.ref.id),
-    ).length,
-    placeholderPaths: own.filter((message) => remaining.has(message.ref.id)).map((m) => m.ref.path),
-    createsDirectArchive:
-      room.room.data['kind'] === 'direct' &&
-      room.room.ref.id.startsWith('dm_') &&
-      remaining.size > 0,
+    remainingMembers: remainingMembers(room, uid),
+    ownMessages: impact.ownMessages,
+    ownReactions: impact.ownReactions,
+    foreignReactionsRemoved: impact.foreignReactionsOnOwnMessages,
+    foreignMessagesPreserved: impact.foreignMessagesPreserved,
+    placeholderPaths: placeholderPaths(room, uid),
+    createsDirectArchive: !!impact.directArchives,
     reviewRequired: 'Fremde Texte, Zitate und gemeinsame Metadaten auf Angaben zum Konto prüfen.',
   };
 }

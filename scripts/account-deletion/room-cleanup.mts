@@ -1,30 +1,19 @@
-import type { DocumentReference, Firestore, WriteBatch } from 'firebase-admin/firestore';
-import { membersOf, readRoom, remainingMessages } from './inventory.mts';
-import type { RoomInventory } from './inventory.mts';
+import type { DocumentReference, Firestore } from 'firebase-admin/firestore';
+import { readRoom } from './inventory.mts';
+import { membersOf, remainingMessages } from './room-content.mts';
+import { needsArchive } from './room-impact.mts';
+import { archiveDirect, finishArchive } from './direct-archive.mts';
+import type { RoomInventory } from './room-content.mts';
 
-/** Deferred Firestore batch mutation applied only inside the operator's reviewed cleanup workflow. */
-type Write = (batch: WriteBatch) => void;
-/** Renews the deletion lease before committing at most 350 queued writes per batch. */
-export async function commitChunks(
-  db: Firestore,
-  changes: Write[],
-  heartbeat: () => Promise<void>,
-): Promise<void> {
-  for (let i = 0; i < changes.length; i += 350) {
-    await heartbeat();
-    const batch = db.batch();
-    for (const change of changes.slice(i, i + 350)) change(batch);
-    await batch.commit();
-  }
-}
+import { commitChunks } from './cleanup-writes.mts';
+import type { Write } from './cleanup-writes.mts';
+export { commitChunks } from './cleanup-writes.mts';
 
-/** Locks one affected conversation, preserves foreign content and resumes or completes its targeted UID cleanup. */
-export async function cleanRoom(
-  db: Firestore,
-  reference: DocumentReference,
-  uid: string,
-  heartbeat: () => Promise<void>,
-) {
+/** Messages retained after removing the target account's identifying content. */
+type RetainedMessages = ReturnType<typeof remainingMessages>;
+
+/** Claims a stable archive ID or refuses an overlapping cleanup for another account. */
+async function lockRoom(db: Firestore, reference: DocumentReference, uid: string) {
   const lock = db.doc('deletionLocks/' + reference.id);
   const archiveId = await db.runTransaction(async (tx) => {
     const snapshot = await tx.get(lock);
@@ -35,104 +24,104 @@ export async function cleanRoom(
     tx.create(lock, { uid, archiveId: id });
     return id;
   });
-  const room = await readRoom(reference);
-  if ((await lock.get()).get('archiveReady') === true) {
-    await finishArchive(db, room, archiveId, heartbeat);
-    await lock.delete();
-    return;
-  }
-  const remaining = remainingMessages(room, uid);
-  const ownIds = new Set(
+  return { lock, archiveId };
+}
+
+/** Keeps only other people's reactions on messages that remain available after this deletion. */
+function retainedReactions(room: RoomInventory, uid: string, remaining: Map<string, unknown>) {
+  const removed = new Set(
     room.messages
       .filter((m) => m.data['authorId'] === uid || !remaining.has(m.ref.id))
       .map((m) => m.ref.id),
   );
-  const reactions = room.reactions.filter(
-    (r) => r.data['userId'] !== uid && !ownIds.has(String(r.data['messageId'])),
+  return room.reactions.filter(
+    (r) => r.data['userId'] !== uid && !removed.has(String(r.data['messageId'])),
   );
-  const members = membersOf(room.room.data).filter((id) => id !== uid);
-  const migrate =
-    room.room.data['kind'] === 'direct' && reference.id.startsWith('dm_') && remaining.size > 0;
+}
 
-  if (migrate) {
-    await archiveDirect(db, room, archiveId, uid, members, remaining, reactions, heartbeat);
-  } else {
-    const changes: Write[] = [];
-    // Reactions first: a retry must still identify the original authors of all target messages.
-    for (const reaction of room.reactions)
-      if (!reactions.includes(reaction)) changes.push((batch) => batch.delete(reaction.ref));
-    for (const message of room.messages) {
-      if (message.data['authorId'] !== uid && remaining.has(message.ref.id)) continue;
-      const retained = remaining.get(message.ref.id);
-      changes.push((batch) =>
-        retained ? batch.set(message.ref, retained) : batch.delete(message.ref),
-      );
-    }
-    await commitChunks(db, changes, heartbeat);
-    if (room.exists) {
-      if (!members.length && !remaining.size && !reactions.length) {
-        await removeEmptyRoom(db, room);
-      } else
-        await reference.update({
-          memberIds: members,
-          ...(room.room.data['createdBy'] === uid ? { createdBy: '' } : {}),
-        });
-    }
+/** Converts the rejected reactions into writes that run before their target messages are changed. */
+function reactionRemovals(room: RoomInventory, reactions: RoomInventory['reactions']): Write[] {
+  const changes: Write[] = room.reactions
+    .filter((r) => !reactions.includes(r))
+    .map((r) => (batch) => {
+      batch.delete(r.ref);
+    });
+  return changes;
+}
+
+/** Queues reaction removal before message changes so interrupted runs still identify original authors. */
+function roomWrites(room: RoomInventory, uid: string, remaining: RetainedMessages) {
+  const reactions = retainedReactions(room, uid, remaining);
+  const changes = reactionRemovals(room, reactions);
+  for (const message of room.messages) {
+    if (message.data['authorId'] !== uid && remaining.has(message.ref.id)) continue;
+    const retained = remaining.get(message.ref.id);
+    changes.push((batch) => {
+      if (retained) batch.set(message.ref, retained);
+      else batch.delete(message.ref);
+    });
   }
-  await lock.delete();
+  return changes;
 }
 
-/** Copies retained direct-chat content to a UID-neutral archive before exposing it to remaining members. */
-async function archiveDirect(
-  db: Firestore,
-  room: RoomInventory,
-  archiveId: string,
-  uid: string,
-  members: string[],
-  messages: Map<string, Record<string, unknown>>,
-  reactions: RoomInventory['reactions'],
-  heartbeat: () => Promise<void>,
-): Promise<void> {
-  const target = db.doc('conversations/' + archiveId);
-  const targetLock = db.doc('deletionLocks/' + archiveId);
-  await targetLock.set({ uid, archiveId });
-  // Hidden from client queries until the complete transcript has been copied.
-  const data = {
-    ...room.room.data,
-    memberIds: [],
-    archived: true,
-    createdBy: room.room.data['createdBy'] === uid ? '' : room.room.data['createdBy'],
+/** Removes empty channel metadata or keeps the conversation for remaining authors and members. */
+async function finishRoom(db: Firestore, room: RoomInventory, uid: string) {
+  if (!room.exists) return;
+  const members = membersOf(room.room.data).filter((id) => id !== uid);
+  const remaining = remainingMessages(room, uid);
+  if (!members.length && !remaining.size && !retainedReactions(room, uid, remaining).length)
+    await removeEmptyRoom(db, room);
+  else
+    await room.room.ref.update({
+      memberIds: members,
+      ...(room.room.data['createdBy'] === uid ? { createdBy: '' } : {}),
+    });
+}
+
+/** Shared state for one locked conversation and the lease-renewal callback. */
+type RoomCleanup = {
+  db: Firestore;
+  room: RoomInventory;
+  uid: string;
+  archiveId: string;
+  heartbeat: () => Promise<void>;
+};
+
+/** Carries only retained participants, messages and reactions into a direct-chat archive. */
+function archivePlan(plan: RoomCleanup, remaining: Map<string, Record<string, unknown>>) {
+  return {
+    ...plan,
+    messages: remaining,
+    members: membersOf(plan.room.room.data).filter((id) => id !== plan.uid),
+    reactions: retainedReactions(plan.room, plan.uid, remaining),
   };
-  await target.set(data);
-  const writes: Write[] = [];
-  for (const [id, value] of messages)
-    writes.push((batch) => batch.set(target.collection('messages').doc(id), value));
-  for (const item of reactions)
-    writes.push((batch) => batch.set(target.collection('reactions').doc(item.ref.id), item.data));
-  await commitChunks(db, writes, heartbeat);
-  // Make the archive durable and visible before removing its source. Resume uses the same ID.
-  await target.update({ memberIds: members });
-  await db.doc('deletionLocks/' + room.room.ref.id).update({ archiveReady: true });
-  await finishArchive(db, room, archiveId, heartbeat);
 }
 
-/** Requires the prepared archive before removing source messages, reactions, room metadata and the archive lock. */
-async function finishArchive(
+/** Applies the appropriate in-place cleanup or UID-neutral direct-chat migration. */
+async function cleanContents(plan: RoomCleanup) {
+  const { db, room, uid, heartbeat } = plan;
+  const remaining = remainingMessages(room, uid);
+  if (needsArchive(room, remaining)) {
+    await archiveDirect(archivePlan(plan, remaining));
+  } else {
+    await commitChunks(db, roomWrites(room, uid, remaining), heartbeat);
+    await finishRoom(db, room, uid);
+  }
+}
+
+/** Locks one affected conversation and resumes a prepared archive before releasing its deletion lock. */
+export async function cleanRoom(
   db: Firestore,
-  room: RoomInventory,
-  archiveId: string,
+  reference: DocumentReference,
+  uid: string,
   heartbeat: () => Promise<void>,
 ) {
-  if (!(await db.doc('conversations/' + archiveId).get()).exists)
-    throw new Error('Vorbereitetes Archiv fehlt. Keine weiteren Daten entfernt.');
-  const removals = [...room.messages, ...room.reactions].map((item): Write => (batch) => {
-    batch.delete(item.ref);
-  });
-  await commitChunks(db, removals, heartbeat);
-  const finish = db.batch();
-  finish.delete(room.room.ref);
-  finish.delete(db.doc('deletionLocks/' + archiveId));
-  await finish.commit();
+  const { lock, archiveId } = await lockRoom(db, reference, uid);
+  const room = await readRoom(reference);
+  if ((await lock.get()).get('archiveReady') === true)
+    await finishArchive(db, room, archiveId, heartbeat);
+  else await cleanContents({ db, room, uid, archiveId, heartbeat });
+  await lock.delete();
 }
 
 /** Deletes empty conversation metadata and only the channel-name reservation that still points to it. */

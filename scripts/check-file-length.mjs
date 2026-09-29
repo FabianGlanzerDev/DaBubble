@@ -15,6 +15,7 @@ const extensions = new Set(['.ts', '.mts', '.mjs', '.html', '.scss', '.json', '.
 const oversized = [];
 let checked = 0;
 
+/** Traverses authored files while excluding generated output and dependency directories. */
 async function check(directory) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     if (ignored.has(entry.name)) continue;
