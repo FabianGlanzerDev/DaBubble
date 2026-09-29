@@ -9,16 +9,19 @@ Entwickler: **Fabian Glanzer**. Vorgesehene Veröffentlichung: https://dabubble-
 - Registrierung mit E-Mail, Passwort, Name und Avatar-Auswahl; Anmeldung mit E-Mail/Passwort oder Google.
 - Vollwertiger Gastzugang über Firebase Anonymous Authentication mit denselben Eigentümer- und Mitgliedschaftsgrenzen wie reguläre Konten.
 - Wiederherstellung bestehender Sitzungen, Abmeldung und ausdrückliche Kontoverknüpfung beziehungsweise Umwandlung eines Gastkontos.
-- Passwort-Reset per Firebase-E-Mail sowie Bearbeitung des eigenen Namens und Avatars.
+- Passwort-Reset per Firebase-E-Mail sowie Bearbeitung des eigenen Namens und Avatars mit Synchronisierung in weiteren angemeldeten Tabs.
 - Channels erstellen, umbenennen, beschreiben, Mitglieder hinzufügen und Channels verlassen.
 - Channel- und Direktnachrichten senden, eigene Nachrichten bearbeiten oder entfernen, in Threads antworten und Emoji-Reaktionen verwenden.
 - Suche in zugänglichen Gesprächen sowie Auswahl von Personen und Channels über `@` und `#`.
 - Online-Status über serverseitig verwaltete Verbindungen in Firebase Realtime Database; mehrere Tabs und Geräte werden berücksichtigt.
 - Intro-Animation, responsive Ansichten, Tastaturbedienung und getrennte Menü-, Chat- und Threadansichten auf Mobilgeräten.
+- Modale Dialoge setzen den Fokus auf ihren Inhalt, begrenzen Tab und Shift+Tab auf die oberste Ebene und geben ihn nach dem Schließen an den verfügbaren Auslöser zurück. Austritts- und Löschbestätigungen beginnen auf „Abbrechen“; während des Speicherns lässt sich die Bestätigung nicht mit Escape schließen.
 
 ## Technik und Struktur
 
 Angular 22 mit eigenständigen Komponenten, TypeScript im Strict Mode, SCSS und Angular Router mit Hash-Routing. Firebase Authentication verwaltet Konten, Cloud Firestore die Profile und Chatdaten, Realtime Database die Anwesenheit. Firebase Analytics wird im Anwendungscode nicht eingebunden. Schrift und Bilder werden lokal ausgeliefert; die [Nunito-Lizenz](public/assets/fonts/nunito-OFL.txt) liegt im Projekt.
+
+Das Logo in Kopfzeile und Intro wird als verlustfreies WebP ausgeliefert. Avatare und Icons bleiben SVGs. Die PNG-Versionen bleiben für Favicon und bestehende Bildadressen, etwa bei einer E-Mail-Vorlage, verfügbar.
 
 | Bereich                                  | Inhalt                                                                              |
 | ---------------------------------------- | ----------------------------------------------------------------------------------- |
@@ -77,6 +80,8 @@ npm run build
 ```
 
 `npm run check` führt Typecheck, Lint, Format-, Dateilängenprüfung und Produktionsbuild gemeinsam aus. `npm run check:secrets` prüft separat Arbeitsdateien und erreichbare Git-Historie auf bekannte Schlüssel-/Tokenmuster; es ersetzt keine inhaltliche Prüfung vor der Veröffentlichung.
+
+Für selbst geschriebenen Anwendungs- und Verwaltungscode gilt die 14-Zeilen-Grenze je Funktion. ESLint kontrolliert Codezeilen, die Dateiprüfung maximal 400 Zeilen pro selbst gepflegter Datei; die generierte npm-Lockdatei ist ausgenommen. Funktionen und Variablen verwenden camelCase, Angular-Klassen und Typen ihre üblichen PascalCase-Namen. Der Formatter hält eine Leerzeile zwischen Funktionen ein und entspricht damit den 1–2 Leerzeilen der Checkliste. Englische TSDoc-Kommentare erläutern Zweck und wichtige Grenzen; Compodoc ist optional.
 
 Build und statische Prüfungen ersetzen nicht die manuelle Funktionsprüfung der veröffentlichten Anwendung. Der Ablauf für die Live-Abnahme steht im Abschnitt „Veröffentlichung per FTP“.
 
