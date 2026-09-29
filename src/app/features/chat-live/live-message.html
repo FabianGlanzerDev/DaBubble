@@ -77,16 +77,15 @@
       </div>
     }
     @if (removing()) {
-      <div class="delete-confirm">
-        <p>Diese Nachricht für alle löschen?</p>
-        <div class="editor-actions">
-          <button class="button secondary" type="button" (click)="removing.set(false)">
-            Abbrechen</button
-          ><button class="button" type="button" [disabled]="action.busy()" (click)="remove()">
-            Löschen bestätigen
-          </button>
-        </div>
-      </div>
+      <app-confirm-dialog
+        heading="Nachricht löschen?"
+        message="Diese Nachricht für alle löschen?"
+        confirmLabel="Löschen bestätigen"
+        [busy]="action.busy()"
+        [error]="action.error()"
+        (cancelled)="removing.set(false)"
+        (confirmed)="remove()"
+      />
     }
     @if (action.error()) {
       <p class="action-error" role="alert">{{ action.error() }}</p>

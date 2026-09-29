@@ -2,39 +2,57 @@ import {
   Component,
   ChangeDetectionStrategy,
   DestroyRef,
-  ElementRef,
-  afterNextRender,
   inject,
   output,
   input,
-  viewChild,
 } from '@angular/core';
 import { ConfirmationKind, ConfirmationMessage } from './confirmation-message';
+import { ModalFocus } from './modal-focus';
 
 /** Shows an accessible timed confirmation after its caller has established that the operation succeeded. */
 @Component({
   selector: 'app-success-overlay',
-  imports: [ConfirmationMessage],
+  imports: [ConfirmationMessage, ModalFocus],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<div class="success-layer">
-    <div #status role="status" tabindex="-1" (keydown.enter)="finish()" (keydown.escape)="finish()">
+  template: `<dialog
+    class="success-layer"
+    [appModalFocus]="true"
+    tabindex="-1"
+    [modalDismissible]="true"
+    (modalDismiss)="finish()"
+    aria-labelledby="success-message"
+    (keydown.enter)="finish()"
+  >
+    <div id="success-message" role="status" tabindex="-1" data-modal-focus>
       <app-confirmation-message [kind]="kind()" />
       @if (description()) {
         <span class="sr-only">{{ description() }}</span>
       }
     </div>
-  </div>`,
+  </dialog>`,
   styles: `
     .success-layer {
       position: fixed;
       z-index: 20;
       inset: 0;
+      width: 100%;
+      height: 100dvh;
+      max-width: none;
+      max-height: none;
+      margin: 0;
+      border: 0;
       overflow: hidden;
-      background: #ffffff66;
-      display: flex;
+      background: transparent;
+      color: inherit;
       align-items: flex-end;
       justify-content: flex-end;
       padding: 40px;
+    }
+    .success-layer[open] {
+      display: flex;
+    }
+    .success-layer::backdrop {
+      background: #ffffff66;
     }
     [role='status'] {
       max-width: 100%;
@@ -66,12 +84,10 @@ export class SuccessOverlay {
   readonly description = input('');
   readonly finished = output<void>();
   private readonly destroy = inject(DestroyRef);
-  private readonly status = viewChild.required<ElementRef<HTMLElement>>('status');
   private done = false;
 
-  /** Focuses the confirmation after rendering and disposes the automatic completion timer on destruction. */
+  /** Disposes the automatic completion timer if navigation destroys the confirmation early. */
   constructor() {
-    afterNextRender(() => this.status().nativeElement.focus());
     const timer = setTimeout(() => this.finish(), 1800);
     this.destroy.onDestroy(() => clearTimeout(timer));
   }

@@ -8,6 +8,7 @@
     <app-icon name="hash" /><input
       class="overlay-input"
       id="channel-name"
+      data-modal-focus
       placeholder="z.B. Kooperationsprojekte"
       [value]="name()"
       (input)="changeName($event)"
@@ -59,6 +60,7 @@
       <div class="with-icon">
         <app-icon name="hash" /><input
           id="edit-channel-name"
+          data-modal-focus
           class="overlay-input"
           [value]="name()"
           (input)="changeName($event)"
@@ -95,6 +97,7 @@
       <label class="sr-only" for="edit-description">Beschreibung</label
       ><textarea
         id="edit-description"
+        data-modal-focus
         class="overlay-input"
         rows="3"
         [value]="description()"

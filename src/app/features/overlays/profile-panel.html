@@ -7,6 +7,7 @@
       <button
         type="button"
         [attr.aria-pressed]="draftAvatar() === avatar"
+        [attr.data-modal-focus]="draftAvatar() === avatar ? '' : null"
         [attr.aria-label]="'Avatar ' + (avatar + 1)"
         (click)="draftAvatar.set(avatar)"
         [disabled]="realAccount() && session.busy()"
@@ -42,6 +43,7 @@
   <input
     class="overlay-input"
     id="profile-name"
+    data-modal-focus
     [value]="draftName()"
     (input)="updateName($event)"
     autocomplete="off"

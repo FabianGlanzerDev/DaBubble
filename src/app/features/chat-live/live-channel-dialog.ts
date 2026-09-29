@@ -17,11 +17,12 @@ import { channelNameError } from '../../core/chat/chat-models';
 import { OverlayState } from '../../core/ui/overlay-state';
 import { Icon } from '../../shared/ui/icon';
 import { LiveMemberList } from './live-member-list';
+import { ConfirmDialog } from '../../shared/ui/confirm-dialog';
 
 /** Edits real channel metadata and membership with inline validation and per-action error state. */
 @Component({
   selector: 'app-live-channel-dialog',
-  imports: [NgTemplateOutlet, Icon, LiveMemberList],
+  imports: [NgTemplateOutlet, Icon, LiveMemberList, ConfirmDialog],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './live-channel-dialog.html',
   styleUrls: ['../overlays/channel-panel.scss', './live-channel-dialog.scss'],

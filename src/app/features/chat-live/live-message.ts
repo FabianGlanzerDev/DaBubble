@@ -9,11 +9,12 @@ import { AvatarImage } from '../../shared/ui/avatar-image';
 import { Icon } from '../../shared/ui/icon';
 import { LiveReactions } from './live-reactions';
 import { LiveMessageText } from './live-message-text';
+import { ConfirmDialog } from '../../shared/ui/confirm-dialog';
 
 /** Displays persisted message content with author actions, thread entry and real emoji reactions. */
 @Component({
   selector: 'app-live-message',
-  imports: [DatePipe, AvatarImage, Icon, LiveReactions, LiveMessageText],
+  imports: [DatePipe, AvatarImage, Icon, LiveReactions, LiveMessageText, ConfirmDialog],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './live-message.html',
   styleUrls: ['../chat/message-preview.scss', './live-message.scss'],

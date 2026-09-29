@@ -1,15 +1,17 @@
 <dialog
   #dialog
+  [appModalFocus]="overlay.current()"
+  [modalDismissible]="true"
+  (modalDismiss)="overlay.close()"
   aria-labelledby="overlay-title"
   [attr.data-type]="overlay.current()?.type"
   [class.closing]="overlay.closing()"
-  (cancel)="cancel($event)"
   (pointerdown)="backdrop($event)"
 >
   @if (overlay.current(); as current) {
     <div class="overlay-body">
       <header [class.settings-heading]="current.type === 'settings'">
-        <h2 id="overlay-title">
+        <h2 id="overlay-title" tabindex="-1" data-modal-heading>
           @if (current.type === 'channel') {
             <app-icon name="hash" />
           }
@@ -18,7 +20,6 @@
         <button
           class="icon-button"
           type="button"
-          autofocus
           aria-label="Dialog schließen"
           (click)="overlay.close()"
         >

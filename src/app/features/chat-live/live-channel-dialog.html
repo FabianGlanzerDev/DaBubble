@@ -63,6 +63,7 @@
         <textarea
           #descriptionInput
           id="channel-description"
+          data-modal-focus
           class="overlay-input"
           [value]="description()"
           (input)="description.set($any($event.target).value); descriptionEdited.set(true)"
@@ -112,16 +113,6 @@
         {{ action.busy() ? 'Wird erstellt…' : 'Erstellen' }}
       </button>
     </div>
-  } @else if (confirmLeave()) {
-    <p>Du verlierst den Zugriff auf diesen Channel und seine Nachrichten.</p>
-    <div class="actions end">
-      <button class="button secondary" type="button" (click)="confirmLeave.set(false)">
-        Abbrechen
-      </button>
-      <button class="button" type="button" [disabled]="action.busy()" (click)="leave()">
-        {{ action.busy() ? 'Channel wird verlassen…' : 'Austritt bestätigen' }}
-      </button>
-    </div>
   } @else {
     <div class="actions end">
       <button
@@ -135,12 +126,24 @@
     </div>
   }
 </form>
+@if (confirmLeave()) {
+  <app-confirm-dialog
+    heading="Channel verlassen?"
+    message="Du verlierst den Zugriff auf diesen Channel und seine Nachrichten."
+    confirmLabel="Austritt bestätigen"
+    [busy]="action.busy()"
+    [error]="action.error()"
+    (cancelled)="confirmLeave.set(false)"
+    (confirmed)="leave()"
+  />
+}
 <ng-template #nameField>
   <div class="with-icon">
     <app-icon name="hash" />
     <input
       #nameInput
       id="channel-name"
+      data-modal-focus
       class="overlay-input"
       placeholder="z.B. Kooperationsprojekte"
       [value]="name()"

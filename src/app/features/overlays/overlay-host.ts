@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  afterRenderEffect,
   computed,
   inject,
   signal,
@@ -20,6 +19,7 @@ import { AuthSession } from '../../core/auth/auth-session';
 import { authIssue } from '../../core/auth/auth-errors';
 import { LiveDialog } from '../chat-live/live-dialog';
 import { RouterLink } from '@angular/router';
+import { ModalFocus } from '../../shared/ui/modal-focus';
 
 const titles: Record<OverlayType, string> = {
   confirmation: 'Animationsbeispiel',
@@ -49,6 +49,7 @@ const titles: Record<OverlayType, string> = {
     ConfirmationMessage,
     ReactionList,
     LiveDialog,
+    ModalFocus,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './overlay-host.html',
@@ -69,11 +70,6 @@ export class OverlayHost {
       : titles[current?.type ?? 'settings'];
   });
 
-  /** Synchronizes the native dialog lifecycle after reactive overlay state has rendered. */
-  constructor() {
-    afterRenderEffect(() => this.syncDialog());
-  }
-
   /** Closes account controls only after Firebase logout succeeds; failures remain visible in the dialog. */
   protected async logout(): Promise<void> {
     if (this.session.busy()) return;
@@ -84,22 +80,6 @@ export class OverlayHost {
     } catch (error) {
       this.logoutError.set(authIssue(error).message);
     }
-  }
-
-  /** Mirrors shared overlay state into native modal state and restores focus after dismissal. */
-  private syncDialog(): void {
-    const dialog = this.dialog().nativeElement;
-    if (this.overlay.current() && !dialog.open) dialog.showModal();
-    if (!this.overlay.current() && dialog.open) {
-      dialog.close();
-      this.overlay.restoreFocus();
-    }
-  }
-
-  /** Keeps Escape dismissal under the shared closing animation instead of the browser's immediate close. */
-  protected cancel(event: Event): void {
-    event.preventDefault();
-    this.overlay.close();
   }
 
   /** Dismisses only pointer events outside the dialog bounds, preserving clicks within its content. */

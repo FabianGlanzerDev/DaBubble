@@ -1,4 +1,3 @@
-import { DOCUMENT } from '@angular/common';
 import { Injectable, inject, signal } from '@angular/core';
 import { MobileOverlayHistory } from './mobile-overlay-history';
 
@@ -31,21 +30,18 @@ export interface OverlayContext {
   readonly anchor?: { readonly x: number; readonly y: number };
 }
 
-/** Coordinates dialog transitions, mobile history and restoration of the opening control's focus. */
+/** Coordinates dialog transitions and mobile history; the native modal host manages keyboard focus. */
 @Injectable({ providedIn: 'root' })
 export class OverlayState {
-  private readonly document = inject(DOCUMENT);
   private readonly history = inject(MobileOverlayHistory);
   private historyOpen = false;
   readonly current = signal<OverlayContext | null>(null);
   readonly closing = signal(false);
-  private returnFocus: HTMLElement | null = null;
   private closeTimer: ReturnType<typeof setTimeout> | undefined;
 
-  /** Captures the original focus target and publishes the next dialog with matching mobile history. */
+  /** Publishes the next dialog with matching mobile history and cancels any pending dismissal. */
   open(type: OverlayType, context: Omit<OverlayContext, 'type'> = {}): void {
     clearTimeout(this.closeTimer);
-    if (!this.current()) this.returnFocus = this.document.activeElement as HTMLElement | null;
     this.closing.set(false);
     this.current.set({ type, ...context });
     this.history.open(this.current()!);
@@ -58,13 +54,6 @@ export class OverlayState {
     this.closeTimer = setTimeout(() => {
       if (!this.history.dismiss()) this.current.set(null);
     }, 200);
-  }
-
-  /** Restores keyboard focus only when the original control still exists and is visible. */
-  restoreFocus(): void {
-    if (this.returnFocus?.isConnected && this.returnFocus.checkVisibility())
-      this.returnFocus.focus();
-    this.returnFocus = null;
   }
 
   /** Replays stored dialog context or closes a mobile dialog after browser-history navigation. */
@@ -87,7 +76,6 @@ export class OverlayState {
   closeForNavigation(): void {
     this.historyOpen = false;
     clearTimeout(this.closeTimer);
-    this.returnFocus = null;
     this.current.set(null);
     this.closing.set(false);
   }
