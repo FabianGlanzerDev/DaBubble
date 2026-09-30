@@ -2,13 +2,13 @@
 
 DaBubble ist mein Frontend-Abschlussprojekt bei der Developer Akademie. Die als Einzelprojekt entwickelte Chat-Anwendung orientiert sich an den bereitgestellten Figma-Vorlagen und ermöglicht die Kommunikation in Channels und Direktnachrichten auf Desktop und Mobilgeräten.
 
-Entwickler: **Fabian Glanzer**. Vorgesehene Veröffentlichung: https://dabubble-3278.developerakademie.net/.
+Entwickler: **Fabian Glanzer**. Veröffentlicht unter: https://dabubble-3278.developerakademie.net/.
 
 ## Funktionen
 
 - Registrierung mit E-Mail, Passwort, Name und Avatar-Auswahl; Anmeldung mit E-Mail/Passwort oder Google.
 - Vollwertiger Gastzugang über Firebase Anonymous Authentication mit denselben Eigentümer- und Mitgliedschaftsgrenzen wie reguläre Konten.
-- Wiederherstellung bestehender Sitzungen, Abmeldung und ausdrückliche Kontoverknüpfung beziehungsweise Umwandlung eines Gastkontos.
+- Wiederherstellung bestehender Sitzungen, Abmeldung und ausdrückliche Umwandlung eines Gastkontos.
 - Passwort-Reset per Firebase-E-Mail sowie Bearbeitung des eigenen Namens und Avatars mit Synchronisierung in weiteren angemeldeten Tabs.
 - Channels erstellen, umbenennen, beschreiben, Mitglieder hinzufügen und Channels verlassen.
 - Channel- und Direktnachrichten senden, eigene Nachrichten bearbeiten oder entfernen, in Threads antworten und Emoji-Reaktionen verwenden.
@@ -21,7 +21,7 @@ Entwickler: **Fabian Glanzer**. Vorgesehene Veröffentlichung: https://dabubble-
 
 Angular 22 mit eigenständigen Komponenten, TypeScript im Strict Mode, SCSS und Angular Router mit Hash-Routing. Firebase Authentication verwaltet Konten, Cloud Firestore die Profile und Chatdaten, Realtime Database die Anwesenheit. Firebase Analytics wird im Anwendungscode nicht eingebunden. Schrift und Bilder werden lokal ausgeliefert; die [Nunito-Lizenz](public/assets/fonts/nunito-OFL.txt) liegt im Projekt.
 
-Das Logo in Kopfzeile und Intro wird als verlustfreies WebP ausgeliefert. Avatare und Icons bleiben SVGs. Die PNG-Versionen bleiben für Favicon und bestehende Bildadressen, etwa bei einer E-Mail-Vorlage, verfügbar.
+Logo, Favicon, Avatar-Illustrationen und Workspace-Bild werden lokal als verlustfreie WebP-Bilder ausgeliefert. Die gespeicherten Avatar-IDs und ihre Zuordnung bleiben unverändert. SVG-Icons einschließlich der leeren Avatar-Silhouette bleiben Vektoren. Alte PNG- und SVG-Bildadressen bleiben als Kompatibilitätsdateien erhalten; die App verwendet die alten Rasterdateien nicht mehr. Ob eine externe Mailvorlage noch eine alte Logo-Adresse nutzt, ist nicht bestätigt. Das Logo in der Kopfzeile ist rein visuell und nicht fokussierbar.
 
 | Bereich                                  | Inhalt                                                                              |
 | ---------------------------------------- | ----------------------------------------------------------------------------------- |
@@ -81,7 +81,7 @@ npm run build
 
 `npm run check` führt Typecheck, Lint, Format-, Dateilängenprüfung und Produktionsbuild gemeinsam aus. `npm run check:secrets` prüft separat Arbeitsdateien und erreichbare Git-Historie auf bekannte Schlüssel-/Tokenmuster; es ersetzt keine inhaltliche Prüfung vor der Veröffentlichung.
 
-Für selbst geschriebenen Anwendungs- und Verwaltungscode gilt die 14-Zeilen-Grenze je Funktion. ESLint kontrolliert Codezeilen, die Dateiprüfung maximal 400 Zeilen pro selbst gepflegter Datei; die generierte npm-Lockdatei ist ausgenommen. Funktionen und Variablen verwenden camelCase, Angular-Klassen und Typen ihre üblichen PascalCase-Namen. Der Formatter hält eine Leerzeile zwischen Funktionen ein und entspricht damit den 1–2 Leerzeilen der Checkliste. Englische TSDoc-Kommentare erläutern Zweck und wichtige Grenzen; Compodoc ist optional.
+Für selbst geschriebenen Anwendungs- und Verwaltungscode gilt die 14-Zeilen-Grenze je Funktion. ESLint kontrolliert Codezeilen, die Dateiprüfung maximal 400 Zeilen pro selbst gepflegter Datei; die generierte npm-Lockdatei ist ausgenommen. Variablen, Parameter, Eigenschaften, Funktionen und Methoden verwenden camelCase; Klassen, Interfaces, Typen und Enums PascalCase. ESLint sichert die Schreibweise für TypeScript ab. Externe API-Felder, Datenbankschlüssel, Angular-Bindungen sowie CSS- und Dateinamen behalten ihr erforderliches Format. Der Formatter hält eine Leerzeile zwischen Funktionen ein und entspricht damit den 1–2 Leerzeilen der Checkliste. Englische TSDoc-Kommentare erläutern Zweck und wichtige Grenzen; Compodoc ist optional.
 
 Build und statische Prüfungen ersetzen nicht die manuelle Funktionsprüfung der veröffentlichten Anwendung. Der Ablauf für die Live-Abnahme steht im Abschnitt „Veröffentlichung per FTP“.
 
@@ -116,11 +116,14 @@ Alte Links ohne `/#/` können auf einem Server ohne wirksames Rewrite weiterhin 
 
 Nach dem Upload manuell prüfen: Intro und Assets; Direktaufruf und Neuladen der öffentlichen sowie erlaubten dynamischen Chat-Links; Browser-Zurück; Anmeldung, Logout und Kontowechsel in zwei Tabs; Registrierung mit Avatar; echte Reset-Mail und Google-Anmeldung; Chat, Mitgliedschaften und Anwesenheit mit getrennten eigenen Konten. Desktop und Mobilansichten bis 320 px einschließlich Tastatur und Touch einbeziehen. Diese Live-Abnahme wird durch einen lokalen Build nicht nachgewiesen.
 
+**Manuelle Live-Prüfung durch Fabian Glanzer (30.09.2026):** Das aktuelle FTP-Paket wurde hochgeladen. „Log out“ ist zentriert. Online-Status und Schreiben funktionieren auf zwei Geräten. Abmelden, erneute Anmeldung und Neuladen funktionieren ohne Sitzungsfenster oder 404. Diese Ergebnisse wurden vom Betreiber bestätigt; sie sind keine automatisierte Cloud-Prüfung.
+
 ## Wichtige Betriebsgrenzen
 
 - **Privatsphäre:** Private Profile sind nur dem jeweiligen Konto zugänglich. Ein angemeldeten Nutzern zugängliches Verzeichnis enthält Name und Avatar zur Personenauswahl. Gespräche, Nachrichten, Threads und Reaktionen sind an Mitgliedschaften gebunden; Gastkonten umgehen diese Regeln nicht.
 - **Gastzugang:** Neuladen erhält die anonyme Sitzung. „Log out“ beendet die Sitzung, löscht aber weder das Konto noch Chatdaten. Ohne vorherige Verknüpfung kann ein abgemeldeter Gast seinen bisherigen Zugang nicht mit einem erneuten Gäste-Login zurückholen. Die Bestätigung vor Gastabmeldung ist deshalb nötig. Eine Kontoumwandlung während der aktiven Sitzung erhält die UID und ihre Chatbezüge.
-- **Google-Verknüpfung:** Zum gezielten Erhalt eines bestehenden Passwortkontos zuerst damit anmelden und Google ausdrücklich über das Profilmenü verknüpfen. Getrennte Konten oder Chatbestände werden nicht automatisch zusammengeführt. Eine Firebase-Abmeldung beendet nicht die unabhängige Google-Sitzung im Browser.
+- **Anmeldung und Logout:** Die Anmeldung zeigt keine zusätzliche Sitzungs-Auswahl. „Log out“ beendet die Firebase-Sitzung in den Tabs desselben Browserprofils und räumt deren Chat-Abonnements und Anwesenheitsverbindungen auf. Andere Geräte behalten ihre eigene Anmeldung. Konten und Chatdaten bleiben erhalten; das Anmeldeformular wird geleert. Eine aktive Gastsitzung wird bei einem Kontowechsel erst nach bestätigter Gastabmeldung aufgegeben.
+- **Google:** Normale Anmeldung und ausdrücklich bestätigte Gastumwandlung bleiben möglich. Eine separate Verknüpfung dauerhafter Konten wird nicht angeboten. Bei einer Kollision mit einem Passwortkonto bleibt dessen Zugang erhalten; die App fordert die bisherige Anmeldemethode an. Direkte Google-Anmeldung kann bei einer von Google bestätigten Adresse einen unbestätigten Passwortanbieter ersetzen; ein nachträglich abgefangener Kollisionsfehler schützt nicht in jedem Fall. Deshalb prüft die App die Zuordnung über Firebase-Verknüpfung mit einer isolierten Hilfssitzung im Arbeitsspeicher, ohne Firestore-Profil, Chat oder Anwesenheit. Entfernt wird ausschließlich ihr neu angelegtes, laut erneuter Serverabfrage noch anonymes Konto; ein verknüpftes Google-Konto bleibt erhalten. Ein vorübergehender Bereinigungsfehler wird einmal wiederholt. Bei anhaltendem Netzfehler oder Browserabbruch kann ein Auth-Hilfskonto verbleiben. Eine vollständig garantierte Bereinigung würde zusätzlich einen administrativen oder serverseitigen Ablauf benötigen. Bereits bestehende Konten werden dabei nicht gelöscht. Eine Firebase-Abmeldung beendet nicht die unabhängige Google-Sitzung im Browser.
 - **Anwesenheit:** Grün bedeutet mindestens eine vom Realtime-Dienst erkannte aktive Verbindung. Bei abruptem Netzabbruch kann die Erkennung verzögert erfolgen; bei Fehlern wird kein verlässlicher Online-Status behauptet. Statuspunkte sind keine Markierung ungelesener Nachrichten.
 - **Chatdaten:** Das Entfernen einer Nachricht in der Oberfläche ist keine vollständige technische Kontolöschung. Threadstruktur und andere Beiträge können erhalten bleiben. Suche arbeitet mit zugänglichen Gesprächsdaten im Client; eine Skalierungszusage für große Datenbestände besteht nicht. Erwähnungen verwenden Namen und bleiben bei Umbenennungen oder gleichen Namen eingeschränkt.
 - **Designbeispiele:** `/#/vorschau`, `/#/avatar-vorschau` und `/#/meldungen-vorschau` zeigen gekennzeichnete Beispiele ohne persistente Chataktionen. Der Gäste-Login öffnet hingegen den echten Chat.
