@@ -17,7 +17,7 @@ import { LiveSearch } from './live-search';
     @if (conversation()) {
       <a class="mobile-workspace-back" routerLink="/chat" aria-label="Zurück zum Menü">
         <app-icon name="chevron" /><img
-          src="assets/images/original/devspace.svg"
+          src="assets/images/original/devspace.webp"
           width="50"
           height="50"
           alt=""

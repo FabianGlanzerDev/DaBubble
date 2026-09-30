@@ -13,7 +13,7 @@ import { AvatarImage } from '../../shared/ui/avatar-image';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<nav aria-label="Arbeitsbereich">
     <div class="workspace-title">
-      <img src="assets/images/original/devspace.svg" width="60" height="60" alt="" />
+      <img src="assets/images/original/devspace.webp" width="60" height="60" alt="" />
       <h2>Devspace</h2>
       <a class="icon-button" routerLink="/chat/neue-nachricht" aria-label="Neue Nachricht"
         ><app-icon name="compose"

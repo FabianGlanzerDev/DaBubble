@@ -17,7 +17,7 @@ import { RouterLink } from '@angular/router';
     @if (conversation()) {
       <a class="mobile-workspace-back" [routerLink]="basePath()" aria-label="Zurück zum Menü">
         <app-icon name="chevron" /><img
-          src="assets/images/original/devspace.svg"
+          src="assets/images/original/devspace.webp"
           width="50"
           height="50"
           alt=""

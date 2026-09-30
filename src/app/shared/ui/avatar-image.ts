@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { PresenceState } from '../../core/presence/presence-state';
 
-/** Original SVG assets supplied with the accepted comparison project. */
+/** Renders local lossless avatar artwork while retaining the persisted numeric avatar mapping. */
 @Component({
   selector: 'app-avatar-image',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -14,7 +14,7 @@ import { PresenceState } from '../../core/presence/presence-state';
         [src]="
           index() === null
             ? 'assets/images/original/no-avatar.svg'
-            : 'assets/images/original/avatar-option-' + assetOrder[index() ?? 0] + '.svg'
+            : 'assets/images/original/avatar-option-' + assetOrder[index() ?? 0] + '.webp'
         "
         [width]="size()"
         [height]="size()"
