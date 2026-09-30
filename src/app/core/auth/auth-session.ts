@@ -70,8 +70,8 @@ export class AuthSession {
 
   /** Lazily creates the Firebase runtime and registers cleanup for the service lifetime. */
   private async connect(settings: FirebaseSettings): Promise<void> {
-    const { FirebaseRuntime } = await import('../firebase/firebase-runtime');
-    this.client = new FirebaseRuntime(settings, this.presence);
+    const firebaseModule = await import('../firebase/firebase-runtime');
+    this.client = new firebaseModule.FirebaseRuntime(settings, this.presence);
     this.destroy.onDestroy(() => this.client?.destroy());
     this.emulated.set(settings.emulators);
   }
@@ -159,7 +159,7 @@ export class AuthSession {
   /** Bounds UI waiting to ten seconds without claiming to cancel the underlying Firestore request. */
   private async limitProfileRead<T>(operation: Promise<T>): Promise<T> {
     let timer: ReturnType<typeof setTimeout> | undefined;
-    const timeout = new Promise<never>((_, reject) => {
+    const timeout = new Promise<never>((resolve, reject) => {
       timer = setTimeout(() => reject(new Error('unavailable')), 10000);
     });
     try {
@@ -179,10 +179,10 @@ export class AuthSession {
     await this.profileLoad;
   }
 
-  /** Completes email sign-in and refreshes UI identity; guest switching requires its confirmed UID. */
-  async login(email: string, password: string, confirmedGuestUid?: string): Promise<void> {
+  /** Completes email sign-in and refreshes identity without implicitly abandoning an active guest account. */
+  async login(email: string, password: string): Promise<void> {
     await this.perform('login', async (client) => {
-      await client.login(email, password, confirmedGuestUid);
+      await client.login(email, password);
       await this.changeUser(client.identity());
     });
   }
@@ -222,10 +222,10 @@ export class AuthSession {
     await this.router.navigateByUrl('/anmeldung', { replaceUrl: true });
   }
 
-  /** Runs Google sign-in or explicit linking and carries the provider name into profile setup. */
-  async google(linkExisting = false): Promise<void> {
+  /** Runs Google sign-in or guest conversion and carries the provider name into profile setup. */
+  async google(): Promise<void> {
     await this.perform('google', async (client) => {
-      await client.google(linkExisting);
+      await client.google();
       this.pendingName.set(client.identity()?.displayName?.trim().slice(0, 80) ?? '');
       await this.changeUser(client.identity());
     });

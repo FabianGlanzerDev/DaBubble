@@ -7,12 +7,12 @@
     <header class="card-heading">
       <a
         class="back-link icon-button"
-        [routerLink]="session.isGuest() || linking() ? '/chat' : '/anmeldung'"
+        [routerLink]="session.isGuest() ? '/chat' : '/anmeldung'"
         aria-label="Zurück"
         ><app-icon name="arrow"
       /></a>
       <h1 id="access-title" data-page-heading tabindex="-1">
-        {{ guest() ? 'Als Gast abmelden?' : linking() ? 'Google verknüpfen' : 'Google-Anmeldung' }}
+        {{ guest() ? 'Als Gast abmelden?' : 'Google-Anmeldung' }}
       </h1>
     </header>
     @if (guest()) {
@@ -67,22 +67,10 @@
       }
     } @else if (!session.googleAvailable()) {
       <p role="status">
-        Google-Anmeldung und Google-Verknüpfung sind derzeit nicht verfügbar. Nutze E-Mail und
-        Passwort oder den Gäste-Login.
+        Google-Anmeldung ist derzeit nicht verfügbar. Nutze E-Mail und Passwort oder den
+        Gäste-Login.
       </p>
       <a routerLink="/anmeldung">Zur Anmeldung</a>
-    } @else if (linking() && (!session.user() || session.isGuest())) {
-      <p>
-        Bitte melde dich zuerst mit deinem bestehenden Konto an. Wähle danach im Profilmenü „Google
-        verknüpfen“.
-      </p>
-      <a routerLink="/anmeldung">Zur Anmeldung</a>
-    } @else if (linked()) {
-      <p role="status">
-        Google ist jetzt als zusätzliche Anmeldemethode verknüpft. Deine Benutzerkennung, dein
-        Profil und deine Chats bleiben erhalten.
-      </p>
-      <a class="auth-button" routerLink="/chat">Zum Arbeitsbereich</a>
     } @else {
       @if (session.isGuest()) {
         <p>
@@ -90,26 +78,15 @@
           Google-Konto bereits vergeben, bleibt dein Gastzugang bestehen; Konten werden nicht
           zusammengeführt.
         </p>
-      } @else if (linking()) {
-        <p>
-          Du ergänzt dein angemeldetes Konto {{ session.user()?.email }} um Google. Profil,
-          Benutzerkennung und Chats bleiben unverändert. Ein bereits anderswo verwendetes
-          Google-Konto kann nicht übernommen werden.
-        </p>
       } @else {
         <p>
-          Google übermittelt deine Identität an Firebase. Bei derselben bestätigten E-Mail-Adresse
-          kann Firebase dich einem bestehenden DaBubble-Konto zuordnen. Dessen Profil und Chats
-          bleiben erhalten; getrennte Benutzerkennungen werden nicht zusammengeführt.
-        </p>
-        <p>
-          Du hast bereits ein Passwortkonto? Melde dich zunächst damit an und wähle im Profilmenü
-          „Google verknüpfen“, um Google ausdrücklich als zusätzlichen Zugang einzurichten.
+          Google übermittelt deine Identität an Firebase. Ein bereits mit Google eingerichtetes
+          DaBubble-Konto behält seine Benutzerkennung, sein Profil und seine Chats.
         </p>
         <p class="access-note">
-          Bei einem bisher unbestätigten Passwortkonto kann Firebase durch die direkte
-          Google-Anmeldung den Passwortzugang ersetzen. Wenn du beide Anmeldemethoden behalten
-          möchtest, verwende zuerst dein Passwort und danach „Google verknüpfen“.
+          Besteht für dieselbe E-Mail-Adresse ein Konto mit einer anderen Anmeldemethode, wird der
+          Google-Zugang abgelehnt. Melde dich dann mit deiner bisherigen Methode an. Konten und
+          Chatdaten werden nicht zusammengeführt.
         </p>
         <a routerLink="/anmeldung">Mit bestehendem Passwort anmelden</a>
       }
@@ -122,20 +99,15 @@
           (change)="confirmed.set(approval.checked)"
         />
         <span>{{
-          linking() || session.isGuest()
+          session.isGuest()
             ? 'Ich möchte Google ausdrücklich mit diesem Konto verknüpfen.'
-            : 'Ich möchte mit Google fortfahren und stimme der beschriebenen Kontozuordnung zu.'
+            : 'Ich möchte mich mit Google anmelden.'
         }}</span>
       </label>
       <button
         class="google-button"
         type="button"
-        [disabled]="
-          !confirmed() ||
-          !session.configured() ||
-          session.busy() ||
-          (!linking() && !!session.user() && !session.isGuest())
-        "
+        [disabled]="!confirmed() || !session.configured() || session.busy()"
         (click)="proceed()"
       >
         <span class="google-mark" aria-hidden="true"></span
@@ -154,9 +126,7 @@
         Die Anmeldung läuft im Google-Fenster. Schließe dieses Fenster, um abzubrechen.
       </p>
     } @else {
-      <a class="cancel-link" [routerLink]="session.isGuest() || linking() ? '/chat' : '/anmeldung'"
-        >Abbrechen</a
-      >
+      <a class="cancel-link" [routerLink]="session.isGuest() ? '/chat' : '/anmeldung'">Abbrechen</a>
     }
   </section>
 </app-public-layout>

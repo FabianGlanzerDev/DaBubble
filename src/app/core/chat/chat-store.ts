@@ -7,7 +7,9 @@ import type { ChatApi } from './chat-api';
 @Injectable({ providedIn: 'root' })
 export class ChatStore {
   readonly session = inject(AuthSession);
-  private readonly accountUid = computed(() => this.session.user()?.uid);
+  private readonly accountUid = computed(() =>
+    this.session.pending() === 'logout' ? undefined : this.session.user()?.uid,
+  );
   private readonly destroy = inject(DestroyRef);
   private client: ChatApi | null = null;
   private revision = 0;
@@ -46,10 +48,10 @@ export class ChatStore {
   /** Creates the chat client and directory entry only while the initiating account revision is current. */
   private async initialize(uid: string, revision: number): Promise<void> {
     try {
-      const { ChatApi } = await import('./chat-api');
+      const chatModule = await import('./chat-api');
       const database = await this.session.chatDatabase();
       if (revision !== this.revision) return;
-      this.client = new ChatApi(database, uid);
+      this.client = new chatModule.ChatApi(database, uid);
       const profile = this.session.profile();
       if (profile) await this.client.publishPerson(profile);
       if (revision === this.revision) this.subscribe(revision);

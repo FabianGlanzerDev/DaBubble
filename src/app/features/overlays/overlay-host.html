@@ -73,18 +73,6 @@
                   >Zur Anmeldung</a
                 >
               }
-              @if (
-                session.googleAvailable() &&
-                current.account &&
-                !session.user()?.providerIds?.includes('google.com')
-              ) {
-                <a
-                  class="settings-option google-link"
-                  routerLink="/zugang/verknuepfen"
-                  (click)="overlay.close()"
-                  >Google verknüpfen</a
-                >
-              }
               @if (logoutError()) {
                 <p class="action-error" role="alert">{{ logoutError() }}</p>
               }

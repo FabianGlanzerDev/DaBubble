@@ -15,7 +15,6 @@ import {
   confirmPasswordReset,
   browserPopupRedirectResolver,
   GoogleAuthProvider,
-  signInWithPopup,
   linkWithPopup,
   signInAnonymously,
   linkWithCredential,
@@ -35,6 +34,7 @@ import { FirebaseSettings } from './firebase-settings';
 import { loadGuestProfile } from './guest-profile';
 import { observeProfile } from './profile-listener';
 import { LogoutFence } from './logout-fence';
+import { signInGoogleSafely } from './google-sign-in';
 import { PresenceClient } from '../presence/presence-client';
 import { PresenceState } from '../presence/presence-state';
 import {
@@ -95,20 +95,15 @@ export class FirebaseRuntime {
   }
 
   /** Wraps email sign-in in the cross-tab logout fence to reject stale successful attempts. */
-  login(email: string, password: string, confirmedGuestUid?: string): Promise<void> {
-    return this.authenticate(() => this.signInEmail(email, password, confirmedGuestUid));
+  login(email: string, password: string): Promise<void> {
+    return this.authenticate(() => this.signInEmail(email, password));
   }
 
-  /** Requires explicit guest-switch confirmation and retains the current session if new credentials fail. */
-  private async signInEmail(
-    email: string,
-    password: string,
-    confirmedGuestUid?: string,
-  ): Promise<void> {
+  /** Requires guest logout before account switching and retains regular sessions when new credentials fail. */
+  private async signInEmail(email: string, password: string): Promise<void> {
     await this.auth.authStateReady();
     const current = this.auth.currentUser;
-    if (current?.isAnonymous && current.uid !== confirmedGuestUid)
-      throw new Error('auth/guest-switch-confirmation-required');
+    if (current?.isAnonymous) throw new Error('auth/guest-switch-confirmation-required');
     // Firebase replaces the current session only after the new credentials succeed.
     // Do not sign out first: a failed login must retain the original account's access.
     await signInWithEmailAndPassword(this.auth, email.trim(), password);
@@ -131,23 +126,20 @@ export class FirebaseRuntime {
     }
   }
 
-  /** Runs Google authentication under the logout fence, with linking controlled by the caller. */
-  google(linkExisting: boolean): Promise<void> {
-    return this.authenticate(() => this.signInGoogle(linkExisting));
+  /** Runs Google authentication under the cross-tab logout fence. */
+  google(): Promise<void> {
+    return this.authenticate(() => this.signInGoogle());
   }
 
-  /** Links guests or explicitly confirmed users; otherwise opens account selection for a signed-out login. */
-  private async signInGoogle(linkExisting: boolean): Promise<void> {
+  /** Upgrades anonymous accounts in place; other Google sign-ins preserve existing account providers. */
+  private async signInGoogle(): Promise<void> {
     const user = this.auth.currentUser;
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
-    if (user?.isAnonymous || (user && linkExisting)) {
+    if (user?.isAnonymous) {
       await linkWithPopup(user, provider, browserPopupRedirectResolver);
       await user.getIdToken(true);
-    } else {
-      if (user || linkExisting) throw new Error('auth/session-active');
-      await signInWithPopup(this.auth, provider, browserPopupRedirectResolver);
-    }
+    } else await signInGoogleSafely(this.auth, provider);
   }
 
   /** Runs anonymous sign-in under the same cross-tab logout protection as regular sign-in. */
@@ -181,7 +173,11 @@ export class FirebaseRuntime {
   /** A late Firebase response must not undo a completed logout in another tab. */
   private async authenticate(operation: () => Promise<unknown>): Promise<void> {
     const version = this.logoutFence.version();
-    await operation();
+    try {
+      await operation();
+    } catch (error) {
+      throw version === this.logoutFence.version() ? error : new Error('auth/session-ended');
+    }
     if (version === this.logoutFence.version()) return;
     await this.logout();
     throw new Error('auth/session-ended');

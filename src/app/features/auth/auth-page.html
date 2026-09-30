@@ -26,9 +26,6 @@
         </h1>
       </header>
       <p class="description">{{ page().description }}</p>
-      @if (mode() === 'login' && !embedded()) {
-        <app-session-notice [(confirmedGuestUid)]="confirmedGuestUid" />
-      }
       @if (resuming()) {
         <p class="access-note">
           Dein Konto ist bereits angelegt. Du kannst deinen Namen anpassen und die Avatar-Auswahl

@@ -17,7 +17,6 @@ import { Icon } from '../../shared/ui/icon';
 import { FormField, fieldError } from '../../shared/ui/form-field';
 import { AuthSession } from '../../core/auth/auth-session';
 import { AuthIssue, authIssue, guestIssue } from '../../core/auth/auth-errors';
-import { SessionNotice } from './session-notice';
 
 const pages = {
   login: {
@@ -36,7 +35,7 @@ type Mode = keyof typeof pages;
 /** Validates login and signup forms while preserving persisted sessions and recoverable avatar setup. */
 @Component({
   selector: 'app-auth-page',
-  imports: [PublicLayout, Icon, RouterLink, FormField, SessionNotice],
+  imports: [PublicLayout, Icon, RouterLink, FormField],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './auth-page.html',
   styleUrl: './auth-page.scss',
@@ -52,7 +51,6 @@ export class AuthPage {
   protected readonly email = signal('');
   protected readonly password = signal('');
   protected readonly consent = signal(false);
-  protected readonly confirmedGuestUid = signal('');
   protected readonly progress = computed(() =>
     this.session.registration.forUser(this.session.user()),
   );
@@ -106,13 +104,12 @@ export class AuthPage {
     this.consent.set(true);
   }
 
-  /** Removes prior form values and guest confirmation after logout while retaining designated sign-out errors. */
+  /** Clears prior login values after logout while retaining designated sign-out errors. */
   private clearLogin(): void {
     this.email.set('');
     this.password.set('');
     if (!this.issue()?.retainOnSignOut) this.issue.set(null);
     this.submitted.set(false);
-    this.confirmedGuestUid.set('');
     for (const field of this.fields()) field.reset();
   }
 
@@ -158,10 +155,10 @@ export class AuthPage {
     }
   }
 
-  /** Signs in with confirmed session-switch intent and restricts the return destination to internal chat routes. */
+  /** Signs in without discarding anonymous access and restricts return navigation to internal chat routes. */
   private async login(): Promise<void> {
     try {
-      await this.session.login(this.email(), this.password(), this.confirmedGuestUid());
+      await this.session.login(this.email(), this.password());
       this.password.set('');
       const destination = this.query().get('returnUrl') ?? '/chat';
       await this.router.navigateByUrl(

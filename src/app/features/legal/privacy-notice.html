@@ -43,11 +43,17 @@
   Wenn du Google ausdrücklich als Anmeldemethode wählst, öffnet die App ein Google-Anmeldefenster.
   Google und Firebase verarbeiten dabei deine Google-Kennung, E-Mail-Adresse und den Anzeigenamen.
   Dein Google-Passwort wird nicht an DaBubble übermittelt. Neue Nutzer wählen ihren Namen und Avatar
-  anschließend in DaBubble; ein Google-Profilfoto wird nicht in Firestore übernommen. Eine Zuordnung
-  zu einem bestehenden Konto kann bei derselben bestätigten E-Mail-Adresse erfolgen. Die App erklärt
-  dies vor der Anmeldung und verlangt deine Bestätigung. Getrennte Benutzerkennungen und
-  Chatbestände werden nicht zusammengeführt. Du kannst Google auch ausdrücklich als zusätzlichen
-  Zugang mit deinem bereits angemeldeten Konto verknüpfen.
+  anschließend in DaBubble; ein Google-Profilfoto wird nicht in Firestore übernommen. Ein bereits
+  mit Google eingerichtetes Konto behält seine Benutzerkennung. Ein bestehender Zugang mit derselben
+  E-Mail-Adresse und einer anderen Anmeldemethode wird nicht automatisch ersetzt. Dafür prüft die
+  App die Zuordnung über eine kurzlebige, nur im Arbeitsspeicher angemeldete Firebase-Hilfssitzung
+  ohne Firestore-Profil, Chatdaten oder Anwesenheit. Ein noch anonymes Hilfskonto wird nach
+  Abschluss oder Abbruch wieder entfernt, soweit Firebase erreichbar ist. Vorher wird sein anonymer
+  Zustand erneut beim Server geprüft; ein vorübergehender Bereinigungsfehler wird einmal wiederholt.
+  Bei einem Verbindungs- oder Browserabbruch kann ein ungenutztes Hilfskonto in Authentication
+  verbleiben. Getrennte Konten und Chatbestände werden nicht zusammengeführt. Die App bietet keine
+  zusätzliche Google-Verknüpfung für bereits bestehende dauerhafte Konten an. Eine ausdrücklich
+  gewählte Umwandlung eines aktiven Gastkontos bleibt möglich.
 </p>
 <p>
   Der Gäste-Zugang legt in Firebase Authentication ein anonymes Konto mit Benutzerkennung an. Gäste

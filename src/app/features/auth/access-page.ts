@@ -14,7 +14,7 @@ import { authIssue } from '../../core/auth/auth-errors';
 import { PublicLayout } from '../../shared/layout/public-layout';
 import { Icon } from '../../shared/ui/icon';
 
-/** Handles explicit Google linking and guest account decisions before invoking authentication changes. */
+/** Explains Google sign-in and protects anonymous access before an explicit guest logout. */
 @Component({
   selector: 'app-access-page',
   imports: [PublicLayout, Icon, RouterLink],
@@ -32,11 +32,9 @@ export class AccessPage {
   });
   protected readonly kind = computed(() => this.parameters().get('art'));
   protected readonly guest = computed(() => this.kind() === 'gast');
-  protected readonly linking = computed(() => this.kind() === 'verknuepfen');
   protected readonly confirmed = signal(false);
   protected readonly logoutConfirmed = signal(false);
   protected readonly error = signal('');
-  protected readonly linked = signal(false);
 
   /** Rejects stale guest-management routes and resets confirmations when access parameters change. */
   constructor() {
@@ -46,11 +44,17 @@ export class AccessPage {
     });
     effect(() => {
       this.parameters();
-      this.confirmed.set(false);
-      this.logoutConfirmed.set(false);
       this.error.set('');
-      this.linked.set(false);
     });
+    effect(() => this.resetConfirmations());
+  }
+
+  /** Requires fresh consent when navigation or a second tab changes the account affected by this page. */
+  private resetConfirmations(): void {
+    this.parameters();
+    this.session.user();
+    this.confirmed.set(false);
+    this.logoutConfirmed.set(false);
   }
 
   /** Requires the relevant confirmation and prevents duplicate access actions while Firebase is busy. */
@@ -67,18 +71,16 @@ export class AccessPage {
     }
   }
 
-  /** Routes linked users to confirmation and new or upgraded identities to their required profile step. */
+  /** Routes existing profiles to chat and new or converted identities to avatar setup. */
   private async useGoogle(): Promise<void> {
     const wasGuest = this.session.isGuest();
-    await this.session.google(this.linking());
+    await this.session.google();
     if (this.destroy.destroyed) return;
-    if (this.linking()) this.linked.set(true);
-    else
-      await this.router.navigateByUrl(
-        !wasGuest && (this.session.profile() || this.session.profileError())
-          ? '/chat'
-          : '/avatar-auswahl',
-      );
+    await this.router.navigateByUrl(
+      !wasGuest && (this.session.profile() || this.session.profileError())
+        ? '/chat'
+        : '/avatar-auswahl',
+    );
   }
 
   /** Signs out only after explicit acknowledgement, preserving the guest account and its chat data. */

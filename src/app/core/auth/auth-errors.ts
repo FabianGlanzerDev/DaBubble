@@ -21,6 +21,10 @@ const issues: Record<string, AuthIssue> = {
     field: 'email',
     message: 'Diese E-Mail-Adresse wird bereits verwendet.',
   },
+  'auth/invalid-google-response': {
+    field: 'general',
+    message: 'Google hat die Anmeldung nicht vollständig bestätigt. Bitte versuche es erneut.',
+  },
   'auth/invalid-email': { field: 'email', message: 'Bitte gib eine gültige E-Mail-Adresse ein.' },
   'auth/weak-password': {
     field: 'password',
@@ -97,7 +101,7 @@ const issues: Record<string, AuthIssue> = {
   'auth/account-exists-with-different-credential': {
     field: 'general',
     message:
-      'Für diese E-Mail-Adresse besteht bereits ein anderer Zugang. Melde dich damit an und wähle im Profilmenü „Google verknüpfen“. Es wurden keine Chatdaten zusammengeführt.',
+      'Für diese E-Mail-Adresse besteht bereits ein anderer Zugang. Melde dich mit deiner bisherigen Anmeldemethode an. Die App führt keine Konten oder Chatdaten zusammen.',
   },
   'auth/credential-already-in-use': {
     field: 'general',
@@ -111,7 +115,7 @@ const issues: Record<string, AuthIssue> = {
   'auth/session-active': {
     field: 'general',
     message:
-      'Es besteht bereits eine Anmeldung. Wähle auf der Anmeldeseite „Abmelden“, wenn du ein anderes Konto verwenden möchtest.',
+      'Es besteht bereits eine Anmeldung. Wähle im Profilmenü „Log out“, bevor du ein anderes Konto verwendest.',
   },
   'auth/sign-out-incomplete': {
     field: 'general',
@@ -121,7 +125,7 @@ const issues: Record<string, AuthIssue> = {
   'auth/guest-switch-confirmation-required': {
     field: 'general',
     message:
-      'Bitte bestätige vor dem Kontowechsel den Verlust des Gastzugangs. Mit „Konto erstellen“ kannst du stattdessen dein Gastkonto mit seinen Chats behalten.',
+      'Dein Gastzugang bleibt aktiv. Wähle im Chat-Profilmenü „Log out“ und bestätige die Abmeldung, bevor du ein anderes Konto verwendest. „Konto erstellen“ behält deine Gastkennung und Chats.',
   },
   'auth/guest-account-active': {
     field: 'general',

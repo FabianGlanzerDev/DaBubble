@@ -99,6 +99,7 @@ export const routes: Routes = [
   },
   {
     path: 'zugang/:art',
+    canMatch: [(route, segments) => ['google', 'gast'].includes(segments[1]?.path ?? '')],
     title: 'Zugang wählen · DaBubble',
     loadComponent: () => import('./features/auth/access-page').then((m) => m.AccessPage),
   },
