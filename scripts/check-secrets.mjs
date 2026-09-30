@@ -22,10 +22,11 @@ function inspect(label, content) {
 function git(args) {
   return execFileSync('git', args, { maxBuffer: 100 * 1024 * 1024 });
 }
+const deleted = new Set(git(['ls-files', '--deleted', '-z']).toString().split('\0'));
 const files = git(['ls-files', '--cached', '--others', '--exclude-standard', '-z'])
   .toString()
   .split('\0')
-  .filter(Boolean);
+  .filter((file) => file && !deleted.has(file));
 for (const file of files) inspect(file, await readFile(file));
 const objects = git(['rev-list', '--objects', '--all', '--reflog'])
   .toString()

@@ -41,6 +41,7 @@ export class PresenceClient {
   private wanted: string[] = [];
   /** Suspends this tab's presence when the page leaves the active document lifecycle. */
   private readonly hide = () => this.suspend();
+
   /** Reconnects this tab's presence when the browser restores the page. */
   private readonly show = () => this.resume();
 

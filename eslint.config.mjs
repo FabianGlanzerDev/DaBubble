@@ -2,6 +2,18 @@ import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import angular from 'angular-eslint';
 
+const namingConvention = [
+  'error',
+  { selector: 'default', format: ['camelCase'] },
+  { selector: 'typeLike', format: ['PascalCase'] },
+  { selector: 'import', format: ['camelCase', 'PascalCase'] },
+  {
+    selector: ['objectLiteralProperty', 'typeProperty'],
+    modifiers: ['requiresQuotes'],
+    format: null,
+  },
+];
+
 export default tseslint.config(
   { ignores: ['dist/**', 'node_modules/**', '.angular/**', 'test-results/**'] },
   {
@@ -16,6 +28,7 @@ export default tseslint.config(
     files: ['scripts/account-deletion/**/*.mts'],
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     rules: {
+      '@typescript-eslint/naming-convention': namingConvention,
       'max-lines-per-function': ['error', { max: 14, skipBlankLines: true, skipComments: true }],
     },
   },
@@ -28,6 +41,7 @@ export default tseslint.config(
     ],
     processor: angular.processInlineTemplates,
     rules: {
+      '@typescript-eslint/naming-convention': namingConvention,
       'max-lines-per-function': ['error', { max: 14, skipBlankLines: true, skipComments: true }],
     },
   },
