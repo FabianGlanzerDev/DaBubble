@@ -70,6 +70,7 @@ dialog.closing::backdrop {
   display: block;
   width: 100%;
   padding: 12px;
+  text-align: center;
   font-size: 24px;
   font-weight: 600;
   background: transparent;
@@ -85,11 +86,6 @@ dialog.closing::backdrop {
 }
 .settings-option:disabled {
   background: transparent;
-}
-.settings-option.google-link {
-  width: 100%;
-  justify-content: center;
-  text-align: center;
 }
 @keyframes dialog-in {
   from {
@@ -211,12 +207,11 @@ dialog.closing::backdrop {
     right: 16px;
   }
   .settings-option {
-    display: flex;
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr) 24px;
     align-items: center;
     gap: 16px;
-    text-align: left;
     font-size: 20px;
-    width: fit-content;
     min-height: 52px;
     padding-inline: 20px;
   }

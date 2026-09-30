@@ -1,22 +1,16 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { RouterLink } from '@angular/router';
 
-/** Renders the shared DaBubble logo with a route back through the intro animation. */
+/** Displays non-interactive branding without adding navigation or a keyboard stop. */
 @Component({
   selector: 'app-brand',
-  imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class.large]': 'large()' },
-  template: `<a
-    routerLink="/intro"
-    [queryParams]="{ replay: true }"
-    aria-label="DaBubble – Intro erneut abspielen"
-  >
+  template: `<span class="brand">
     <img src="assets/images/original/logo-solo.webp" width="70" height="70" alt="" />
     <span>DABubble</span>
-  </a>`,
+  </span>`,
   styles: `
-    a {
+    .brand {
       display: inline-flex;
       gap: var(--brand-gap, 0.9rem);
       align-items: center;
@@ -31,7 +25,7 @@ import { RouterLink } from '@angular/router';
       width: 42px;
       height: 42px;
     }
-    :host(.large) a {
+    :host(.large) .brand {
       font-size: 32px;
     }
     :host(.large) img {
@@ -42,7 +36,7 @@ import { RouterLink } from '@angular/router';
       :host {
         display: inline-flex;
       }
-      :host(.large) a {
+      :host(.large) .brand {
         font-size: var(--mobile-brand-font, 28px);
       }
       :host(.large) img {
