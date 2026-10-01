@@ -44,17 +44,16 @@ function totals(rooms: RoomInventory[], uid: string) {
 /** Confirmed account identity included in the stable review fingerprint. */
 type PlanIdentity = { project: string; uid: string; accountExists: boolean };
 /** Private profile and public directory existence captured during the same inventory. */
-type Profiles = { profile: Row; directory: Row };
+type Profiles = { profile: Row; directory: Row; proof: Row };
 
 /** Summarizes existence and cleanup effects without including shared message contents. */
 export function summarizePlan(identity: PlanIdentity, profiles: Profiles, rooms: RoomInventory[]) {
   return {
-    project: identity.project,
+    ...identity,
     database: '(default)',
-    uid: identity.uid,
-    accountExists: identity.accountExists,
     profileExists: profiles.profile.exists,
     directoryExists: profiles.directory.exists,
+    proofExists: profiles.proof.exists,
     rooms: rooms.length,
     ...totals(rooms, identity.uid),
     sharedTextReview:

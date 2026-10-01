@@ -47,6 +47,7 @@ function verifyCompleted(job: DeletionJob): void {
     summary.accountExists ||
     summary.profileExists ||
     summary.directoryExists ||
+    summary.proofExists ||
     job.plan.rooms.length
   )
     throw new Error(

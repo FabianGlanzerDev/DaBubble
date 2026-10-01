@@ -36,6 +36,7 @@ async function verifyCleanup(context: DeletionContext, uid: string) {
     remaining.rooms.length ||
     remaining.summary.profileExists ||
     remaining.summary.directoryExists ||
+    remaining.summary.proofExists ||
     !locks.empty
   )
     throw new Error('Verknüpfte Daten verbleiben. Vorgang erneut aufnehmen.');

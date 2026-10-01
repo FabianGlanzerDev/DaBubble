@@ -86,14 +86,23 @@ async function affectedRooms(context: DeletionContext, uid: string): Promise<Roo
 export async function inventory(context: DeletionContext, uid: string) {
   validateUid(uid);
   const account = await describeAccount(context, uid);
-  const profile = row(await context.db.doc('users/' + uid).get());
-  const directory = row(await context.db.doc('directory/' + uid).get());
+  const profiles = await profileRows(context, uid);
   const rooms = await affectedRooms(context, uid);
   const summary = summarizePlan(
     { project: context.project, uid, accountExists: account !== null },
-    { profile, directory },
+    profiles,
     rooms,
   );
-  const fingerprint = fingerprintPlan(summary, account, [profile, directory], rooms);
+  const fingerprint = fingerprintPlan(summary, account, Object.values(profiles), rooms);
   return { summary, account, rooms, fingerprint };
+}
+
+/** Reads private profile, directory and proof documents for the same reviewed account. */
+async function profileRows(context: DeletionContext, uid: string) {
+  const [profile, directory, proof] = await Promise.all(
+    ['users', 'directory', 'deletionProofs'].map(async (name) =>
+      row(await context.db.doc(name + '/' + uid).get()),
+    ),
+  );
+  return { profile: profile!, directory: directory!, proof: proof! };
 }

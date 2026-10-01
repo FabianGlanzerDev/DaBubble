@@ -69,13 +69,27 @@ async function finishRoom(db: Firestore, room: RoomInventory, uid: string) {
   if (!room.exists) return;
   const members = membersOf(room.room.data).filter((id) => id !== uid);
   const remaining = remainingMessages(room, uid);
-  if (!members.length && !remaining.size && !retainedReactions(room, uid, remaining).length)
-    await removeEmptyRoom(db, room);
+  if (canRemoveRoom(room, uid, members, remaining)) await removeEmptyRoom(db, room);
   else
     await room.room.ref.update({
       memberIds: members,
       ...(room.room.data['createdBy'] === uid ? { createdBy: '' } : {}),
     });
+}
+
+/** Preserves the public demo container even when no visitor contributions remain. */
+function canRemoveRoom(
+  room: RoomInventory,
+  uid: string,
+  members: string[],
+  remaining: RetainedMessages,
+): boolean {
+  return (
+    !room.room.data['publicDemo'] &&
+    (room.room.data['kind'] === 'direct' || !members.length) &&
+    !remaining.size &&
+    !retainedReactions(room, uid, remaining).length
+  );
 }
 
 /** Shared state for one locked conversation and the lease-renewal callback. */
@@ -143,4 +157,5 @@ export async function finishProfile(db: Firestore, uid: string): Promise<void> {
   // recursiveDelete also handles any administrative subcollections below profile documents.
   await db.recursiveDelete(db.doc('users/' + uid));
   await db.recursiveDelete(db.doc('directory/' + uid));
+  await db.recursiveDelete(db.doc('deletionProofs/' + uid));
 }

@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { DeletionProofForm } from './deletion-proof-form';
 
 /** Renders the maintained privacy text separately from the surrounding legal-page layout. */
 @Component({
   selector: 'app-privacy-notice',
+  imports: [DeletionProofForm],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './privacy-notice.html',
   styles: `

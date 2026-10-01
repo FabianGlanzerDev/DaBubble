@@ -1,4 +1,4 @@
-<p>Stand: 29. September 2026</p>
+<p>Stand: 30. September 2026</p>
 
 <h2>1. Wer verantwortlich ist</h2>
 <p>
@@ -57,13 +57,13 @@
 </p>
 <p>
   Der Gäste-Zugang legt in Firebase Authentication ein anonymes Konto mit Benutzerkennung an. Gäste
-  können Channels, Nachrichten, Direktnachrichten, Threads und Reaktionen verwenden und ihr
-  Gastprofil bearbeiten. Dafür werden dieselben Profildaten und Chatdaten wie bei dauerhaften Konten
-  gespeichert. Fremde private Profildokumente bleiben gesperrt; für Gespräche gelten dieselben
-  Mitgliedschafts- und Autorenrechte. Ein neues dauerhaftes Konto kann ausdrücklich mit dem
-  Gastkonto verknüpft werden; Benutzerkennung, Profil und bisherige Chatdaten bleiben dabei
-  erhalten. Ist der gewählte Zugang schon vergeben, bleibt das Gastkonto bestehen. Getrennte Konten
-  und Chatbestände werden nicht zusammengeführt.
+  können Channels, Nachrichten, Direktnachrichten, Threads und Reaktionen verwenden und ihren Avatar
+  ändern. Der automatisch vergebene Gastname ist nicht bearbeitbar. Dafür werden dieselben
+  Profildaten und Chatdaten wie bei dauerhaften Konten gespeichert. Fremde private Profildokumente
+  bleiben gesperrt; für private Gespräche gelten dieselben Mitgliedschafts- und Autorenrechte. Ein
+  neues dauerhaftes Konto kann ausdrücklich mit dem Gastkonto verknüpft werden; Benutzerkennung,
+  Profil und bisherige Chatdaten bleiben dabei erhalten. Ist der gewählte Zugang schon vergeben,
+  bleibt das Gastkonto bestehen. Getrennte Konten und Chatbestände werden nicht zusammengeführt.
 </p>
 <p>Cloud Firestore speichert und synchronisiert folgende Daten:</p>
 <ul>
@@ -84,11 +84,21 @@
 <p>
   Dein Name, Avatar und deine Benutzerkennung erscheinen in einem für angemeldete Nutzer,
   einschließlich Gäste, lesbaren Verzeichnis. Deine E-Mail-Adresse steht dort nicht. Ohne Anmeldung
-  ist dieses Verzeichnis nicht lesbar. Unterhaltungen, Nachrichten und Reaktionen sind über die App
-  nur für die jeweiligen Mitglieder zugänglich. Neu hinzugefügte Channel-Mitglieder können auch
-  bisherige Beiträge lesen. Ein Austritt entfernt deine bisherigen Beiträge nicht.
+  ist dieses Verzeichnis nicht lesbar. Private Unterhaltungen, Nachrichten und Reaktionen sind über
+  die App nur für die jeweiligen Mitglieder zugänglich. Neu hinzugefügte Channel-Mitglieder können
+  auch bisherige Beiträge lesen. Ein Austritt entfernt deine bisherigen Beiträge nicht.
   Projektadministratoren mit entsprechenden Berechtigungen und Google als Dienstleister haben
   technisch Zugriff auf gespeicherte Daten. Die Chats sind nicht Ende-zu-Ende-verschlüsselt.
+</p>
+<p>
+  Ausdrücklich als öffentlich gekennzeichnete Demo-Channels sind für alle angemeldeten Nutzer und
+  Gäste zugänglich. Dort geschriebene Beiträge, Threads und Reaktionen werden dauerhaft wie andere
+  Chatdaten gespeichert und sind für diesen Teilnehmerkreis sichtbar. Bitte veröffentliche dort
+  keine vertraulichen Angaben. Die Demo-Profile „Mila (Demo)“ und „Noah (Demo)“ sind fiktive
+  Beispiele ohne eigenes angemeldetes Konto, Online-Status oder automatische Antworten.
+  Direktgespräche mit einem Demo-Profil sind nur für das jeweilige beteiligte echte Konto
+  zugänglich; andere Besucher erhalten keinen Zugriff. Bestehende private Gespräche werden nicht
+  geöffnet und Nutzer nicht automatisch zu deren Mitgliedern gemacht.
 </p>
 <p>
   Für den Online-Status nutzt die App zusätzlich die Firebase Realtime Database. Sie speichert unter
@@ -137,10 +147,10 @@
   Die App löscht Gastdaten auch nach einzelnen Chataktionen, beim Schließen des Browsers oder
   Entfernen der Website-Daten nicht automatisch. Ohne vorherige Verknüpfung mit E-Mail/Passwort oder
   Google kannst du nach dem Abmelden oder Verlust der Browserdaten nicht gezielt zu demselben
-  Gastkonto zurückkehren. Ein erneuter Gäste-Login legt dann ein neues Gastkonto an. Die App weist
-  vor der Gastabmeldung darauf hin und verlangt eine ausdrückliche Bestätigung. Du kannst
-  Website-Daten in den Browsereinstellungen entfernen. Firestore nutzt in dieser App keinen
-  dauerhaften Offline-Speicher, sondern Arbeitsspeicher.
+  Gastkonto zurückkehren. Ein erneuter Gäste-Login legt dann ein neues Gastkonto an. „Log out“
+  meldet dich unmittelbar ohne zusätzliche Bestätigungsseite ab. Du kannst Website-Daten in den
+  Browsereinstellungen entfernen. Firestore nutzt in dieser App keinen dauerhaften Offline-Speicher,
+  sondern Arbeitsspeicher.
 </p>
 <p>
   Zur Abstimmung einer Abmeldung zwischen Tabs speichert die App eine zufällige Abmeldemarkierung im
@@ -207,11 +217,11 @@
 </p>
 <p>
   Der Ablauf sperrt das Konto und seine weiteren Datenzugriffe. Er entfernt das Profil und den
-  Eintrag im Nutzerverzeichnis, Mitgliedschaften, die Erstellerkennung in Gesprächen, eigene
-  Nachrichten und eigene Emoji-Reaktionen. Reaktionen anderer Personen auf entfernte eigene
-  Nachrichten werden ebenfalls entfernt. Zuletzt wird das Konto in Firebase Authentication gelöscht.
-  Unterbrochene Vorgänge können erneut aufgenommen werden; ein Fehler wird nicht als erfolgreiche
-  Löschung ausgegeben.
+  Eintrag im Nutzerverzeichnis, hinterlegte Prüfwerte für Löschanfragen, Mitgliedschaften, die
+  Erstellerkennung in Gesprächen, eigene Nachrichten und eigene Emoji-Reaktionen. Reaktionen anderer
+  Personen auf entfernte eigene Nachrichten werden ebenfalls entfernt. Zuletzt wird das Konto in
+  Firebase Authentication gelöscht. Unterbrochene Vorgänge können erneut aufgenommen werden; ein
+  Fehler wird nicht als erfolgreiche Löschung ausgegeben.
 </p>
 <p>
   Bei eingerichteter Status-Datenbank entfernt der bestätigte administrative Löschablauf auch die
@@ -226,8 +236,10 @@
   verbleibenden fremden Beiträgen erhalten eine neue zufällige Gesprächskennung und werden für die
   verbleibenden Mitglieder als schreibgeschütztes Archiv angezeigt. Die alte Gesprächskennung mit
   der gelöschten Nutzerkennung und die alten Nachrichtendokumente werden entfernt. Eigene
-  Selbstgespräche und Gespräche ohne verbleibende Mitglieder, Nachrichten oder Reaktionen werden
-  vollständig aus der aktiven Datenbank entfernt; bei Channels auch der zugehörige Namenseintrag.
+  Selbstgespräche und Direktgespräche ohne verbleibende Nachrichten oder Reaktionen werden aus der
+  aktiven Datenbank entfernt. Ein leerer privater Channel wird entfernt, wenn keine Mitglieder mehr
+  verbleiben; dabei entfällt auch sein Namenseintrag. Die ausdrücklich öffentlichen Demo-Channels
+  und die fiktiven Demo-Profile bleiben für andere Besucher bestehen.
 </p>
 <p>
   Zum Schutz vor noch gültigen Sitzungstoken bleibt zunächst ein nicht öffentlich lesbarer
@@ -269,13 +281,17 @@
 </p>
 <p>
   Bei einem Gastkonto gibt es keine hinterlegte E-Mail-Adresse. Solange deine Sitzung noch aktiv
-  ist, findest du deine Gastkennung im Profilmenü unter „Log out“ → „Gastkennung für Löschanfragen“.
-  Die Kennung allein beweist nicht, dass das Konto dir gehört. Über den E-Mail-Kontakt können wir
-  eine vorübergehende Änderung deines eigenen Profilnamens mit einem für deine Anfrage neu
-  vereinbarten Prüfwert abgleichen. Dieser Name ist auch im Nutzerverzeichnis sichtbar; verwende
-  dafür keine vertraulichen Angaben. Ich prüfe die Änderung direkt am betroffenen Konto und
-  bestätige dir den Abgleich. Eine Registrierung ist für diesen Nachweis nicht erforderlich.
+  ist, zeigt der nachstehende Bereich deine Benutzerkennung. Die Kennung allein beweist nicht, dass
+  das Konto dir gehört. Nach deiner Anfrage kann ich dir einen zufälligen, nur für diese Anfrage
+  geltenden Prüfwert senden. Du hinterlegst ihn hier mit deiner aktiven Sitzung. Firestore erlaubt
+  dies nur für dein eigenes Konto; der Prüfwert und sein serverseitiger Zeitpunkt sind nicht für
+  andere Nutzer lesbar. Ich gleiche Wert, Zeitpunkt und zuvor vereinbarte Benutzerkennung mit der
+  Anfrage ab. Dein öffentlicher Profilname bleibt unverändert. Das bestätigt keine Löschung; Umfang
+  und ausdrückliche Freigabe klären wir danach separat. Nach dem Abgleich entferne ich den Prüfwert
+  manuell, spätestens bei der ausgeführten Kontolöschung. Es gibt keine automatische Ablaufzeit für
+  diese Nachweise.
 </p>
+<app-deletion-proof-form />
 <p>
   Nach dem Abmelden ohne Kontoumwandlung kann die App den Gastzugang nicht wiederherstellen. Ohne
   aktive Sitzung oder bereits dokumentierten Nachweis lässt sich eine Kontoinhaberschaft anhand von
