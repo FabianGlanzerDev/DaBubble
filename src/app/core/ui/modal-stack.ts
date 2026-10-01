@@ -35,10 +35,11 @@ export class ModalStack {
 
   /** Captures touch and pointer triggers even in browsers that do not focus a clicked button. */
   private rememberTrigger(event: PointerEvent): void {
+    const target = event.target instanceof Element ? event.target : null;
     this.pointerTrigger =
-      event.target instanceof Element
-        ? event.target.closest<HTMLElement>('button, a[href], input, select, textarea, [tabindex]')
-        : null;
+      target?.closest<HTMLElement>('button, a[href], input, select, textarea') ??
+      target?.closest<HTMLElement>('[tabindex]') ??
+      null;
   }
 
   /** Captures the trigger before showModal makes the page inert and activates the new dialog. */
@@ -63,9 +64,21 @@ export class ModalStack {
     this.expose(dialog, false);
     this.syncLayers();
     dialog.close();
-    if (wasTop && entry.opener && canFocus(entry.opener))
-      entry.opener.focus({ preventScroll: true });
+    if (wasTop) this.restoreFocus(entry.opener);
     this.containFocus();
+  }
+
+  /** Falls back to the current conversation when navigation removed the original dialog trigger. */
+  private restoreFocus(opener: HTMLElement | null): void {
+    if (opener && opener !== this.document.body && canFocus(opener)) {
+      opener.focus({ preventScroll: true });
+      return;
+    }
+    if (this.entries.length) return;
+    const editors = this.document.querySelectorAll<HTMLElement>('#thread-message, #chat-message');
+    const heading = this.document.querySelector<HTMLElement>('[data-page-heading]');
+    const target = [...editors, heading].find((element) => element && canFocus(element));
+    target?.focus({ preventScroll: true });
   }
 
   /** Reports whether a modal owns keyboard focus, even while another dialog is closing underneath it. */
