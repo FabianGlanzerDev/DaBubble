@@ -17,7 +17,9 @@ export class MobileOverlayHistory {
   open(context: OverlayContext): void {
     if (this.document.documentElement.clientWidth >= 768) return;
     const tree = this.router.parseUrl(this.router.url);
-    const replaceUrl = !!tree.queryParams['dialog'];
+    const searchOpen = tree.queryParams['view'] === 'search';
+    const replaceUrl = !!tree.queryParams['dialog'] || searchOpen;
+    if (searchOpen) delete tree.queryParams['view'];
     const key = String(++this.sequence);
     this.origin = this.router.url.split('?')[0] ?? '';
     this.contexts.set(key, context);

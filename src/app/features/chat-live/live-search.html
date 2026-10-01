@@ -1,7 +1,7 @@
 <div
   class="search-wrapper"
   [class.mobile-expanded]="mobileExpanded()"
-  (keydown.escape)="dismiss()"
+  (keydown.escape)="dismiss($event)"
   tabindex="-1"
 >
   @if (mobileExpanded()) {
@@ -26,21 +26,27 @@
         recipient() ? 'An: #channel oder @Name' : mobileMenu() ? 'Gehe zu…' : 'Devspace durchsuchen'
       "
       (input)="changeQuery($event)"
+      (focus)="focus()"
+      (click)="focus()"
       (keydown.arrowdown)="focusResult($event)"
       [attr.aria-controls]="fieldId() + '-results'"
-      [attr.aria-expanded]="!!query().trim() || mobileExpanded()"
+      [attr.aria-expanded]="visible()"
     />
     @if (!recipient()) {
       <app-icon class="search-icon" name="search" />
     }
   </div>
-  @if (query().trim() || mobileExpanded()) {
+  @if (visible()) {
     <div
       #results
       class="results"
       [class.channel-results]="query().startsWith('#')"
       [id]="fieldId() + '-results'"
       aria-label="Suchergebnisse"
+      role="group"
+      tabindex="-1"
+      (keydown.arrowdown)="moveResult($event, 1)"
+      (keydown.arrowup)="moveResult($event, -1)"
     >
       @for (room of channels(); track room.id) {
         <a
