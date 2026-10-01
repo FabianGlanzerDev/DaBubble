@@ -1,0 +1,47 @@
+.direct-person {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: calc(100% - 30px);
+  min-height: 60px;
+  margin: 10px 0 10px 30px;
+  padding: 5px 10px;
+  border: 0;
+  border-radius: 30px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  font-size: 18px;
+}
+.direct-person span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.direct-person:hover,
+.direct-person.active {
+  background: var(--page);
+  color: var(--accent);
+}
+.direct-person.active {
+  font-weight: 700;
+}
+@media (max-width: 1599px) {
+  .direct-person {
+    margin-left: 14px;
+    width: calc(100% - 14px);
+  }
+}
+@media (max-width: 767px) {
+  .direct-person {
+    margin: 0 0 20px 64px;
+    width: calc(100% - 64px);
+    padding: 0;
+    gap: 16px;
+  }
+}
+@media (max-width: 374px) {
+  .direct-person {
+    margin-left: 28px;
+    width: calc(100% - 28px);
+  }
+}

@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ChatStore } from '../../core/chat/chat-store';
+import { ChatAction } from '../../core/chat/chat-action';
+import { directRoomId } from '../../core/chat/chat-models';
 import { ChatNavigation } from '../../core/chat/chat-navigation';
 import { OverlayState } from '../../core/ui/overlay-state';
 import { Icon } from '../../shared/ui/icon';
@@ -64,27 +66,33 @@ import { AvatarImage } from '../../shared/ui/avatar-image';
         />Direktnachrichten
       </button>
       <ul id="live-direct" [class.folded]="!directOpen()">
-        @for (room of directs(); track room.id) {
+        @for (person of store.people(); track person.uid) {
           <li>
-            <a
-              [routerLink]="nav.path(room)"
-              routerLinkActive="active"
-              ariaCurrentWhenActive="page"
-              [attr.aria-description]="
-                room.archived || store.person(partner(room.memberIds)).demo
-                  ? null
-                  : store.session.presence.label(partner(room.memberIds))
-              "
-              ><app-avatar-image
-                [index]="room.archived ? null : store.person(partner(room.memberIds)).avatarId"
-                [uid]="
-                  room.archived || store.person(partner(room.memberIds)).demo
-                    ? null
-                    : partner(room.memberIds)
-                "
-                [size]="50"
-              /><span>{{ store.label(room) }}</span></a
+            <button
+              type="button"
+              class="direct-person"
+              [class.active]="active(person.uid)"
+              [attr.aria-current]="active(person.uid) ? 'page' : null"
+              [attr.data-person-id]="person.uid"
+              [disabled]="action.busy()"
+              [attr.aria-description]="store.session.presence.label(person.uid)"
+              (click)="direct(person.uid)"
             >
+              <app-avatar-image
+                [index]="person.avatarId"
+                [uid]="person.demo ? null : person.uid"
+                [size]="50"
+              />
+              <span
+                >{{ person.name
+                }}{{ person.uid === store.session.user()?.uid ? ' (Du)' : '' }}</span
+              >
+            </button>
+          </li>
+        }
+        @for (room of archives(); track room.id) {
+          <li>
+            <a [routerLink]="nav.path(room)" routerLinkActive="active">{{ store.label(room) }}</a>
           </li>
         }
       </ul>
@@ -92,8 +100,11 @@ import { AvatarImage } from '../../shared/ui/avatar-image';
         ><app-icon name="compose" />Neue Nachricht</a
       >
     </section>
+    @if (action.error()) {
+      <p class="action-error" role="alert">{{ action.error() }}</p>
+    }
   </nav>`,
-  styleUrls: ['../chat/workspace-sidebar.scss'],
+  styleUrls: ['../chat/workspace-sidebar.scss', './live-sidebar.scss'],
   styles: 'ul { max-height: none; } ul.folded { max-height: 0; }',
 })
 export class LiveSidebar {
@@ -102,13 +113,19 @@ export class LiveSidebar {
   private readonly overlay = inject(OverlayState);
   protected readonly channelsOpen = signal(true);
   protected readonly directOpen = signal(true);
-  protected readonly directs = computed(() =>
-    this.store.rooms().filter((room) => room.kind === 'direct'),
+  protected readonly action = new ChatAction();
+  protected readonly archives = computed(() =>
+    this.store.rooms().filter((room) => room.kind === 'direct' && room.archived),
   );
 
-  /** Selects the other direct-chat participant, falling back to the sole member for self conversations. */
-  protected partner(members: string[]): string {
-    return members.find((id) => id !== this.store.session.user()?.uid) ?? members[0] ?? '';
+  /** Matches the deterministic direct route without creating a conversation during rendering. */
+  protected active(uid: string): boolean {
+    return this.nav.roomId() === directRoomId(this.store.session.user()?.uid ?? '', uid);
+  }
+
+  /** Creates or reuses the selected person's private conversation and exposes actionable failures. */
+  protected direct(uid: string): void {
+    void this.action.run(() => this.nav.direct(uid));
   }
 
   /** Opens channel creation in real persistence mode rather than the design preview. */

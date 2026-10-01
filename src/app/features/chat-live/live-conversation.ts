@@ -14,13 +14,14 @@ import { ChatNavigation } from '../../core/chat/chat-navigation';
 import { OverlayState } from '../../core/ui/overlay-state';
 import { Icon } from '../../shared/ui/icon';
 import { AvatarImage } from '../../shared/ui/avatar-image';
+import { PresenceLabel } from '../../shared/ui/presence-label';
 import { LiveComposer } from './live-composer';
 import { LiveMessage } from './live-message';
 
 /** Renders live root or thread messages and coordinates room details, day separators and scroll position. */
 @Component({
   selector: 'app-live-conversation',
-  imports: [DatePipe, Icon, AvatarImage, LiveComposer, LiveMessage],
+  imports: [DatePipe, Icon, AvatarImage, LiveComposer, LiveMessage, PresenceLabel],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './live-conversation.html',
   styleUrls: ['../chat/conversation.scss', './live-conversation.scss'],

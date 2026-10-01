@@ -37,9 +37,14 @@
             [uid]="channel.archived || partner().demo ? null : partner().uid"
           />
         }
-        <h1 data-page-heading tabindex="-1">
-          {{ store.label(channel) }}{{ selfConversation() && !channel.archived ? ' (Du)' : '' }}
-        </h1>
+        <span class="conversation-identity"
+          ><h1 data-page-heading tabindex="-1">
+            {{ store.label(channel) }}{{ selfConversation() && !channel.archived ? ' (Du)' : '' }}
+          </h1>
+          @if (channel.kind === 'direct' && !channel.archived && !partner().demo) {
+            <app-presence-label [uid]="partner().uid" />
+          }
+        </span>
         @if (channel.kind === 'channel' && !channel.archived) {
           <app-icon name="chevron" />
         }
@@ -112,7 +117,11 @@
         <section class="empty-conversation" aria-label="Gesprächsbeginn">
           <button class="empty-person" type="button" (click)="details()">
             @if (channel.kind === 'direct') {
-              <app-avatar-image [index]="partner().avatarId" [size]="100" />
+              <app-avatar-image
+                [index]="partner().avatarId"
+                [uid]="partner().demo ? null : partner().uid"
+                [size]="100"
+              />
             }
             <strong
               >{{ channel.kind === 'channel' ? '# ' : '' }}{{ store.label(channel)

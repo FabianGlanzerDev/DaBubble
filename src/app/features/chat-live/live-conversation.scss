@@ -19,7 +19,7 @@ h2 {
   overflow-wrap: anywhere;
 }
 h2 span {
-  font-size: 14px;
+  font-size: 16px;
   color: var(--accent);
 }
 .conversation-header {
@@ -88,4 +88,25 @@ app-live-composer {
   color: var(--text-secondary);
   font-size: 14px;
   overflow-wrap: anywhere;
+}
+@media (max-height: 700px) {
+  .conversation-header {
+    padding-block: 8px;
+    min-height: 64px;
+  }
+  .transcript {
+    padding-block: 12px;
+    gap: 16px;
+  }
+  app-live-composer {
+    margin: 8px 16px 12px;
+  }
+}
+
+.conversation-identity {
+  min-width: 0;
+}
+.conversation-identity app-presence-label {
+  font-size: 16px;
+  gap: 8px;
 }
