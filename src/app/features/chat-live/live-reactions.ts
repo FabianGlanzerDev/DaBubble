@@ -2,26 +2,24 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, signal } f
 import { ChatStore } from '../../core/chat/chat-store';
 import { ChatAction } from '../../core/chat/chat-action';
 import { ChatMessage } from '../../core/chat/chat-models';
-import { OverlayState } from '../../core/ui/overlay-state';
+import { LiveReactionButton } from './live-reaction-button';
 
 /** Groups real per-user emoji selections into accessible reaction counts and participant details. */
 @Component({
   selector: 'app-live-reactions',
+  imports: [LiveReactionButton],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class.own]': 'own()' },
   template: `<div class="reactions" [class.expanded]="expanded()" [class.compact]="compact()">
       @for (reaction of items(); track reaction.emoji; let i = $index) {
-        <button
-          type="button"
+        <app-live-reaction-button
           [class.overflow-reaction]="i >= 7"
-          [attr.aria-pressed]="reaction.mine"
-          [title]="reaction.names.join(', ')"
-          [attr.aria-label]="reaction.emoji + ': ' + reaction.names.join(', ')"
+          [emoji]="reaction.emoji"
+          [names]="reaction.names"
+          [mine]="reaction.mine"
           [disabled]="action.busy() || readonly()"
-          (click)="toggle(reaction.emoji)"
-        >
-          {{ reaction.emoji }} {{ reaction.names.length }}
-        </button>
+          (selected)="toggle(reaction.emoji)"
+        />
       }
       @if (items().length > 7) {
         <button
@@ -34,9 +32,6 @@ import { OverlayState } from '../../core/ui/overlay-state';
         </button>
       }
     </div>
-    @if (items().length) {
-      <button type="button" class="reaction-people" (click)="people()">Wer hat reagiert?</button>
-    }
     @if (action.error()) {
       <p class="action-error" role="alert">{{ action.error() }}</p>
     }`,
@@ -69,13 +64,6 @@ import { OverlayState } from '../../core/ui/overlay-state';
     .more-reactions {
       display: none;
     }
-    .reaction-people {
-      font-size: 12px;
-      border: 0;
-      color: var(--accent);
-      padding: 4px 0;
-      background: transparent;
-    }
     .compact:not(.expanded) .overflow-reaction {
       display: none;
     }
@@ -101,7 +89,6 @@ export class LiveReactions {
   readonly own = input(false);
   readonly readonly = input(false);
   private readonly store = inject(ChatStore);
-  private readonly overlay = inject(OverlayState);
   protected readonly action = new ChatAction();
   protected readonly expanded = signal(false);
   private readonly reactions = computed(() =>
@@ -128,14 +115,5 @@ export class LiveReactions {
   /** Submits a per-user emoji toggle while exposing failures without modifying another user's reactions. */
   protected toggle(emoji: string): void {
     void this.action.run(() => this.store.react(this.message(), emoji));
-  }
-
-  /** Opens reaction details scoped to this message and conversation. */
-  protected people(): void {
-    this.overlay.open('reactions', {
-      live: true,
-      channelId: this.message().roomId,
-      messageId: this.message().id,
-    });
   }
 }
