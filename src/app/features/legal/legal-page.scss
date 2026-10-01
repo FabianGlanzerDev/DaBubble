@@ -106,7 +106,7 @@ p {
 
   article {
     width: min(100%, 400px);
-    min-height: 556px;
+    min-height: 0;
     padding-inline: clamp(24px, calc(100vw - 320px), 56px);
   }
 
@@ -126,5 +126,29 @@ p {
     top: -100px;
     right: 0;
     left: auto;
+  }
+}
+
+@media (max-height: 800px) {
+  main {
+    padding-block: 112px 32px;
+  }
+  article {
+    padding-block: 24px 32px;
+  }
+  .privacy {
+    padding-block: 112px 32px;
+  }
+}
+@media (max-width: 767px) and (max-height: 800px) {
+  main,
+  .privacy {
+    padding-block: 24px;
+  }
+  h1 {
+    margin-top: 12px;
+  }
+  h2 {
+    margin-top: 24px;
   }
 }

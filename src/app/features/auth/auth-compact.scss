@@ -1,0 +1,63 @@
+.general-feedback {
+  min-height: 72px;
+  margin: 8px 0 -24px;
+  padding: 0 12px;
+  font-size: 14px;
+  line-height: 24px;
+}
+@media (max-width: 767px) {
+  .general-feedback {
+    min-height: 0;
+    margin: 16px 0 0;
+  }
+  .general-feedback:empty {
+    display: none;
+  }
+}
+@media (min-width: 768px) and (max-height: 900px) {
+  .general-feedback {
+    margin-bottom: 0;
+  }
+  .auth-card {
+    min-height: 0;
+    padding-block: 20px;
+    --field-height: 50px;
+    --field-padding: 11px;
+    --field-line: 24px;
+    --field-error-height: 24px;
+    --field-error-line: 12px;
+  }
+  h1 {
+    font-size: 40px;
+    line-height: 1.1;
+  }
+  .registration-screen {
+    margin-top: 0;
+  }
+  .description,
+  .login-card .description {
+    font-size: 18px;
+    line-height: 22px;
+    margin: 12px 0;
+  }
+  .fields {
+    gap: 8px;
+  }
+  .reset-link {
+    min-height: 36px;
+    margin-bottom: 8px;
+  }
+  .divider {
+    min-height: 20px;
+    margin-bottom: 12px;
+  }
+  .google-button {
+    min-height: 46px;
+  }
+  .login-actions {
+    margin-top: 16px;
+  }
+  .continue-row {
+    margin-top: 12px;
+  }
+}

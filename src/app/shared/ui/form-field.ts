@@ -58,9 +58,9 @@ function identityFieldError(kind: 'name' | 'email', value: string): string {
         [attr.aria-invalid]="showError()"
         [attr.aria-describedby]="showError() ? fieldId() + '-error' : null"
     /></label>
-    @if (showError()) {
-      <span class="error" [id]="fieldId() + '-error'" aria-live="polite">{{ error() }}</span>
-    }
+    <span class="error" [id]="fieldId() + '-error'" aria-live="polite">{{
+      showError() ? error() : ''
+    }}</span>
   </div>`,
   styles: `
     :host {
@@ -74,7 +74,7 @@ function identityFieldError(kind: 'name' | 'email', value: string): string {
       display: flex;
       align-items: center;
       gap: 30px;
-      min-height: 60px;
+      min-height: var(--field-height, 60px);
       padding: 0 32px;
       border: 1px solid transparent;
       border-radius: 100px;
@@ -94,11 +94,11 @@ function identityFieldError(kind: 'name' | 'email', value: string): string {
     input {
       width: 100%;
       min-width: 0;
-      padding: 16px 0;
+      padding: var(--field-padding, 16px) 0;
       border: 0;
       background: transparent;
       font-size: 18px;
-      line-height: 26px;
+      line-height: var(--field-line, 26px);
       color: var(--text);
     }
     input::placeholder {
@@ -115,9 +115,10 @@ function identityFieldError(kind: 'name' | 'email', value: string): string {
     .error {
       display: block;
       margin: 4px 12px 0;
+      min-block-size: var(--field-error-height, 30px);
       color: #a51e1e;
       font-size: 12px;
-      line-height: 15px;
+      line-height: var(--field-error-line, 15px);
     }
     @media (max-width: 767px) {
       label {
@@ -131,6 +132,8 @@ function identityFieldError(kind: 'name' | 'email', value: string): string {
         padding: 12px 0;
       }
       .error {
+        min-block-size: 26px;
+        line-height: 13px;
         margin-inline: 0;
         font-size: 11px;
       }

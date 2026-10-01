@@ -10,10 +10,17 @@
 }
 .actions.end {
   justify-content: flex-end;
-  margin-top: 20px;
+  margin-top: 0;
 }
 @media (max-width: 374px) {
   .channel-section {
     padding: 16px;
   }
+}
+.channel-error {
+  min-height: 42px;
+  margin: 4px 0 0;
+  color: #a51e1e;
+  font-size: 12px;
+  line-height: 14px;
 }

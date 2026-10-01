@@ -90,7 +90,7 @@ footer p {
   }
   [data-variant='register'],
   [data-variant='request'] {
-    --mobile-stack: 532px;
+    --mobile-stack: clamp(532px, calc(1607px - 250vw), 807px);
   }
   [data-variant='avatar'] {
     --mobile-stack: 756px;
@@ -102,7 +102,7 @@ footer p {
     position: static;
     flex-direction: column;
     align-items: center;
-    padding: max(32px, calc((100dvh - var(--mobile-stack)) / 2)) 16px 0;
+    padding: max(24px, calc((100dvh - var(--mobile-stack)) / 2)) 16px 0;
     gap: 18px;
   }
   .registration {
@@ -142,9 +142,19 @@ footer p {
     padding-top: 64px;
   }
 }
-@media (min-width: 768px) and (max-height: 1000px) {
+@media (min-width: 768px) and (max-height: 900px) {
   main {
-    padding-bottom: 175px;
+    padding-block: 100px 60px;
+  }
+  header {
+    inset: 20px 32px auto;
+  }
+  .registration {
+    top: 20px;
+    right: 32px;
+  }
+  footer {
+    bottom: 8px;
   }
 }
 

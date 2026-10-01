@@ -36,13 +36,6 @@
           Dein Konto ist angelegt. <a routerLink="/avatar-auswahl">Registrierung fortsetzen</a>
         </p>
       }
-      @if (session.isGuest() && mode() === 'register') {
-        <p class="access-note">
-          Gastzugang · „Konto erstellen“ behält deine Benutzerkennung und deine Chatdaten. Für die
-          Anmeldung an einem bestehenden Konto zuerst
-          <a routerLink="/zugang/gast">Gastzugang beenden</a>.
-        </p>
-      }
       @if (accessBlocked()) {
         <p class="access-note" role="status">
           Die Chat-Ansicht ist geschützt. Bitte melde dich an.
@@ -149,9 +142,14 @@
           </button>
         </div>
       }
-      @if (fieldIssue('general')) {
-        <p class="action-error" role="alert">{{ fieldIssue('general') }}</p>
-      }
+      <p
+        class="general-feedback"
+        [class.action-error]="!!fieldIssue('general')"
+        [attr.role]="fieldIssue('general') ? 'alert' : null"
+        [attr.aria-hidden]="fieldIssue('general') ? null : 'true'"
+      >
+        {{ fieldIssue('general') }}
+      </p>
     </form>
     @if (!session.configured() && !session.initializing()) {
       <p id="auth-note" class="action-error" role="alert">{{ notice() }}</p>

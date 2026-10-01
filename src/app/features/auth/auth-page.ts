@@ -38,7 +38,7 @@ type Mode = keyof typeof pages;
   imports: [PublicLayout, Icon, RouterLink, FormField],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './auth-page.html',
-  styleUrl: './auth-page.scss',
+  styleUrls: ['./auth-page.scss', './auth-compact.scss'],
 })
 export class AuthPage {
   protected readonly session = inject(AuthSession);
@@ -155,7 +155,7 @@ export class AuthPage {
     }
   }
 
-  /** Signs in without discarding anonymous access and restricts return navigation to internal chat routes. */
+  /** Changes accounts only after successful authentication and limits return navigation to internal chat routes. */
   private async login(): Promise<void> {
     try {
       await this.session.login(this.email(), this.password());
