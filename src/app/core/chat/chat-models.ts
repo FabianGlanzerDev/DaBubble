@@ -80,6 +80,8 @@ export function chatError(error: unknown): string {
     return 'Bitte prüfe Channel-Name und Beschreibung (maximal 1000 Zeichen).';
   if (code === 'invalid-message') return 'Eine Nachricht benötigt 1–4000 Zeichen.';
   if (code === 'membership-changed') return 'Du bist nicht mehr Mitglied dieser Unterhaltung.';
+  if (code === 'channel-full')
+    return 'Ein Channel kann höchstens 100 Mitglieder haben. Bitte wähle weniger Personen aus.';
   if (code === 'offline')
     return 'Du bist offline. Dein Entwurf bleibt erhalten. Bitte versuche es nach dem Verbinden erneut.';
   return 'Chat-Daten konnten nicht geladen oder gespeichert werden. Bitte prüfe Verbindung und Zugriffsrechte und versuche es erneut.';

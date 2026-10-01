@@ -185,7 +185,9 @@ export class ChatStore {
   /** Adds selected members sequentially; already completed additions remain if a later addition fails. */
   async invite(id: string, members: string[]): Promise<void> {
     const client = this.api();
-    for (const member of members) await client.addMember(id, member);
+    const current = this.rooms().find((room) => room.id === id)?.memberIds ?? [];
+    if (new Set([...current, ...members]).size > 100) throw new Error('channel-full');
+    for (const member of new Set(members)) await client.addMember(id, member);
   }
 
   /** Delegates validated channel metadata changes to the authenticated transactional API. */

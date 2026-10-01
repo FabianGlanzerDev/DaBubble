@@ -87,6 +87,7 @@ export class ChatRoomApi {
       const members = (await transaction.get(reference)).data()?.['memberIds'] as string[];
       if (!members?.includes(this.uid)) throw new Error('membership-changed');
       if (members.includes(memberId)) return;
+      if (members.length >= 100) throw new Error('channel-full');
       transaction.update(reference, {
         memberIds: [...members, memberId],
         updatedAt: serverTimestamp(),
