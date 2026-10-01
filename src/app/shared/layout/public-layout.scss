@@ -38,7 +38,7 @@ main {
   justify-content: center;
   align-items: center;
   min-height: 100dvh;
-  padding: 146px 24px 145px;
+  padding: 146px 24px 100px;
 }
 footer {
   position: absolute;
@@ -64,7 +64,7 @@ footer a {
 footer p {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 11px;
+  font-size: 14px;
 }
 @media (max-width: 1100px) {
   .registration {
@@ -167,4 +167,18 @@ footer a {
 footer a:hover {
   background: white;
   color: var(--accent);
+}
+@media (min-width: 768px) and (max-height: 700px) {
+  main {
+    padding-block: 90px 48px;
+  }
+  header {
+    top: 10px;
+  }
+  .registration {
+    top: 8px;
+  }
+  footer {
+    bottom: 0;
+  }
 }

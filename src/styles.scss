@@ -95,7 +95,7 @@ p {
 }
 .eyebrow {
   color: var(--accent);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 750;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -151,7 +151,7 @@ p {
   display: grid;
   gap: 0.5rem;
   text-align: left;
-  font-size: 0.875rem;
+  font-size: 16px;
   font-weight: 600;
 }
 .field input {
@@ -232,7 +232,7 @@ p {
 }
 .overlay-note {
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.5;
   margin: 20px 0 0;
 }
@@ -250,7 +250,7 @@ p {
     max-width: 100%;
   }
   .overlay-note {
-    font-size: 11px;
+    font-size: 14px;
   }
   .icon-button:active,
   .text-button:active {

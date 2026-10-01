@@ -117,8 +117,8 @@ function identityFieldError(kind: 'name' | 'email', value: string): string {
       margin: 4px 12px 0;
       min-block-size: var(--field-error-height, 30px);
       color: #a51e1e;
-      font-size: 12px;
-      line-height: var(--field-error-line, 15px);
+      font-size: 14px;
+      line-height: var(--field-error-line, 18px);
     }
     @media (max-width: 767px) {
       label {
@@ -132,10 +132,10 @@ function identityFieldError(kind: 'name' | 'email', value: string): string {
         padding: 12px 0;
       }
       .error {
-        min-block-size: 26px;
-        line-height: 13px;
+        min-block-size: 36px;
+        line-height: 18px;
         margin-inline: 0;
-        font-size: 11px;
+        font-size: 14px;
       }
     }
     @media (max-width: 374px) {

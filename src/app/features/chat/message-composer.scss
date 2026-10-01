@@ -37,7 +37,7 @@ textarea {
 }
 .draft-note {
   color: var(--text-secondary);
-  font-size: 11px;
+  font-size: 14px;
   padding: 0 8px;
 }
 .send {
@@ -93,7 +93,7 @@ textarea {
     font-size: 16px;
   }
   .draft-note {
-    font-size: 10px;
+    font-size: 14px;
   }
   .mentions {
     max-height: min(470px, 55dvh);
@@ -112,5 +112,14 @@ textarea {
   .mentions button span {
     min-width: 0;
     overflow-wrap: anywhere;
+  }
+}
+@media (max-height: 700px) {
+  .composer {
+    min-height: 0;
+    padding-block: 8px;
+  }
+  .mentions {
+    max-height: min(240px, 40dvh);
   }
 }
