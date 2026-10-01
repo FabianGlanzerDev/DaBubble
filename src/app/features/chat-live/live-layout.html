@@ -3,7 +3,7 @@
   <button
     class="menu-handle"
     type="button"
-    (click)="menuOpen.set(!menuOpen())"
+    (click)="toggleMenu()"
     [attr.aria-expanded]="menuOpen()"
     aria-controls="workspace-menu"
     [attr.aria-label]="menuOpen() ? 'Menü einklappen' : 'Menü ausklappen'"
@@ -41,7 +41,7 @@
       <div class="mobile-search">
         <app-live-search fieldId="mobile-live-search" [mobileMenu]="true" />
       </div>
-      <app-live-sidebar />
+      <div class="sidebar-content"><app-live-sidebar /></div>
       <a
         class="mobile-compose icon-button"
         routerLink="/chat/neue-nachricht"

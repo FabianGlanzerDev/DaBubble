@@ -21,7 +21,11 @@ import { DemoWelcome } from './demo-welcome';
   styles: `
     :host {
       display: block;
-      padding: 32px;
+      padding: 20px 32px;
+      margin-block: 12px;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
     }
     h1 {
       font-size: 24px;

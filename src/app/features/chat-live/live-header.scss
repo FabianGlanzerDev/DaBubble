@@ -6,11 +6,30 @@
 }
 .guest-label {
   color: var(--accent);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
 }
 @media (max-width: 767px) {
   .desktop-search {
     display: none;
+  }
+}
+@media (max-height: 700px) and (min-width: 768px) {
+  header {
+    height: 88px;
+    padding-block: 9px;
+  }
+}
+@media (min-width: 768px) and (max-width: 1199px) {
+  header {
+    grid-template-columns: var(--menu-width) minmax(0, 1fr) 130px;
+  }
+}
+@media (max-width: 767px) {
+  header {
+    grid-template-columns: minmax(0, 1fr) 100px;
+  }
+  .profile {
+    gap: 8px;
   }
 }
