@@ -1,25 +1,39 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ChatStore } from '../../core/chat/chat-store';
 import { ChatNavigation } from '../../core/chat/chat-navigation';
-import { OverlayState } from '../../core/ui/overlay-state';
+import { ChatAction } from '../../core/chat/chat-action';
+import { decodeMessage } from '../../core/chat/message-mentions';
 
-/** Turns recognized directory and channel mentions into navigation controls without interpreting arbitrary HTML. */
+/** Represents plain text or a safely resolved directory/channel navigation target. */
+interface MessagePart {
+  text: string;
+  uid?: string;
+  path?: string[];
+}
+
+/** Renders UID-based mentions as direct-chat actions, keeping ambiguous legacy names as plain text. */
 @Component({
   selector: 'app-live-message-text',
   imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `@for (part of parts(); track $index) {
-    @if (person(part); as match) {
-      <button type="button" (click)="overlay.open('profile', { live: true, personId: match.uid })">
-        {{ part }}
-      </button>
-    } @else if (channel(part); as match) {
-      <a [routerLink]="nav.path(match)">{{ part }}</a>
-    } @else {
-      {{ part }}
+      @if (part.uid; as uid) {
+        <button
+          type="button"
+          [disabled]="action.busy()"
+          (click)="direct(uid)"
+          [textContent]="part.text"
+        ></button>
+      } @else if (part.path; as path) {
+        <a [routerLink]="path" [textContent]="part.text"></a>
+      } @else {
+        <span [textContent]="part.text"></span>
+      }
     }
-  }`,
+    @if (action.error()) {
+      <span class="action-error" role="alert">{{ action.error() }}</span>
+    }`,
   styles: `
     :host {
       white-space: pre-wrap;
@@ -40,39 +54,57 @@ import { OverlayState } from '../../core/ui/overlay-state';
 export class LiveMessageText {
   readonly text = input.required<string>();
   private readonly store = inject(ChatStore);
-  protected readonly nav = inject(ChatNavigation);
-  protected readonly overlay = inject(OverlayState);
+  private readonly nav = inject(ChatNavigation);
+  protected readonly action = new ChatAction();
   protected readonly parts = computed(() => this.split());
 
-  /** Separates recognized mention tokens from plain message text while discarding empty fragments. */
-  private split(): string[] {
-    const pattern = this.pattern();
-    return pattern
-      ? this.text()
-          .split(new RegExp('(' + pattern + ')', 'g'))
-          .filter(Boolean)
-      : [this.text()];
+  /** Separates explicit identity ranges before considering older name-only message formats. */
+  private split(): MessagePart[] {
+    const draft = decodeMessage(this.text()),
+      parts: MessagePart[] = [];
+    let offset = 0;
+    for (const mention of draft.mentions) {
+      parts.push(...this.legacy(draft.text.slice(offset, mention.start)));
+      parts.push(this.identityPart(draft.text.slice(mention.start, mention.end), mention.uid));
+      offset = mention.end;
+    }
+    return [...parts, ...this.legacy(draft.text.slice(offset))];
   }
 
-  /** Escapes known names for literal matching and prioritizes longer names to avoid partial mention matches. */
-  private pattern(): string {
+  /** Leaves unavailable identities readable without creating a conversation with a missing directory entry. */
+  private identityPart(text: string, uid: string): MessagePart {
+    const known = this.store.people().some((person) => person.uid === uid);
+    return { text, uid: known ? uid : undefined };
+  }
+
+  /** Resolves legacy tokens only when the directory supplies one unambiguous identity. */
+  private legacy(text: string): MessagePart[] {
     const names = [
       ...this.store.people().map((p) => '@' + p.name),
       ...this.store.channels().map((r) => '#' + r.name),
     ];
-    return names
+    const pattern = names
       .sort((a, b) => b.length - a.length)
       .map((name) => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
       .join('|');
+    return (pattern ? text.split(new RegExp('(' + pattern + ')', 'g')) : [text])
+      .filter(Boolean)
+      .map((part) => this.target(part));
   }
 
-  /** Resolves an exact rendered person mention against the available directory. */
-  protected person(text: string) {
-    return this.store.people().find((person) => '@' + person.name === text);
+  /** Avoids guessing between identical display names or revealing unavailable conversation details. */
+  private target(text: string): MessagePart {
+    const people = this.store.people().filter((person) => '@' + person.name === text);
+    const room = this.store.channels().find((channel) => '#' + channel.name === text);
+    return {
+      text,
+      uid: people.length === 1 ? people[0]?.uid : undefined,
+      path: room ? this.nav.path(room) : undefined,
+    };
   }
 
-  /** Resolves an exact channel mention only among conversations available to the current account. */
-  protected channel(text: string) {
-    return this.store.channels().find((room) => '#' + room.name === text);
+  /** Reuses the selected UID's direct conversation without opening an intermediate profile. */
+  protected direct(uid: string): void {
+    void this.action.run(() => this.nav.direct(uid));
   }
 }

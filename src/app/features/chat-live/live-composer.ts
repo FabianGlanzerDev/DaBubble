@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   afterNextRender,
   computed,
@@ -8,12 +9,15 @@ import {
   input,
   signal,
   viewChild,
+  viewChildren,
 } from '@angular/core';
 import { ChatStore } from '../../core/chat/chat-store';
 import { ChatAction } from '../../core/chat/chat-action';
 import { OverlayState } from '../../core/ui/overlay-state';
 import { Icon } from '../../shared/ui/icon';
 import { AvatarImage } from '../../shared/ui/avatar-image';
+import { ChatDrafts } from '../../core/chat/chat-drafts';
+import { changeDraft, encodeMessage } from '../../core/chat/message-mentions';
 import type { ChatPerson } from '../../core/chat/chat-models';
 
 /** A selectable mention with a stable identity separate from its visible name and inserted text. */
@@ -46,17 +50,31 @@ interface MentionOption {
       [value]="draft()"
       (input)="update($event)"
       (keydown)="key($event)"
+      (click)="caret()"
+      (keyup.arrowleft)="caret()"
+      (keyup.arrowright)="caret()"
+      [attr.aria-expanded]="suggestions().length > 0"
+      [attr.aria-controls]="fieldId() + '-mentions'"
       [disabled]="action.busy()"
     ></textarea>
     @if (suggestions().length) {
       <div
         class="mentions"
+        [id]="fieldId() + '-mentions'"
+        (keydown.arrowdown)="moveSuggestion($event, 1)"
+        (keydown.arrowup)="moveSuggestion($event, -1)"
         role="group"
         aria-label="Erwähnungen"
         (keydown.escape)="dismissMentions($event)"
       >
         @for (entry of suggestions(); track entry.key) {
-          <button type="button" [attr.aria-label]="entry.value" (click)="mention(entry.value)">
+          <button
+            #option
+            type="button"
+            [attr.aria-label]="entry.value"
+            [attr.data-mention-id]="entry.key"
+            (click)="mention(entry)"
+          >
             @if (entry.person; as person) {
               <app-avatar-image [index]="person.avatarId" [uid]="person.uid" [size]="50" />
             }
@@ -79,7 +97,7 @@ interface MentionOption {
         class="icon-button"
         type="button"
         aria-label="Person erwähnen"
-        (click)="insert('@')"
+        (click)="startMention()"
         [disabled]="action.busy()"
       >
         <app-icon name="at" />
@@ -110,8 +128,13 @@ export class LiveComposer {
   private readonly store = inject(ChatStore);
   private readonly overlay = inject(OverlayState);
   private readonly field = viewChild.required<ElementRef<HTMLTextAreaElement>>('field');
+  private readonly destroy = inject(DestroyRef);
   protected readonly action = new ChatAction();
-  protected readonly draft = signal('');
+  private readonly drafts = inject(ChatDrafts);
+  private readonly draftKey = computed(() => this.roomId() + '/' + this.rootId());
+  private readonly content = computed(() => this.drafts.get(this.draftKey()));
+  protected readonly draft = computed(() => this.content().text);
+  private readonly options = viewChildren<ElementRef<HTMLButtonElement>>('option');
   private readonly cursor = signal(0);
   private readonly token = computed(
     () =>
@@ -165,26 +188,59 @@ export class LiveComposer {
   /** Keeps the draft and caret position synchronized for contextual mention suggestions. */
   protected update(event: Event): void {
     const field = event.target as HTMLTextAreaElement;
-    this.draft.set(field.value);
+    this.replaceDraft(field.value);
     this.cursor.set(field.selectionStart);
   }
 
-  /** Sends on unmodified Enter while preserving Shift+Enter and IME composition; Escape dismisses suggestions. */
-  protected key(event: KeyboardEvent): void {
-    if (event.key === 'Escape') this.cursor.set(0);
-    if (event.key !== 'Enter' || event.shiftKey || event.isComposing) return;
-    event.preventDefault();
-    this.send();
+  /** Reads a moved caret so mention filtering follows mouse and keyboard selection. */
+  protected caret(): void {
+    this.cursor.set(this.field().nativeElement.selectionStart);
   }
 
-  /** Clears the draft only after a successful write and returns focus to the message editor. */
+  /** Starts a new mention token at the saved editor selection, even after ordinary text. */
+  protected startMention(): void {
+    const start = this.field().nativeElement.selectionStart;
+    this.insert(start && !/\s/.test(this.draft().charAt(start - 1)) ? ' @' : '@');
+  }
+
+  /** Moves through suggestions with arrow keys while retaining normal Tab navigation. */
+  protected moveSuggestion(event: Event, direction: number): void {
+    event.preventDefault();
+    const options = this.options().map((option) => option.nativeElement);
+    const current = options.indexOf(document.activeElement as HTMLButtonElement);
+    options[(current + direction + options.length) % options.length]?.focus();
+  }
+
+  /** Opens keyboard suggestions before considering Enter as a send action, preserving IME composition. */
+  protected key(event: KeyboardEvent): void {
+    if (event.isComposing) return;
+    if (event.key === 'Escape') this.dismissMentions(event);
+    if (event.key === 'ArrowDown' && this.suggestions().length) {
+      event.preventDefault();
+      this.options()[0]?.nativeElement.focus();
+    } else if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      this.send();
+    }
+  }
+
+  /** Updates visible text while retaining identities only for mention ranges that were not edited. */
+  private replaceDraft(text: string): void {
+    this.drafts.set(this.draftKey(), changeDraft(this.content(), text));
+  }
+
+  /** Clears only the successfully sent room/thread draft, even if navigation changes during the write. */
   protected send(): void {
     if (!this.draft().trim()) return;
+    const key = this.draftKey(),
+      text = encodeMessage(this.content());
     void this.action.run(async () => {
-      await this.store.send(this.roomId(), this.draft(), this.rootId());
-      this.draft.set('');
+      await this.store.send(this.roomId(), text, this.rootId());
+      this.drafts.set(key, { text: '', mentions: [] });
       this.cursor.set(0);
-      requestAnimationFrame(() => this.field().nativeElement.focus({ preventScroll: true }));
+      requestAnimationFrame(() => {
+        if (!this.destroy.destroyed) this.field().nativeElement.focus({ preventScroll: true });
+      });
     });
   }
 
@@ -192,7 +248,7 @@ export class LiveComposer {
   protected insert(text: string): void {
     const field = this.field().nativeElement;
     const start = field.selectionStart;
-    this.draft.set(this.draft().slice(0, start) + text + this.draft().slice(field.selectionEnd));
+    this.replaceDraft(this.draft().slice(0, start) + text + this.draft().slice(field.selectionEnd));
     this.cursor.set(start + text.length);
     requestAnimationFrame(() => {
       field.focus();
@@ -200,11 +256,18 @@ export class LiveComposer {
     });
   }
 
-  /** Replaces the current mention token with the selected name and a trailing space. */
-  protected mention(text: string): void {
-    const field = this.field().nativeElement;
-    field.setSelectionRange(this.cursor() - this.token().length, this.cursor());
-    this.insert(text + ' ');
+  /** Inserts the selected visible name and retains its UID independently of duplicate or later renamed accounts. */
+  protected mention(entry: MentionOption): void {
+    const start = this.cursor() - this.token().length;
+    this.field().nativeElement.setSelectionRange(start, this.cursor());
+    this.insert(entry.value + ' ');
+    if (!entry.person) return;
+    const draft = this.content();
+    const mention = { start, end: start + entry.value.length, uid: entry.person.uid };
+    this.drafts.set(this.draftKey(), {
+      ...draft,
+      mentions: [...draft.mentions, mention].sort((a, b) => a.start - b.start),
+    });
   }
 
   /** Opens the shared picker with a callback that inserts the chosen emoji into this draft. */

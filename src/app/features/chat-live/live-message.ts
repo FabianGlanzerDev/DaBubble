@@ -9,6 +9,12 @@ import { AvatarImage } from '../../shared/ui/avatar-image';
 import { Icon } from '../../shared/ui/icon';
 import { LiveReactions } from './live-reactions';
 import { LiveMessageText } from './live-message-text';
+import {
+  changeDraft,
+  decodeMessage,
+  encodeMessage,
+  MessageDraft,
+} from '../../core/chat/message-mentions';
 import { ConfirmDialog } from '../../shared/ui/confirm-dialog';
 
 /** Displays persisted message content with author actions, thread entry and real emoji reactions. */
@@ -42,7 +48,8 @@ export class LiveMessage {
   protected readonly editing = signal(false);
   protected readonly removing = signal(false);
   protected readonly pinned = signal(false);
-  protected readonly text = signal('');
+  private readonly draft = signal<MessageDraft>({ text: '', mentions: [] });
+  protected readonly text = computed(() => this.draft().text);
   protected readonly editorId = computed(
     () => 'edit-' + (this.compact() ? 'thread-' : 'main-') + this.message().id,
   );
@@ -54,15 +61,20 @@ export class LiveMessage {
 
   /** Starts editing from the latest displayed text and dismisses pending deletion confirmation. */
   protected beginEdit(): void {
-    this.text.set(this.message().text);
+    this.draft.set(decodeMessage(this.message().text));
     this.editing.set(true);
     this.removing.set(false);
+  }
+
+  /** Preserves selected mention identities when editing surrounding text and drops modified labels. */
+  protected updateText(event: Event): void {
+    this.draft.set(changeDraft(this.draft(), (event.target as HTMLTextAreaElement).value));
   }
 
   /** Leaves edit mode only after the server accepts the message update. */
   protected save(): void {
     void this.action.run(async () => {
-      await this.store.edit(this.message(), this.text());
+      await this.store.edit(this.message(), encodeMessage(this.draft()));
       this.editing.set(false);
     });
   }

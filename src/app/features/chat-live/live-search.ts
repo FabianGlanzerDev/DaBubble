@@ -9,6 +9,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { decodeMessage } from '../../core/chat/message-mentions';
 import { ChatStore } from '../../core/chat/chat-store';
 import { ChatNavigation } from '../../core/chat/chat-navigation';
 import { ChatAction } from '../../core/chat/chat-action';
@@ -64,9 +65,10 @@ export class LiveSearch {
             (this.store.messages()[room.id] ?? [])
               .filter(
                 (message) =>
-                  !message.deleted && message.text.toLocaleLowerCase().includes(this.term()),
+                  !message.deleted &&
+                  decodeMessage(message.text).text.toLocaleLowerCase().includes(this.term()),
               )
-              .map((message) => ({ room, message })),
+              .map((message) => ({ room, message, text: decodeMessage(message.text).text })),
           ),
   );
 
