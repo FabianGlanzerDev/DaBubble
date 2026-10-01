@@ -50,6 +50,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "firebase-config.json",
+                "input": ".generated",
+                "output": "/"
               }
             ],
             "styles": ["src/styles.scss"]

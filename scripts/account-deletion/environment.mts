@@ -5,6 +5,7 @@ import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getSecurityRules } from 'firebase-admin/security-rules';
 import { connectPresence, requirePresenceRules } from './presence.mts';
+import { readWebConfig } from '../firebase-config.mts';
 
 /** Checks the reserved namespace and both local services before creating privileged emulator clients. */
 function validateEmulators(
@@ -26,7 +27,7 @@ export function validateTarget(project: string, emulator: boolean): void {
   const firestore = process.env['FIRESTORE_EMULATOR_HOST'];
   const realtime = process.env['FIREBASE_DATABASE_EMULATOR_HOST'];
   if (emulator) validateEmulators(project, auth, firestore);
-  else if (project !== 'YOUR_FIREBASE_PROJECT_ID' || auth || firestore || realtime)
+  else if (project !== readWebConfig().firebase.projectId || auth || firestore || realtime)
     throw new Error('Cloud-Ziel oder Emulator-Umgebung nicht eindeutig. Abbruch.');
 }
 
@@ -58,6 +59,12 @@ export type DeletionContext = ReturnType<typeof connectDeletion>;
 export async function requireDeletionRules(context: DeletionContext): Promise<void> {
   if (context.emulator) return;
   await requirePresenceRules(context.presence);
+  await requireFirestoreRules(context);
+}
+
+/** Requires the exact reviewed Firestore rules before an operator writes administrative Cloud data. */
+export async function requireFirestoreRules(context: DeletionContext): Promise<void> {
+  if (context.emulator) return;
   const source = await readFile('firestore.rules', 'utf8');
   const deployed = await getSecurityRules(context.app).getFirestoreRuleset();
   if (
@@ -65,7 +72,7 @@ export async function requireDeletionRules(context: DeletionContext): Promise<vo
     normalize(deployed.source[0]?.content ?? '') !== normalize(source)
   )
     throw new Error(
-      'Die veröffentlichten Regeln entsprechen nicht firestore.rules. Keine Löschung ausgeführt.',
+      'Die veröffentlichten Regeln entsprechen nicht firestore.rules. Keine Änderung ausgeführt.',
     );
 }
 

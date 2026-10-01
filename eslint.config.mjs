@@ -25,7 +25,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['scripts/account-deletion/**/*.mts'],
+    files: ['scripts/**/*.mts'],
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     rules: {
       '@typescript-eslint/naming-convention': namingConvention,

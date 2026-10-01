@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import type { App } from 'firebase-admin/app';
 import { getDatabaseWithUrl } from 'firebase-admin/database';
 import type { Database } from 'firebase-admin/database';
+import { readWebConfig } from '../firebase-config.mts';
 
 /** Uses the verified local emulator or the configured database URL for privileged presence maintenance. */
 export function connectPresence(app: App, emulator: boolean): Database | null {
@@ -15,7 +16,7 @@ export function connectPresence(app: App, emulator: boolean): Database | null {
 
 /** Validates the configured cloud URL without inventing a database or silently targeting an emulator. */
 function cloudPresence(app: App): Database | null {
-  const config = JSON.parse(readFileSync('public/firebase-config.json', 'utf8'));
+  const config = readWebConfig();
   const url: unknown = config.firebase?.databaseURL;
   if (url === undefined || url === null || url === '') return null;
   if (

@@ -5,6 +5,7 @@ const ignored = new Set([
   'node_modules',
   '.git',
   '.angular',
+  '.generated',
   'dist',
   'test-results',
   'playwright-report',

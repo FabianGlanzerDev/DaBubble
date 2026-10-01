@@ -46,6 +46,7 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+/.generated/
 *.pem
 *.key
 *.p12

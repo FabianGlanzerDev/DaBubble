@@ -4,6 +4,10 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "prestart": "node scripts/generate-firebase-config.mjs",
+    "start:emulator": "node scripts/generate-firebase-config.mjs --emulator && ng serve --host 127.0.0.1",
+    "prebuild": "node scripts/generate-firebase-config.mjs",
+    "prewatch": "node scripts/generate-firebase-config.mjs",
     "build": "ng build",
     "preview": "node scripts/serve-static.mjs",
     "watch": "ng build --watch --configuration development",
@@ -12,6 +16,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "account:delete": "node scripts/account-deletion/cli.mts",
+    "demo:seed": "node scripts/seed-demo.mts",
     "check:secrets": "node scripts/check-secrets.mjs",
     "check:files": "node scripts/check-file-length.mjs",
     "check": "npm run typecheck && npm run lint && npm run format:check && npm run check:files && npm run build"
