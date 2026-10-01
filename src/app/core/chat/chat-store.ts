@@ -73,7 +73,7 @@ export class ChatStore {
   /** Sorts directory entries and synchronizes the UIDs observed by the presence service. */
   private acceptPeople(people: ChatPerson[]): void {
     this.people.set(people.sort((a, b) => a.name.localeCompare(b.name)));
-    this.session.watchPresence(people.map((person) => person.uid));
+    this.session.watchPresence(people.filter((person) => !person.demo).map((person) => person.uid));
   }
 
   /** Drops revoked conversations and attaches listeners to newly permitted rooms before ending loading. */

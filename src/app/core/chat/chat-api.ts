@@ -1,7 +1,9 @@
 import {
   collection,
+  and,
   doc,
   onSnapshot,
+  or,
   orderBy,
   query,
   runTransaction,
@@ -36,11 +38,14 @@ export class ChatApi extends ChatRoomApi {
     );
   }
 
-  /** Streams only conversations whose membership array contains the current UID. */
+  /** Streams joined private rooms and explicitly public demo channels without exposing other rooms. */
   rooms(next: (rooms: ChatRoom[]) => void, fail: (error: unknown) => void): Unsubscribe {
     const source = query(
       collection(this.db, 'conversations'),
-      where('memberIds', 'array-contains', this.uid),
+      or(
+        where('memberIds', 'array-contains', this.uid),
+        and(where('publicDemo', '==', true), where('kind', '==', 'channel')),
+      ),
     );
     return this.listen(source, (rows) => next(rows.map((row) => this.room(row))), fail);
   }

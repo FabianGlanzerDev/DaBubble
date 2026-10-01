@@ -2,19 +2,17 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
-  computed,
   effect,
   inject,
   signal,
 } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Router, RouterLink } from '@angular/router';
 import { AuthSession } from '../../core/auth/auth-session';
 import { authIssue } from '../../core/auth/auth-errors';
 import { PublicLayout } from '../../shared/layout/public-layout';
 import { Icon } from '../../shared/ui/icon';
 
-/** Explains Google sign-in and protects anonymous access before an explicit guest logout. */
+/** Explains Google authentication and requires explicit consent before linking an active guest identity. */
 @Component({
   selector: 'app-access-page',
   imports: [PublicLayout, Icon, RouterLink],
@@ -26,46 +24,23 @@ export class AccessPage {
   protected readonly session = inject(AuthSession);
   private readonly router = inject(Router);
   private readonly destroy = inject(DestroyRef);
-  private readonly route = inject(ActivatedRoute);
-  private readonly parameters = toSignal(this.route.paramMap, {
-    initialValue: this.route.snapshot.paramMap,
-  });
-  protected readonly kind = computed(() => this.parameters().get('art'));
-  protected readonly guest = computed(() => this.kind() === 'gast');
   protected readonly confirmed = signal(false);
-  protected readonly logoutConfirmed = signal(false);
   protected readonly error = signal('');
 
-  /** Rejects stale guest-management routes and resets confirmations when access parameters change. */
+  /** Requires fresh consent if another tab changes the identity affected by Google linking. */
   constructor() {
     effect(() => {
-      if (this.guest() && !this.session.initializing() && !this.session.isGuest())
-        void this.router.navigateByUrl('/anmeldung', { replaceUrl: true });
+      this.session.user();
+      this.confirmed.set(false);
     });
-    effect(() => {
-      this.parameters();
-      this.error.set('');
-    });
-    effect(() => this.resetConfirmations());
-  }
-
-  /** Requires fresh consent when navigation or a second tab changes the account affected by this page. */
-  private resetConfirmations(): void {
-    this.parameters();
-    this.session.user();
-    this.confirmed.set(false);
-    this.logoutConfirmed.set(false);
   }
 
   /** Requires the relevant confirmation and prevents duplicate access actions while Firebase is busy. */
   protected async proceed(): Promise<void> {
-    if (this.session.busy() || (!this.guest() && !this.confirmed())) return;
+    if (this.session.busy() || !this.confirmed()) return;
     this.error.set('');
     try {
-      if (this.guest()) {
-        await this.session.guest();
-        await this.router.navigateByUrl('/chat');
-      } else await this.useGoogle();
+      await this.useGoogle();
     } catch (error) {
       this.error.set(authIssue(error).message);
     }
@@ -81,16 +56,5 @@ export class AccessPage {
         ? '/chat'
         : '/avatar-auswahl',
     );
-  }
-
-  /** Signs out only after explicit acknowledgement, preserving the guest account and its chat data. */
-  protected async endGuest(): Promise<void> {
-    if (!this.session.isGuest() || !this.logoutConfirmed() || this.session.busy()) return;
-    this.error.set('');
-    try {
-      await this.session.logout();
-    } catch (error) {
-      this.error.set(authIssue(error).message);
-    }
   }
 }

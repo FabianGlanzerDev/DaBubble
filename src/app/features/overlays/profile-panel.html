@@ -45,6 +45,7 @@
     id="profile-name"
     data-modal-focus
     [value]="draftName()"
+    [readOnly]="realAccount() && session.isGuest()"
     (input)="updateName($event)"
     autocomplete="off"
     [attr.aria-invalid]="!!nameError()"
@@ -52,7 +53,9 @@
     aria-describedby="profile-error"
   />
   <p class="field-error" id="profile-error">
-    {{ nameError() }}
+    {{
+      realAccount() && session.isGuest() ? 'Der Gastname wird automatisch vergeben.' : nameError()
+    }}
   </p>
   <div class="actions">
     <button

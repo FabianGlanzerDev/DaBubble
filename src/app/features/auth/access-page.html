@@ -11,61 +11,9 @@
         aria-label="Zurück"
         ><app-icon name="arrow"
       /></a>
-      <h1 id="access-title" data-page-heading tabindex="-1">
-        {{ guest() ? 'Als Gast abmelden?' : 'Google-Anmeldung' }}
-      </h1>
+      <h1 id="access-title" data-page-heading tabindex="-1">Google-Anmeldung</h1>
     </header>
-    @if (guest()) {
-      @if (session.isGuest()) {
-        <p class="access-note" id="guest-signout-warning">
-          Ohne Kontoumwandlung verlierst du dauerhaft den Zugang zu diesem Gastkonto. Ein neuer
-          Gäste-Login stellt ihn nicht wieder her. Abmelden löscht keine Daten.
-        </p>
-        <p>Mit „Konto erstellen“ oder Google behältst du deinen Zugang und alle Chats.</p>
-        <div class="access-actions">
-          <a class="auth-button" routerLink="/registrierung">Konto erstellen</a>
-          @if (session.googleAvailable()) {
-            <a class="auth-button secondary" routerLink="/zugang/google"
-              >Mit Google dauerhaft nutzen</a
-            >
-          }
-          <a routerLink="/chat">Zurück zum Chat</a>
-          <label class="access-confirm">
-            <input
-              #logoutApproval
-              type="checkbox"
-              [checked]="logoutConfirmed()"
-              [disabled]="session.busy()"
-              aria-describedby="guest-signout-warning"
-              (change)="logoutConfirmed.set(logoutApproval.checked)"
-            />
-            <span
-              >Ich möchte mich ohne Kontoumwandlung abmelden und verliere dauerhaft den
-              Zugang.</span
-            >
-          </label>
-          <button
-            class="auth-button secondary"
-            type="button"
-            [disabled]="session.busy() || !logoutConfirmed()"
-            aria-describedby="guest-signout-warning"
-            (click)="endGuest()"
-          >
-            {{ session.busy() ? 'Abmeldung läuft…' : 'Als Gast abmelden' }}
-          </button>
-        </div>
-        <details class="guest-details">
-          <summary>Gastkennung für Löschanfragen</summary>
-          <p>
-            <strong data-guest-uid>{{ session.user()?.uid }}</strong>
-          </p>
-          <p>
-            Die Kennung ist kein Zugangsschlüssel und kein Nachweis der Kontoinhaberschaft.
-            <a routerLink="/datenschutz">Informationen zur Löschanfrage</a>
-          </p>
-        </details>
-      }
-    } @else if (!session.googleAvailable()) {
+    @if (!session.googleAvailable()) {
       <p role="status">
         Google-Anmeldung ist derzeit nicht verfügbar. Nutze E-Mail und Passwort oder den
         Gäste-Login.

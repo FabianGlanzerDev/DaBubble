@@ -99,11 +99,9 @@ export class FirebaseRuntime {
     return this.authenticate(() => this.signInEmail(email, password));
   }
 
-  /** Requires guest logout before account switching and retains regular sessions when new credentials fail. */
+  /** Replaces a session only after valid credentials succeed; failed attempts retain the current account. */
   private async signInEmail(email: string, password: string): Promise<void> {
     await this.auth.authStateReady();
-    const current = this.auth.currentUser;
-    if (current?.isAnonymous) throw new Error('auth/guest-switch-confirmation-required');
     // Firebase replaces the current session only after the new credentials succeed.
     // Do not sign out first: a failed login must retain the original account's access.
     await signInWithEmailAndPassword(this.auth, email.trim(), password);
@@ -237,6 +235,7 @@ export class FirebaseRuntime {
   private async writeProfile(transaction: Transaction, profile: UserProfile): Promise<void> {
     const reference = doc(this.database, 'users', profile.uid);
     const snapshot = await transaction.get(reference);
+    this.requireGuestName(snapshot.exists() ? snapshot.get('name') : profile.name, profile.name);
     if (snapshot.exists())
       transaction.update(reference, { ...profile, updatedAt: serverTimestamp() });
     else
@@ -245,5 +244,11 @@ export class FirebaseRuntime {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
+  }
+
+  /** Rejects anonymous name edits locally while the Firestore rule independently enforces immutability. */
+  private requireGuestName(previous: unknown, next: string): void {
+    if (this.auth.currentUser?.isAnonymous && previous !== next)
+      throw new Error('profile/guest-name-fixed');
   }
 }

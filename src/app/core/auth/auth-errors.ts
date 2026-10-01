@@ -6,6 +6,10 @@ export interface AuthIssue {
 }
 
 const issues: Record<string, AuthIssue> = {
+  'profile/guest-name-fixed': {
+    field: 'name',
+    message: 'Der automatisch vergebene Gastname kann nicht geändert werden.',
+  },
   'auth/session-ended': {
     field: 'general',
     retainOnSignOut: true,
@@ -121,11 +125,6 @@ const issues: Record<string, AuthIssue> = {
     field: 'general',
     message:
       'Die Abmeldung wurde nicht abgeschlossen. Bitte versuche es erneut. Dein Konto bleibt erhalten.',
-  },
-  'auth/guest-switch-confirmation-required': {
-    field: 'general',
-    message:
-      'Dein Gastzugang bleibt aktiv. Wähle im Chat-Profilmenü „Log out“ und bestätige die Abmeldung, bevor du ein anderes Konto verwendest. „Konto erstellen“ behält deine Gastkennung und Chats.',
   },
   'auth/guest-account-active': {
     field: 'general',

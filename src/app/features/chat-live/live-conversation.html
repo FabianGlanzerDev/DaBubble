@@ -22,7 +22,7 @@
         (click)="details()"
         aria-label="Gesprächsdetails"
         [attr.aria-description]="
-          channel.kind === 'direct' && !channel.archived
+          channel.kind === 'direct' && !channel.archived && !partner().demo
             ? store.session.presence.label(partner().uid)
             : null
         "
@@ -34,7 +34,7 @@
           <app-avatar-image
             [index]="channel.archived ? null : partner().avatarId"
             [size]="50"
-            [uid]="channel.archived ? null : partner().uid"
+            [uid]="channel.archived || partner().demo ? null : partner().uid"
           />
         }
         <h1 data-page-heading tabindex="-1">
@@ -44,7 +44,7 @@
           <app-icon name="chevron" />
         }
       </button>
-      @if (channel.kind === 'channel') {
+      @if (channel.kind === 'channel' && !channel.publicDemo) {
         <div class="members">
           <button
             type="button"
@@ -77,6 +77,15 @@
     role="region"
     tabindex="0"
   >
+    @if (channel.publicDemo && !compact()) {
+      <p class="demo-note">
+        Öffentlicher Demo-Channel · Beiträge sind für alle angemeldeten Nutzer und Gäste sichtbar.
+      </p>
+    } @else if (partner().demo && !compact()) {
+      <p class="demo-note">
+        Privater Test mit einem fiktiven Demo-Profil. Es antwortet nicht automatisch.
+      </p>
+    }
     @if (compact()) {
       @if (parent(); as message) {
         <app-live-message [message]="message" [compact]="true" />

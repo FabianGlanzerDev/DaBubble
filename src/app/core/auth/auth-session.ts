@@ -179,7 +179,7 @@ export class AuthSession {
     await this.profileLoad;
   }
 
-  /** Completes email sign-in and refreshes identity without implicitly abandoning an active guest account. */
+  /** Refreshes identity after successful email sign-in; failed credentials preserve the current session. */
   async login(email: string, password: string): Promise<void> {
     await this.perform('login', async (client) => {
       await client.login(email, password);

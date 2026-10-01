@@ -98,11 +98,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/auth-page').then((m) => m.AuthPage),
   },
   {
-    path: 'zugang/:art',
-    canMatch: [(route, segments) => ['google', 'gast'].includes(segments[1]?.path ?? '')],
+    path: 'zugang/google',
     title: 'Zugang wählen · DaBubble',
     loadComponent: () => import('./features/auth/access-page').then((m) => m.AccessPage),
   },
+  { path: 'zugang/gast', pathMatch: 'full', redirectTo: 'anmeldung' },
   {
     path: 'passwort-reset',
     children: [

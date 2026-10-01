@@ -3,6 +3,7 @@ export interface ChatPerson {
   uid: string;
   name: string;
   avatarId: number;
+  demo?: boolean;
 }
 /** Conversation metadata, membership and optional archive state shared by channels and direct chats. */
 export interface ChatRoom {
@@ -15,6 +16,7 @@ export interface ChatRoom {
   createdBy: string;
   createdAt?: number;
   archived?: boolean;
+  publicDemo?: boolean;
 }
 /** Conversation message with an optional root reference; deleted messages retain metadata as tombstones. */
 export interface ChatMessage {

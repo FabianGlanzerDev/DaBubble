@@ -40,7 +40,9 @@ import { AvatarImage } from '../../shared/ui/avatar-image';
         @for (room of store.channels(); track room.id) {
           <li>
             <a [routerLink]="nav.path(room)" routerLinkActive="active" ariaCurrentWhenActive="page"
-              ><app-icon name="hash" /><span>{{ room.name }}</span></a
+              ><app-icon name="hash" /><span
+                >{{ room.name }}{{ room.publicDemo ? ' · Demo' : '' }}</span
+              ></a
             >
           </li>
         }
@@ -69,11 +71,17 @@ import { AvatarImage } from '../../shared/ui/avatar-image';
               routerLinkActive="active"
               ariaCurrentWhenActive="page"
               [attr.aria-description]="
-                room.archived ? null : store.session.presence.label(partner(room.memberIds))
+                room.archived || store.person(partner(room.memberIds)).demo
+                  ? null
+                  : store.session.presence.label(partner(room.memberIds))
               "
               ><app-avatar-image
                 [index]="room.archived ? null : store.person(partner(room.memberIds)).avatarId"
-                [uid]="room.archived ? null : partner(room.memberIds)"
+                [uid]="
+                  room.archived || store.person(partner(room.memberIds)).demo
+                    ? null
+                    : partner(room.memberIds)
+                "
                 [size]="50"
               /><span>{{ store.label(room) }}</span></a
             >

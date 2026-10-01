@@ -22,7 +22,11 @@ import { PresenceLabel } from '../../shared/ui/presence-label';
         </button>
       }
     </div>
-    <app-presence-label class="presence" [uid]="person().uid" />
+    @if (person().demo) {
+      <p>Fiktives Demo-Profil · kein echtes Konto, keine automatischen Antworten.</p>
+    } @else {
+      <app-presence-label class="presence" [uid]="person().uid" />
+    }
     <div class="email">
       <h4><app-icon name="mail" />E-Mail-Adresse</h4>
       @if (own()) {

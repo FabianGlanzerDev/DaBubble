@@ -16,6 +16,7 @@ export class PresenceState {
 
   /** Provides localized status text, including explicit feedback for unavailable presence information. */
   label(uid: string): string {
+    if (uid.startsWith('demo-')) return 'Fiktives Demo-Profil';
     return { online: 'Online', offline: 'Offline', unknown: 'Status nicht verfügbar' }[
       this.status(uid)
     ];

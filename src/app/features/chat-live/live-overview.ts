@@ -1,13 +1,15 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { OverlayState } from '../../core/ui/overlay-state';
 import { LiveSearch } from './live-search';
+import { DemoWelcome } from './demo-welcome';
 
 /** Provides the real workspace's conversation selection and new-message entry state. */
 @Component({
   selector: 'app-live-overview',
-  imports: [LiveSearch],
+  imports: [LiveSearch, DemoWelcome],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<h1 data-page-heading tabindex="-1">Neue Nachricht</h1>
+  template: `<app-demo-welcome />
+    <h1 data-page-heading tabindex="-1">Neue Nachricht</h1>
     <app-live-search [recipient]="true" fieldId="recipient-search" />
     <p>
       Wähle einen Channel mit # oder eine Person mit @. Nachrichten werden nur an die Mitglieder

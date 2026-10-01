@@ -20,7 +20,7 @@ import { PresenceState } from '../../core/presence/presence-state';
         [height]="size()"
         alt=""
     /></picture>
-    @if (uid()) {
+    @if (uid() && !uid()!.startsWith('demo-')) {
       <span class="presence" [attr.data-presence]="status()" [title]="state.label(uid()!)"></span>
     }`,
   styles: `

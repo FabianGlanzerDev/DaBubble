@@ -20,8 +20,10 @@ service cloud.firestore {
       allow get: if owns(uid);
       allow list, delete: if false;
       allow create: if owns(uid) && validProfile(uid)
+        && (!anonymous() || request.resource.data.name == 'Gast ' + uid[0:6])
         && request.resource.data.createdAt == request.time;
       allow update: if owns(uid) && validProfile(uid)
+        && (!anonymous() || request.resource.data.name == resource.data.name)
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'avatarId', 'updatedAt']);
     }
 
@@ -30,13 +32,23 @@ service cloud.firestore {
         && !exists(/databases/$(database)/documents/accountDeletions/$(request.auth.uid));
     }
 
+    function anonymous() {
+      return request.auth.token.firebase.sign_in_provider == 'anonymous';
+    }
+
+    // Only the administrative seed creates public demo rooms; client schemas exclude this flag.
+    function publicDemo(data) {
+      return data.get('publicDemo', false) == true && data.get('kind', '') == 'channel';
+    }
+
     function availableAccount(uid) {
       return exists(/databases/$(database)/documents/directory/$(uid))
         && !exists(/databases/$(database)/documents/accountDeletions/$(uid));
     }
 
     function member(roomId) {
-      return signedIn() && request.auth.uid in get(/databases/$(database)/documents/conversations/$(roomId)).data.memberIds;
+      let data = get(/databases/$(database)/documents/conversations/$(roomId)).data;
+      return signedIn() && (request.auth.uid in data.memberIds || publicDemo(data));
     }
 
     function writableRoom(roomId) {
@@ -54,6 +66,17 @@ service cloud.firestore {
         && request.resource.data.avatarId == get(/databases/$(database)/documents/users/$(uid)).data.avatarId
         && request.resource.data.updatedAt == request.time;
       allow delete: if false;
+    }
+
+    // An operator supplies the random challenge separately; this write only proves an active UID session.
+    match /deletionProofs/{uid} {
+      allow get, delete: if owns(uid);
+      allow list: if false;
+      allow create, update: if owns(uid)
+        && request.resource.data.keys().hasOnly(['challenge', 'updatedAt'])
+        && request.resource.data.challenge is string
+        && request.resource.data.challenge.matches('^[a-f0-9]{32}$')
+        && request.resource.data.updatedAt == request.time;
     }
 
     function validRoom(data) {
@@ -115,7 +138,7 @@ service cloud.firestore {
     }
 
     match /conversations/{roomId} {
-      allow read: if signedIn() && request.auth.uid in resource.data.memberIds;
+      allow read: if signedIn() && (request.auth.uid in resource.data.get('memberIds', []) || publicDemo(resource.data));
       // A participant may probe the deterministic, as-yet absent direct conversation.
       allow get: if signedIn() && !exists(/databases/$(database)/documents/conversations/$(roomId))
         && (roomId == 'dm_' + request.auth.uid || roomId.matches('^dm_' + request.auth.uid + '~[^~]+$')
