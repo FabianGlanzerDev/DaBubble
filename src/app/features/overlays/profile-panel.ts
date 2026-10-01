@@ -49,6 +49,13 @@ export class ProfilePanel {
         : '',
   );
   protected readonly avatars = [0, 1, 2, 3, 4, 5];
+  protected readonly changed = computed(
+    () =>
+      this.draftName().trim() !== this.person().name || this.draftAvatar() !== this.person().avatar,
+  );
+  protected readonly canSave = computed(
+    () => this.realAccount() && this.changed() && !this.nameError() && !this.session.busy(),
+  );
 
   /** Seeds a fresh profile draft unless returning from the avatar step, where unsaved choices must remain. */
   protected openEdit(): void {
@@ -68,7 +75,7 @@ export class ProfilePanel {
 
   /** Persists valid own-account changes and returns to profile only if the initiating dialog is still open. */
   protected async save(): Promise<void> {
-    if (!this.realAccount() || this.nameError() || this.session.busy()) return;
+    if (!this.canSave()) return;
     this.error.set('');
     const context = this.overlay.current();
     try {

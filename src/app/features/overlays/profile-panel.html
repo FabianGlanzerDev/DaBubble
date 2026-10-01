@@ -18,12 +18,7 @@
   </div>
   <div class="actions">
     <button class="button secondary" type="button" (click)="openEdit()">Zurück</button
-    ><button
-      class="button"
-      type="button"
-      [disabled]="!realAccount() || !!nameError() || session.busy()"
-      (click)="save()"
-    >
+    ><button class="button" type="button" [disabled]="!canSave()" (click)="save()">
       {{ session.pending() === 'profile' ? 'Speichert…' : 'Speichern' }}
     </button>
   </div>
@@ -45,16 +40,21 @@
     id="profile-name"
     data-modal-focus
     [value]="draftName()"
-    [readOnly]="realAccount() && session.isGuest()"
     (input)="updateName($event)"
     autocomplete="off"
     [attr.aria-invalid]="!!nameError()"
-    [disabled]="realAccount() && session.busy()"
+    [disabled]="realAccount() && (session.isGuest() || session.busy())"
     aria-describedby="profile-error"
   />
-  <p class="field-error" id="profile-error">
+  <p
+    class="field-error"
+    [class.guest-name-note]="realAccount() && session.isGuest()"
+    id="profile-error"
+  >
     {{
-      realAccount() && session.isGuest() ? 'Der Gastname wird automatisch vergeben.' : nameError()
+      realAccount() && session.isGuest()
+        ? 'Der Gastname wird automatisch vergeben und kann nicht geändert werden.'
+        : nameError()
     }}
   </p>
   <div class="actions">
@@ -65,17 +65,17 @@
       (click)="open('profile')"
     >
       Abbrechen</button
-    ><button
-      class="button"
-      type="button"
-      [disabled]="!realAccount() || !!nameError() || session.busy()"
-      (click)="save()"
-    >
+    ><button class="button" type="button" [disabled]="!canSave()" (click)="save()">
       {{ session.pending() === 'profile' ? 'Speichert…' : 'Speichern' }}
     </button>
   </div>
 } @else {
-  <app-avatar-image class="profile-avatar" [index]="person().avatar" [size]="200" />
+  <app-avatar-image
+    class="profile-avatar"
+    [index]="person().avatar"
+    [size]="200"
+    [uid]="realAccount() ? person().id : null"
+  />
   <div class="name-row">
     <h3 class="profile-name">{{ person().name }}</h3>
     @if (own()) {

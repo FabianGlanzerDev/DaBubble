@@ -13,7 +13,12 @@ import { PresenceLabel } from '../../shared/ui/presence-label';
   selector: 'app-live-profile-dialog',
   imports: [AvatarImage, Icon, PresenceLabel],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<app-avatar-image class="profile-avatar" [index]="person().avatarId" [size]="200" />
+  template: `<app-avatar-image
+      class="profile-avatar"
+      [index]="person().avatarId"
+      [size]="200"
+      [uid]="person().demo ? null : person().uid"
+    />
     <div class="name-row">
       <h3 class="profile-name">{{ person().name }}</h3>
       @if (own()) {

@@ -43,7 +43,7 @@
 }
 .presence small {
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: 14px;
 }
 .presence.unavailable,
 .email .private-email {
@@ -85,6 +85,12 @@
   margin-bottom: 24px;
 }
 .avatar-options button {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  line-height: 0;
   padding: 2px;
   border: 3px solid transparent;
   border-radius: 50%;
@@ -144,5 +150,27 @@
   .email p {
     margin-left: 0;
     font-size: 16px;
+  }
+}
+
+.guest-name-note {
+  color: var(--text-secondary);
+  font-size: 16px;
+}
+.overlay-input:disabled {
+  background: var(--page);
+}
+@media (min-width: 768px) {
+  .avatar-options {
+    gap: 4px;
+    justify-content: center;
+  }
+}
+@media (max-width: 767px) {
+  .avatar-options {
+    display: grid;
+    grid-template-columns: repeat(3, 66px);
+    justify-content: center;
+    gap: 12px;
   }
 }
