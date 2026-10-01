@@ -3,6 +3,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  EnvironmentInjector,
+  afterNextRender,
   afterRenderEffect,
   computed,
   effect,
@@ -31,6 +33,8 @@ export class LiveChannelDialog {
   protected readonly store = inject(ChatStore);
   private readonly overlay = inject(OverlayState);
   private readonly router = inject(Router);
+  private readonly injector = inject(EnvironmentInjector);
+  private createdId: string | undefined;
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private lastEdited = '';
   protected readonly room = computed(() =>
@@ -87,11 +91,28 @@ export class LiveChannelDialog {
     this.nameTouched.set(true);
     if (this.validation()) return;
     if (this.room()) this.saveField('name');
-    else
-      void this.action.run(async () => {
-        const id = await this.store.create(this.name(), this.description());
-        await this.router.navigate(['/chat/channels', id]);
-      });
+    else void this.action.run(() => this.create());
+  }
+
+  /** Reuses a persisted channel on navigation retries and respects dismissal during creation. */
+  private async create(): Promise<void> {
+    const context = this.overlay.current();
+    this.createdId ??= await this.store.create(this.name(), this.description());
+    if (this.overlay.current() !== context || this.overlay.closing()) return;
+    const replaceUrl = !!this.router.parseUrl(this.router.url).queryParams['dialog'];
+    if (await this.router.navigate(['/chat/channels', this.createdId], { replaceUrl }))
+      this.offerMembers(this.createdId);
+  }
+
+  /** Opens the second step after rendering without reviving a dismissed or superseded dialog. */
+  private offerMembers(channelId: string): void {
+    afterNextRender(
+      () => {
+        if (!this.overlay.current() && this.router.url === '/chat/channels/' + channelId)
+          this.overlay.open('channel-people', { live: true, channelId });
+      },
+      { injector: this.injector },
+    );
   }
 
   /** Persists only the selected editable field while retaining the other field's live value. */

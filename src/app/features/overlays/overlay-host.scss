@@ -194,6 +194,12 @@ dialog.closing::backdrop {
     top: 24px;
     left: calc(50% - 30px);
   }
+  [data-type='channel-people'] .overlay-body {
+    padding-block: 68px 40px;
+  }
+  [data-type='channel-people']::before {
+    top: 40px;
+  }
   .settings-heading h2 {
     position: absolute;
     width: 1px;

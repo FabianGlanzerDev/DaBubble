@@ -24,6 +24,9 @@ import { LiveMembersDialog } from './live-members-dialog';
     @case ('add-members') {
       <app-live-members-dialog />
     }
+    @case ('channel-people') {
+      <app-live-members-dialog />
+    }
     @case ('profile') {
       <app-live-profile-dialog />
     }

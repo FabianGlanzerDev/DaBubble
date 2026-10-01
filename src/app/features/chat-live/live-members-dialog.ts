@@ -10,8 +10,11 @@ import { LiveMemberPicker } from './live-member-picker';
   imports: [LiveMemberList, LiveMemberPicker],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `@if (room(); as channel) {
-      @if (overlay.current()?.type === 'add-members') {
-        <app-live-member-picker [room]="channel" />
+      @if (overlay.current()?.type !== 'members') {
+        <app-live-member-picker
+          [room]="channel"
+          [initial]="overlay.current()?.type === 'channel-people'"
+        />
       } @else {
         <app-live-member-list [room]="channel" />
       }

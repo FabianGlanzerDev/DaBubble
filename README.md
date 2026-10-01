@@ -10,7 +10,7 @@ Entwickler: **Fabian Glanzer**. Veröffentlicht unter: https://dabubble-3278.dev
 - Gastzugang über Firebase Anonymous Authentication mit eigener Kennung und denselben Eigentümer- und Mitgliedschaftsgrenzen wie reguläre Konten. Ausdrücklich öffentliche Demo-Channels mit Beispielbeiträgen und fiktiven Profilen bieten einen nutzbaren Einstieg.
 - Wiederherstellung bestehender Sitzungen, Abmeldung und ausdrückliche Umwandlung eines Gastkontos.
 - Passwort-Reset per Firebase-E-Mail sowie Bearbeitung des eigenen Avatars mit Synchronisierung in weiteren angemeldeten Tabs. Reguläre Konten können auch ihren Namen ändern; der automatisch vergebene Gastname bleibt unverändert.
-- Channels erstellen, umbenennen, beschreiben, Mitglieder hinzufügen und Channels verlassen.
+- Channels erstellen, umbenennen, beschreiben, Mitglieder hinzufügen und Channels verlassen. Nach dem Erstellen öffnet sich „Leute hinzufügen“: alle Personen aus dem freigegebenen Devspace-Verzeichnis oder eine gezielte Auswahl (höchstens 100 Mitglieder pro Channel). Schließen erhält den Channel; bei einem Fehler bleiben Auswahl und bereits hinzugefügte Mitglieder erhalten, sodass ohne erneute Channel-Erstellung wiederholt werden kann.
 - Channel- und Direktnachrichten senden, eigene Nachrichten bearbeiten oder entfernen, in Threads antworten und Emoji-Reaktionen verwenden.
 - Suche in zugänglichen Gesprächen sowie Auswahl von Personen und Channels über `@` und `#`. Die Direktnachrichtenliste zeigt sofort das freigegebene Nutzerverzeichnis; erst der Klick öffnet oder erstellt ein Gespräch.
 - Online-Status über serverseitig verwaltete Verbindungen in Firebase Realtime Database; mehrere Tabs und Geräte werden berücksichtigt.
